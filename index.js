@@ -1,0 +1,67 @@
+const { token } = require('./config.json');
+const fs = require('node:fs');
+const path = require('node:path');
+const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+var isReady = false;
+
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+client.commands = new Collection();
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+	const filePath = path.join(commandsPath, file);
+	const command = require(filePath);
+	client.commands.set(command.data.name, command);
+  console.log("loaded " + file);
+}
+
+client.once(Events.ClientReady, () => {
+	console.log("Bot online");
+  
+  if (client.guilds.cache.size == 1)
+  {
+    console.log("Logged into 1 server");
+  } else {
+    console.log("Logged into " + client.guilds.cache.size + " servers");
+  }
+  
+  isReady = true;
+});
+
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+
+	const command = client.commands.get(interaction.commandName);
+
+	if (!command) return;
+
+	try {
+		await command.execute(interaction);
+	} catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	}
+});
+
+client.login(token);
+
+//*********THIS CODE IS FOR REPLIT. DELETE IT IF YOU'RE HOSTING THE BOT ELSEWHERE*********
+//reload IP if it can't connect
+const { exec } = require("child_process");
+setTimeout(function() {
+  if (!isReady) {
+    exec("kill 1", (error, stdout, stderr) => {
+      if (error) {
+        console.log(`error: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.log(`stderr: ${stderr}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+    });
+  }
+}, 2000);
