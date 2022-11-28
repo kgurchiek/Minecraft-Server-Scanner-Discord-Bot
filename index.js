@@ -46,22 +46,3 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.login(token);
-
-//*********THIS CODE IS FOR REPLIT. DELETE IT IF YOU'RE HOSTING THE BOT ELSEWHERE*********
-//reload IP if it can't connect
-const { exec } = require("child_process");
-setTimeout(function() {
-  if (!isReady) {
-    exec("kill 1", (error, stdout, stderr) => {
-      if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-      }
-      console.log(`stdout: ${stdout}`);
-    });
-  }
-}, 2000);

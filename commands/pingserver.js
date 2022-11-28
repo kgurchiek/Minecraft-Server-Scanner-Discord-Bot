@@ -28,23 +28,30 @@ module.exports = {
           }
         } else if (response.description.text != null) {
           description = response.description.text;
+        } else if (response.description.translate != null) {
+          description = response.description.translate;
         } else if ("description: " + response.description != null) {
           description = response.description;
         } else {
           description = "Couldn't get description";
         }
 
+        if (description == '') {
+          description = 'ㅤ';
+        }
+
+        description = String(description);
+
         var newEmbed = new EmbedBuilder()
           .setColor("#02a337")
-          .setTitle('Search Results')
+          .setTitle('Ping Results')
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */})
           .addFields(
-            //{ name: 'Result ' + (i + 1) + '/' + results.length, value: 'ㅤ' },
-            { name: 'ip', value: ip, inline: true },
-            { name: 'port', value: port, inline: true },
-            { name: 'version', value: response.version.name, inline: true },
-            { name: 'description', value: description, inline: true },
-            { name: 'players', value: response.players.online + '/' + response.players.max, inline: true }
+            { name: 'ip', value: ip },
+            { name: 'port', value: port },
+            { name: 'version', value: response.version.name },
+            { name: 'description', value: description },
+            { name: 'players', value: response.players.online + '/' + response.players.max }
           )
           .setTimestamp()
         
