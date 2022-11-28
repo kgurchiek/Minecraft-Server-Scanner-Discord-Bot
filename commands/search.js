@@ -1,7 +1,9 @@
 const wait = require('node:timers/promises').setTimeout;
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
-const { totalServers, successIPs, successPorts } = require("../serverList.json");
+const { totalServers, successIPs, successPorts } = require("../newServerList.json");
+//if you're getting inaccurate search results or your bot crashes when using /search, delete the line above and use this one instead:
+//const { totalServers, successIPs, successPorts } = require("../serverList.json");
 var activeSearch = false;
 var wrappingUpSearch = false;
 const buttonTimeout = 60000;
