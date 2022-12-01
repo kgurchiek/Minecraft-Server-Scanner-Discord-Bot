@@ -1,7 +1,7 @@
 # MC-Server-Scanner
 
 <p align="center">
-<img src="https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png" alt="meteor-client-logo" width="15%"/>
+<img src="[https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png](https://cdn.discordapp.com/attachments/963444624146452541/1047753812942802984/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6170702d69636f6e732f313033373235303633303437353035393231312f32316435663630633464323536386562336166346637616563336462646465352e706e67-removebg-prev_1.png)" alt="MC-Server-Scanner-logo" width="15%"/>
 </p>
 
 <div align="center">
