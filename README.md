@@ -14,6 +14,9 @@ You can contact me via discord: Cornbread 2100#8668
 
 ## Commands
 
+### /help
+Sends the bot's list of commands
+
 ### /randserver
 Gets a random Minecraft server
 ㅤ
