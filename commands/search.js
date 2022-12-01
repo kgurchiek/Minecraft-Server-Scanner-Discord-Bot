@@ -1,12 +1,11 @@
 const wait = require('node:timers/promises').setTimeout;
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
-const { totalServers, successIPs, successPorts } = require("../newServerList.json");
-//if you're getting inaccurate search results or your bot crashes when using /search, delete the line above and use this one instead:
-//const { totalServers, successIPs, successPorts } = require("../serverList.json");
+const { totalServers, successIPs, successPorts } = require("../serverList.json");
 var activeSearch = false;
 var wrappingUpSearch = false;
 const buttonTimeout = 60000;
+var maxPings = 5000;
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -320,7 +319,7 @@ module.exports = {
           return String(description);
         }
         
-        function searchForServer(i, max) {
+        function searchForServer(i, current) {
           MinecraftServerListPing.ping(0, successIPs[i], successPorts[i], 3000)
           .then(response => {
             var minOnlineRequirement = response.players.online >= minOnline.value || minOnline.consider == false;
@@ -333,14 +332,27 @@ module.exports = {
             //var descriptionRequirement = true;
 
             if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement) {
-              results.push({
+              var versionString;
+              if (response.version.name.length > 100) {
+                versionString = response.version.name.substring(0, 100) + "...";
+              } else if (response.version.name == null) {
+                versionString = "couldn't get version";
+              } else if (response.version.name == "") {
+                versionString = "ㅤ";
+              } else {
+                versionString = response.version.name;
+              }
+
+              var newResult = {
                 ip: successIPs[i],
                 port: String(successPorts[i]),
-                version: response.version.name,
+                version: String(versionString),
                 description: getDescription(response),
                 onlinePlayers: response.players.online,
                 maxPlayers: response.players.max
-              });
+              }
+              
+              results.push(newResult);
 
               searchFound = true;
             } else {
@@ -354,9 +366,31 @@ module.exports = {
         }
 
         activeSearch = true;
+
+        if (totalServers < maxPings) {
+          for (var i = 0; i < totalServers; i++) {
+            searchForServer(i, totalServers);
+          }
+        } else {
+          for (var i; i < maxPings; i++) {
+            searchForServer(i, maxPings);
+          }
+        }
         
-        for (var i = 0; i < totalServers; i++) {
-          searchForServer(i);
+        function scanChunk(current) {
+          if (current < totalServers) {
+            if (totalServers < maxPings) {
+              for (var i = 0; i < totalServers; i++) {
+                searchForServer(i, totalServers);
+              }
+            } else {
+              for (var i; i < maxPings; i++) {
+                searchForServer(i, maxPings);
+              }
+
+              setTimeout(function() {scanChunk(current)}, 4000);
+            }
+          }
         }
 
         setTimeout(function() {
@@ -367,6 +401,7 @@ module.exports = {
         setTimeout(function() {
           if (searchFound) {
             for (var i = 0; i < results.length; i++) {
+              console.log("version: " + results[i].version);
               var newEmbed = new EmbedBuilder()
                 .setColor("#02a337")
                 .setTitle('Search Results')
@@ -513,22 +548,22 @@ module.exports = {
           
           wrappingUpSearch = false;
           activeSearch = false;
-        }, 7000)
+        }, 20000)
 
         setTimeout(function() {
           buttons = new ActionRowBuilder()
-                  .addComponents(
-                    new ButtonBuilder()
-                      .setCustomId(lastResultID)
-                      .setLabel('Last Page')
-                      .setStyle(ButtonStyle.Secondary)
-                      .setDisabled(true),
-                    new ButtonBuilder()
-                      .setCustomId(nextResultID)
-                      .setLabel('Next Page')
-                      .setStyle(ButtonStyle.Secondary)
-                      .setDisabled(true)
-                  );
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId(lastResultID)
+              .setLabel('Last Page')
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true),
+            new ButtonBuilder()
+              .setCustomId(nextResultID)
+              .setLabel('Next Page')
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true)
+          );
           interaction.editReply({ components:[buttons] });
         }, buttonTimeout + 1000);
       }
