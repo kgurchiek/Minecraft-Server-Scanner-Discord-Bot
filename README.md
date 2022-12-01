@@ -17,7 +17,7 @@ You can contact me via discord: Cornbread 2100#8668
 ### /randserver
 Gets a random Minecraft server
 ㅤ
-### /pingserver <ip> <port>
+### /pingserver \<ip\> \<port\>
 gets info from a server
 
 #### arguments:
