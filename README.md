@@ -1,8 +1,13 @@
 # MC-Server-Scanner
+
+<p align="center">
+<img src="https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png" alt="meteor-client-logo" width="15%"/>
+</p>
+
 <div align="center">
     <a href="https://discord.gg/Uy9m5TP5na"><img src="https://img.shields.io/discord/1005132317297221785?logo=discord" alt="Discord"/></a>
     <img src="https://img.shields.io/github/last-commit/kgurchiek/MC-Server-Scanner" alt="GitHub last commit"/>
-    <img src="https://img.shields.io/github/languages/code-size/kgurchiek/MC-Server_Scanner" alt="GitHub code size in bytes"/>
+    <img src="https://img.shields.io/github/languages/code-size/kgurchiek/MC-Server-Scanner" alt="GitHub code size in bytes"/>
 </div>
 
 This is the full code for a Minecraft server scanner Discord bot I made. This bot itself doesn't do the scanning, it just pings servers in the existing database, which is actively expanded by a seperate scanning program.
