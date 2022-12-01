@@ -1,7 +1,7 @@
 const wait = require('node:timers/promises').setTimeout;
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { MinecraftServerListPing, MinecraftQuery } = require("minecraft-status");
-const { totalServers, successIPs, successPorts } = require("../newServerList.json");
+const { totalServers, successIPs, successPorts } = require("../serverList.json");
 
 module.exports = {
 	data: new SlashCommandBuilder()
