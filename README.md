@@ -9,4 +9,5 @@
 This is the full code for a Minecraft server scanner Discord bot I made. This bot itself doesn't do the scanning, it just pings servers in the existing database, which is actively expanded by a seperate scanning program.
 
 If you find any bugs, please report them in the official discord.
-You can also contact me via discord: Cornbread 2100#8668
+
+You can contact me via discord: Cornbread 2100#8668
