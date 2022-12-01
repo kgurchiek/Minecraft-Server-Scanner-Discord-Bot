@@ -1,7 +1,7 @@
 const wait = require('node:timers/promises').setTimeout;
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
-const { totalServers, successIPs, successPorts } = require("../serverList.json");
+const { totalServers, successIPs, successPorts } = require("../newServerList.json");
 var activeSearch = false;
 var wrappingUpSearch = false;
 const buttonTimeout = 60000;
@@ -299,8 +299,14 @@ module.exports = {
         function getDescription(response) {
           var description = "";
           if (response.description.extra != null) {
-            for (var i = 0; i < response.description.extra.length; i++) {
-              description += response.description.extra[i].text;
+            if (response.description.extra[0].extra == null) {
+              for (var i = 0; i < response.description.extra.length; i++) {
+                description += response.description.extra[i].text;
+              }
+            } else {
+              for (var i = 0; i < response.description.extra[0].extra.length; i++) {
+                description += response.description.extra[0].extra[i].text;
+              }
             }
           } else if (response.description.text != null) {
             description = response.description.text;
@@ -329,10 +335,10 @@ module.exports = {
             var versionRequirement = response.version.name == version.value || (response.version.name + "E").includes(version.value + "E") || version.consider == false;
             var hasImageRequirement = response.favicon != null || hasImage.value == "false" || hasImage.consider == false;
             var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(response).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(response) == description.value) || description.value == "any" || description.consider == false;
-            //var descriptionRequirement = true;
 
             if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement) {
               var versionString;
+              
               if (response.version.name.length > 100) {
                 versionString = response.version.name.substring(0, 100) + "...";
               } else if (response.version.name == null) {
@@ -342,14 +348,19 @@ module.exports = {
               } else {
                 versionString = response.version.name;
               }
+              
 
               var newResult = {
                 ip: successIPs[i],
                 port: String(successPorts[i]),
-                version: String(versionString),
+                version: versionString,
                 description: getDescription(response),
                 onlinePlayers: response.players.online,
                 maxPlayers: response.players.max
+              }
+              
+              if (response.version.name.includes('§')) {
+                newResult.version = 'bad character';
               }
               
               results.push(newResult);
@@ -388,7 +399,7 @@ module.exports = {
                 searchForServer(i, maxPings);
               }
 
-              setTimeout(function() {scanChunk(current)}, 4000);
+              setTimeout(function() {scanChunk(current)}, 3500);
             }
           }
         }
@@ -401,7 +412,6 @@ module.exports = {
         setTimeout(function() {
           if (searchFound) {
             for (var i = 0; i < results.length; i++) {
-              console.log("version: " + results[i].version);
               var newEmbed = new EmbedBuilder()
                 .setColor("#02a337")
                 .setTitle('Search Results')
@@ -419,7 +429,10 @@ module.exports = {
                 embeds.push(newEmbed);
             }
 
-            var buttons = new ActionRowBuilder()
+            var buttons
+
+            if (embeds.length > 1) {
+              buttons = new ActionRowBuilder()
               .addComponents(
                 new ButtonBuilder()
                   .setCustomId(lastResultID)
@@ -431,6 +444,21 @@ module.exports = {
                   .setLabel('Next Page')
                   .setStyle(ButtonStyle.Primary)
               );
+            } else {
+              buttons = new ActionRowBuilder()
+              .addComponents(
+                new ButtonBuilder()
+                  .setCustomId(lastResultID)
+                  .setLabel('Last Page')
+                  .setStyle(ButtonStyle.Secondary)
+                  .setDisabled(true),
+                new ButtonBuilder()
+                  .setCustomId(nextResultID)
+                  .setLabel('Next Page')
+                  .setStyle(ButtonStyle.Secondary)
+                  .setDisabled(true)
+              );
+            }
 
             const searchNextResultFilter = interaction => interaction.customId == nextResultID;
 
@@ -539,7 +567,25 @@ module.exports = {
 
             interaction.editReply({ content:'', embeds:[embeds[0]], components:[buttons] });
           }
-        }, 5000)
+
+          setTimeout(function() {
+            console.log("button timed out");
+            buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('Last Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('Next Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+            interaction.editReply({ components:[buttons] });
+          }, buttonTimeout - 1000);
+        }, (3500 * Math.ceil(totalServers / maxPings)))
 
         setTimeout(function() {
           if (!searchFound) {
@@ -548,24 +594,7 @@ module.exports = {
           
           wrappingUpSearch = false;
           activeSearch = false;
-        }, 20000)
-
-        setTimeout(function() {
-          buttons = new ActionRowBuilder()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId(lastResultID)
-              .setLabel('Last Page')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true),
-            new ButtonBuilder()
-              .setCustomId(nextResultID)
-              .setLabel('Next Page')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true)
-          );
-          interaction.editReply({ components:[buttons] });
-        }, buttonTimeout + 1000);
+        }, 10000)
       }
     } else {
       if(wrappingUpSearch) {
