@@ -11,3 +11,46 @@ This is the full code for a Minecraft server scanner Discord bot I made. This bo
 If you find any bugs, please report them in the official discord (link above).
 
 You can contact me via discord: Cornbread 2100#8668
+
+## Commands
+
+### /randserver
+Gets a random Minecraft server
+ㅤ
+### /pingserver <ip> <port>
+gets info from a server
+
+#### arguments:
+##### ip
+The ip address of the server
+    
+##### port
+The port of the server
+ㅤ
+### /search [minonline] [maxonline] [playerCap] [isfull] [version] [hasImage] [description] [strictDescription]
+searches for a server with specific properties
+
+#### arguments:    
+#####minonline (integer)
+The minimum number of players online
+
+##### maxonline (integer)
+The maximum number of players online (not to be confused with the server's maximum player capacity (playerCap))
+
+##### playerCap (integer)
+The maximum player capacity of the server
+
+##### isfull (true/false)
+Whether or not the server is full
+
+##### version (version number)
+The version of the server
+
+##### hasImage (true/false)
+Whether or not the server has a custom thumbnail image
+
+##### description (text)
+The description of the server
+
+##### strictDescription (true/false)
+(Used with the description argument) If true, the server's description has to perfectly match the description argument. If false, the server's description only has to contain the description argument.
