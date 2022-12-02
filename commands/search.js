@@ -4,33 +4,33 @@ const { MinecraftServerListPing } = require("minecraft-status");
 const { totalServers, successIPs, successPorts } = require("../serverList.json");
 var activeSearch = false;
 var wrappingUpSearch = false;
-const buttonTimeout = 60000;
+const buttonTimeout = 30000;
 var maxPings = 5000;
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName("search")
-		.setDescription("Searches for a server with specific properties")
+  data: new SlashCommandBuilder()
+    .setName("search")
+    .setDescription("Searches for a server with specific properties")
     .addStringOption(option =>
-			option
-				.setName("minonline")
-				.setDescription("The minimum number of online players"))
+      option
+        .setName("minonline")
+        .setDescription("The minimum number of online players"))
     .addStringOption(option =>
-			option
-				.setName("maxonline")
-				.setDescription("The maximum number of online players"))
+      option
+        .setName("maxonline")
+        .setDescription("The maximum number of online players"))
     .addStringOption(option =>
       option
         .setName("playercap")
         .setDescription("The server's maximum player capacity"))
     .addStringOption(option =>
-			option
-				.setName("isfull")
-				.setDescription("whether or not the server is full"))
+      option
+        .setName("isfull")
+        .setDescription("whether or not the server is full"))
     .addStringOption(option =>
-			option
-				.setName("version")
-				.setDescription("The version of the server"))
+      option
+        .setName("version")
+        .setDescription("The version of the server"))
     .addStringOption(option =>
       option
         .setName("hasimage")
@@ -43,10 +43,10 @@ module.exports = {
       option
         .setName("strictdescription")
         .setDescription("Whether or not the description has to be an exact match")),
-	async execute(interaction) {
+  async execute(interaction) {
     await interaction.reply("Searching...");
-    
-    if(!activeSearch && !wrappingUpSearch) {
+
+    if (!activeSearch && !wrappingUpSearch) {
       var minOnline = {
         value: 0,
         consider: false
@@ -110,13 +110,13 @@ module.exports = {
       if (interaction.options.getString("strictdescription") != null) {
         args.push("strictDescription:" + interaction.options.getString("strictdescription"));
       }
-      
+
       if (args.length == 0) {
         errors.push("No arguments specified. Use /help for correct usage.");
-      } 
+      }
       else {
         for (var i = 0; i < args.length; i++) {
-          if(args[0].includes(":")) {
+          if (args[0].includes(":")) {
             function isCorrectArgument(argument, value) {
               if (isNaN(value) || argument == "version") {
                 //value isn't a number
@@ -139,7 +139,7 @@ module.exports = {
                           isValidVersion = false;
                         }
                       }
-    
+
                       if (isValidVersion) {
                         return true
                       } else {
@@ -153,8 +153,8 @@ module.exports = {
                     return false;
                   }
                 }
-                else if(argument == "description") {
-                    return true;
+                else if (argument == "description") {
+                  return true;
                 } else {
                   errors.push("Invalid value \"" + value + "\"");
                   return false;
@@ -175,54 +175,56 @@ module.exports = {
                 }
               }
             }
-            
+
             var argument = args[i].split(":")[0];
             var value = args[i].split(":")[1];
-  
+
             if (argument != "minOnline" && argument != "maxOnline" && argument != "playerCap" && argument != "isFull" && argument != "version" && argument != "hasImage" && argument != "description" && argument != "strictDescription") {
               errors.push("invalid argument \"" + argument + "\"");
             } else {
               if (isCorrectArgument(argument, value)) {
-                if (value != "any")
-                {
-                  if(argument == "minOnline") {
+                if (value != "any") {
+                  if (argument == "minOnline") {
                     minOnline.consider = true;
                     minOnline.value = value;
                   }
-                  
-                  if(argument == "maxOnline") {
+
+                  if (argument == "maxOnline") {
                     maxOnline.consider = true;
                     maxOnline.value = value;
                   }
 
-                  if(argument == "playerCap") {
+                  if (argument == "playerCap") {
                     playerCap.consider = true;
                     playerCap.value = value;
                   }
 
-                  if(argument == "playercap")
-                  
-                  if(argument == "isFull") {
+                  if (argument == "playercap") {
+                    playerCap.consider = true;
+                    playerCap.value = value;
+                  }
+
+                  if (argument == "isFull") {
                     isFull.consider = true;
                     isFull.value = value;
                   }
-                  
-                  if(argument == "version") {
+
+                  if (argument == "version") {
                     version.consider = true;
                     version.value = value;
                   }
 
-                  if(argument == "hasImage") {
+                  if (argument == "hasImage") {
                     hasImage.consider = true;
                     hasImage.value = value;
                   }
 
-                  if(argument == "description") {
+                  if (argument == "description") {
                     description.consider = true;
                     description.value = value;
                   }
 
-                  if(argument == "strictDescription") {
+                  if (argument == "strictDescription") {
                     description.strict = value;
                   }
                 }
@@ -233,7 +235,7 @@ module.exports = {
           }
         }
       }
-      
+
       if (errors.length > 0) {
         interaction.editReply("ERROR: " + errors[0])
       } else {
@@ -259,7 +261,7 @@ module.exports = {
         }
 
         if (isFull.consider) {
-          if(isFull.value == "true") {
+          if (isFull.value == "true") {
             argumentList += "\n" + "**Is Full**";
           } else {
             argumentList += "\n" + "**Isn't Full**"
@@ -274,13 +276,13 @@ module.exports = {
         }
 
         if (hasImage.consider) {
-          if(hasImage.value == "true") {
+          if (hasImage.value == "true") {
             argumentList += "\n" + "**Has Image**";
           } else {
             argumentList += "\n" + "**Doesn't Have Image**"
           }
         }
-        
+
         argumentList += "\n" + "**description:** "
         if (description.consider) {
           argumentList += description.value;
@@ -324,56 +326,56 @@ module.exports = {
 
           return String(description);
         }
-        
+
         function searchForServer(i, current) {
           MinecraftServerListPing.ping(0, successIPs[i], successPorts[i], 3000)
-          .then(response => {
-            var minOnlineRequirement = response.players.online >= minOnline.value || minOnline.consider == false;
-            var maxOnlineRequirement = response.players.online <= maxOnline.value || maxOnline.consider == false;
-            var playerCapRequirement = response.players.max == playerCap.value || playerCap.consider == false;
-            var isFullRequirement = (isFull.value == "false" && response.players.online != response.players.max) || (isFull.value == "true" && response.players.online == response.players.max) || isFull.consider == false;
-            var versionRequirement = response.version.name == version.value || (response.version.name + "E").includes(version.value + "E") || version.consider == false;
-            var hasImageRequirement = response.favicon != null || hasImage.value == "false" || hasImage.consider == false;
-            var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(response).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(response) == description.value) || description.value == "any" || description.consider == false;
+            .then(response => {
+              var minOnlineRequirement = response.players.online >= minOnline.value || minOnline.consider == false;
+              var maxOnlineRequirement = response.players.online <= maxOnline.value || maxOnline.consider == false;
+              var playerCapRequirement = response.players.max == playerCap.value || playerCap.consider == false;
+              var isFullRequirement = (isFull.value == "false" && response.players.online != response.players.max) || (isFull.value == "true" && response.players.online == response.players.max) || isFull.consider == false;
+              var versionRequirement = response.version.name == version.value || (response.version.name + "E").includes(version.value + "E") || version.consider == false;
+              var hasImageRequirement = response.favicon != null || hasImage.value == "false" || hasImage.consider == false;
+              var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(response).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(response) == description.value) || description.value == "any" || description.consider == false;
 
-            if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement) {
-              var versionString;
-              
-              if (response.version.name.length > 100) {
-                versionString = response.version.name.substring(0, 100) + "...";
-              } else if (response.version.name == null) {
-                versionString = "couldn't get version";
-              } else if (response.version.name == "") {
-                versionString = "ㅤ";
+              if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement) {
+                var versionString;
+
+                if (response.version.name.length > 100) {
+                  versionString = response.version.name.substring(0, 100) + "...";
+                } else if (response.version.name == null) {
+                  versionString = "couldn't get version";
+                } else if (response.version.name == "") {
+                  versionString = "ㅤ";
+                } else {
+                  versionString = response.version.name;
+                }
+
+
+                var newResult = {
+                  ip: successIPs[i],
+                  port: String(successPorts[i]),
+                  version: versionString,
+                  description: getDescription(response),
+                  onlinePlayers: response.players.online,
+                  maxPlayers: response.players.max
+                }
+
+                if (response.version.name.includes('§')) {
+                  newResult.version = 'bad character';
+                }
+
+                results.push(newResult);
+
+                searchFound = true;
               } else {
-                versionString = response.version.name;
-              }
-              
 
-              var newResult = {
-                ip: successIPs[i],
-                port: String(successPorts[i]),
-                version: versionString,
-                description: getDescription(response),
-                onlinePlayers: response.players.online,
-                maxPlayers: response.players.max
               }
-              
-              if (response.version.name.includes('§')) {
-                newResult.version = 'bad character';
-              }
-              
-              results.push(newResult);
+            })
 
-              searchFound = true;
-            } else {
-              
-            }
-          })
-            
-          .catch(error => {
-            //console.log(error);
-          });
+            .catch(error => {
+              //console.log(error);
+            });
         }
 
         activeSearch = true;
@@ -387,7 +389,7 @@ module.exports = {
             searchForServer(i, maxPings);
           }
         }
-        
+
         function scanChunk(current) {
           if (current < totalServers) {
             if (totalServers < maxPings) {
@@ -399,7 +401,7 @@ module.exports = {
                 searchForServer(i, maxPings);
               }
 
-              setTimeout(function() {scanChunk(current)}, 3500);
+              setTimeout(function() { scanChunk(current) }, 3500);
             }
           }
         }
@@ -408,14 +410,15 @@ module.exports = {
           wrappingUpSearch = true;
           activeSearch = false;
         }, 3000)
-  
+
         setTimeout(function() {
           if (searchFound) {
+            var lastButtonPress = new Date();
             for (var i = 0; i < results.length; i++) {
               var newEmbed = new EmbedBuilder()
                 .setColor("#02a337")
                 .setTitle('Search Results')
-                .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */})
+                .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
                 .addFields(
                   { name: 'Result ' + (i + 1) + '/' + results.length, value: 'ㅤ' },
                   { name: 'ip', value: results[i].ip },
@@ -426,182 +429,204 @@ module.exports = {
                 )
                 .setTimestamp()
 
-                embeds.push(newEmbed);
+              embeds.push(newEmbed);
             }
 
             var buttons
 
             if (embeds.length > 1) {
               buttons = new ActionRowBuilder()
-              .addComponents(
-                new ButtonBuilder()
-                  .setCustomId(lastResultID)
-                  .setLabel('Last Page')
-                  .setStyle(ButtonStyle.Secondary)
-                  .setDisabled(true),
-                new ButtonBuilder()
-                  .setCustomId(nextResultID)
-                  .setLabel('Next Page')
-                  .setStyle(ButtonStyle.Primary)
-              );
+                .addComponents(
+                  new ButtonBuilder()
+                    .setCustomId(lastResultID)
+                    .setLabel('Last Page')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(true),
+                  new ButtonBuilder()
+                    .setCustomId(nextResultID)
+                    .setLabel('Next Page')
+                    .setStyle(ButtonStyle.Primary)
+                );
             } else {
               buttons = new ActionRowBuilder()
-              .addComponents(
-                new ButtonBuilder()
-                  .setCustomId(lastResultID)
-                  .setLabel('Last Page')
-                  .setStyle(ButtonStyle.Secondary)
-                  .setDisabled(true),
-                new ButtonBuilder()
-                  .setCustomId(nextResultID)
-                  .setLabel('Next Page')
-                  .setStyle(ButtonStyle.Secondary)
-                  .setDisabled(true)
-              );
+                .addComponents(
+                  new ButtonBuilder()
+                    .setCustomId(lastResultID)
+                    .setLabel('Last Page')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(true),
+                  new ButtonBuilder()
+                    .setCustomId(nextResultID)
+                    .setLabel('Next Page')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(true)
+                );
             }
 
             const searchNextResultFilter = interaction => interaction.customId == nextResultID;
 
             const searchLastResultFilter = interaction => interaction.customId == lastResultID;
 
-            const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter, time: buttonTimeout });
+            const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
 
-            const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter, time: buttonTimeout });
+            const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
 
             searchNextResultCollector.on('collect', async interaction => {
+              lastButtonPress = new Date();
+              
               if (currentEmbed + 1 < embeds.length) {
                 currentEmbed++;
                 if (currentEmbed + 1 == embeds.length) {
                   buttons = new ActionRowBuilder()
-                  .addComponents(
-                    new ButtonBuilder()
-                      .setCustomId(lastResultID)
-                      .setLabel('Last Page')
-                      .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                      .setCustomId(nextResultID)
-                      .setLabel('Next Page')
-                      .setStyle(ButtonStyle.Secondary)
-                      .setDisabled(true)
-                  );
+                    .addComponents(
+                      new ButtonBuilder()
+                        .setCustomId(lastResultID)
+                        .setLabel('Last Page')
+                        .setStyle(ButtonStyle.Primary),
+                      new ButtonBuilder()
+                        .setCustomId(nextResultID)
+                        .setLabel('Next Page')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setDisabled(true)
+                    );
                 } else if (currentEmbed == 0) {
                   buttons = new ActionRowBuilder()
-                  .addComponents(
-                    new ButtonBuilder()
-                      .setCustomId(lastResultID)
-                      .setLabel('Last Page')
-                      .setStyle(ButtonStyle.Secondary)
-                      .setDisabled(true),
-                    new ButtonBuilder()
-                      .setCustomId(nextResultID)
-                      .setLabel('Next Page')
-                      .setStyle(ButtonStyle.Primary)
-                  );
+                    .addComponents(
+                      new ButtonBuilder()
+                        .setCustomId(lastResultID)
+                        .setLabel('Last Page')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setDisabled(true),
+                      new ButtonBuilder()
+                        .setCustomId(nextResultID)
+                        .setLabel('Next Page')
+                        .setStyle(ButtonStyle.Primary)
+                    );
                 } else {
                   buttons = new ActionRowBuilder()
-                  .addComponents(
-                    new ButtonBuilder()
-                      .setCustomId(lastResultID)
-                      .setLabel('Last Page')
-                      .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                      .setCustomId(nextResultID)
-                      .setLabel('Next Page')
-                      .setStyle(ButtonStyle.Primary)
-                  );
+                    .addComponents(
+                      new ButtonBuilder()
+                        .setCustomId(lastResultID)
+                        .setLabel('Last Page')
+                        .setStyle(ButtonStyle.Primary),
+                      new ButtonBuilder()
+                        .setCustomId(nextResultID)
+                        .setLabel('Next Page')
+                        .setStyle(ButtonStyle.Primary)
+                    );
                 }
-                await interaction.update({ content:'', embeds: [embeds[currentEmbed]], components: [buttons] });
+                await interaction.update({ content: '', embeds: [embeds[currentEmbed]], components: [buttons] });
               } else {
-                await interaction.update({ content:'', embeds:[], components:[] });
+                await interaction.update({ content: '', embeds: [], components: [] });
               }
             });
 
             searchLastResultCollector.on('collect', async interaction => {
+              lastButtonPress = new Date();
+              
               if (currentEmbed != 0) {
                 currentEmbed--;
                 if (currentEmbed + 1 == embeds.length) {
                   buttons = new ActionRowBuilder()
-                  .addComponents(
-                    new ButtonBuilder()
-                      .setCustomId(lastResultID)
-                      .setLabel('Last Page')
-                      .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                      .setCustomId(nextResultID)
-                      .setLabel('Next Page')
-                      .setStyle(ButtonStyle.Secondary)
-                      .setDisabled(true)
-                  );
+                    .addComponents(
+                      new ButtonBuilder()
+                        .setCustomId(lastResultID)
+                        .setLabel('Last Page')
+                        .setStyle(ButtonStyle.Primary),
+                      new ButtonBuilder()
+                        .setCustomId(nextResultID)
+                        .setLabel('Next Page')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setDisabled(true)
+                    );
                 } else if (currentEmbed == 0) {
                   buttons = new ActionRowBuilder()
-                  .addComponents(
-                    new ButtonBuilder()
-                      .setCustomId(lastResultID)
-                      .setLabel('Last Page')
-                      .setStyle(ButtonStyle.Secondary)
-                      .setDisabled(true),
-                    new ButtonBuilder()
-                      .setCustomId(nextResultID)
-                      .setLabel('Next Page')
-                      .setStyle(ButtonStyle.Primary)
-                  );
+                    .addComponents(
+                      new ButtonBuilder()
+                        .setCustomId(lastResultID)
+                        .setLabel('Last Page')
+                        .setStyle(ButtonStyle.Secondary)
+                        .setDisabled(true),
+                      new ButtonBuilder()
+                        .setCustomId(nextResultID)
+                        .setLabel('Next Page')
+                        .setStyle(ButtonStyle.Primary)
+                    );
                 } else {
                   buttons = new ActionRowBuilder()
-                  .addComponents(
-                    new ButtonBuilder()
-                      .setCustomId(lastResultID)
-                      .setLabel('Last Page')
-                      .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                      .setCustomId(nextResultID)
-                      .setLabel('Next Page')
-                      .setStyle(ButtonStyle.Primary)
-                  );
+                    .addComponents(
+                      new ButtonBuilder()
+                        .setCustomId(lastResultID)
+                        .setLabel('Last Page')
+                        .setStyle(ButtonStyle.Primary),
+                      new ButtonBuilder()
+                        .setCustomId(nextResultID)
+                        .setLabel('Next Page')
+                        .setStyle(ButtonStyle.Primary)
+                    );
                 }
 
-                await interaction.update({ content:'', embeds: [embeds[currentEmbed]], components: [buttons] });
+                await interaction.update({ content: '', embeds: [embeds[currentEmbed]], components: [buttons] });
               } else {
-                await interaction.update({ content:'', embeds:[], components:[] });
+                await interaction.update({ content: '', embeds: [], components: [] });
               }
             });
 
-            interaction.editReply({ content:'', embeds:[embeds[0]], components:[buttons] });
+            interaction.editReply({ content: '', embeds: [embeds[0]], components: [buttons] });
           }
 
-          setTimeout(function() {
-            console.log("button timed out");
-            buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('Last Page')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('Next Page')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true)
-            );
-            interaction.editReply({ components:[buttons] });
-          }, buttonTimeout - 1000);
+          function timeSinceDate(date1) {
+            var date2 = new Date();
+            var date1Total = date1.getSeconds() + date1.getMinutes() * 60 + date1.getHours() * 3600 + date1.getDay() * 86400;
+            var date2Total = date2.getSeconds() + date2.getMinutes() * 60 + date2.getHours() * 3600 + date2.getDay() * 86400;
+          
+            return date2Total - date1Total;
+          }
+          
+          function buttonTimeoutCheck() {
+            if (timeSinceDate(lastButtonPress) >= (buttonTimeout / 1000) - 1) {
+              searchNextResultCollector.stop();
+              searchLastResultCollector.stop();
+              
+              console.log("button timed out");
+              buttons = new ActionRowBuilder()
+                .addComponents(
+                  new ButtonBuilder()
+                    .setCustomId(lastResultID)
+                    .setLabel('Last Page')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(true),
+                  new ButtonBuilder()
+                    .setCustomId(nextResultID)
+                    .setLabel('Next Page')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(true)
+                );
+              interaction.editReply({ components: [buttons] });
+            } else {
+              setTimeout(function() {buttonTimeoutCheck()}, 500);
+            }
+          }
+
+          buttonTimeoutCheck();
+          
         }, (3500 * Math.ceil(totalServers / maxPings)))
 
         setTimeout(function() {
           if (!searchFound) {
             interaction.editReply("no matches could be found");
           }
-          
+
           wrappingUpSearch = false;
           activeSearch = false;
-        }, 10000)
+        }, (3500 * Math.ceil(totalServers / maxPings)))
       }
     } else {
-      if(wrappingUpSearch) {
+      if (wrappingUpSearch) {
         interaction.editReply("Wrapping up a previous search, please try again in a bit");
       } else {
         interaction.editReply("Another search is currently running, try again in a few seconds")
       }
     }
-	},
+  },
 };
