@@ -568,6 +568,9 @@ module.exports = {
           }
 
           function timeSinceDate(date1) {
+            if (date1 == null) {
+              date1 = new Date();
+            }
             var date2 = new Date();
             var date1Total = date1.getSeconds() + date1.getMinutes() * 60 + date1.getHours() * 3600 + date1.getDay() * 86400;
             var date2Total = date2.getSeconds() + date2.getMinutes() * 60 + date2.getHours() * 3600 + date2.getDay() * 86400;
