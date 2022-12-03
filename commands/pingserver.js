@@ -9,7 +9,7 @@ module.exports = {
 			option.setName("ip")
 				.setDescription("The ip of the server to ping")
         .setRequired(true))
-    .addStringOption(option =>
+    .addIntegerOption(option =>
 			option.setName("port")
 				.setDescription("The port of the server to ping")
         .setRequired(true)),
@@ -17,14 +17,20 @@ module.exports = {
     await interaction.reply("pinging...");
     
     const ip = interaction.options.getString("ip");
-    const port = interaction.options.getString("port")
+    const port = interaction.options.getInteger("port");
     
     MinecraftServerListPing.ping(0, ip, port, 2000)
       .then(response => {
         var description = "";
         if (response.description.extra != null) {
-          for (var i = 0; i < response.description.extra.length; i++) {
-            description += response.description.extra[i].text;
+          if (response.description.extra[0].extra == null) {
+            for (var i = 0; i < response.description.extra.length; i++) {
+              description += response.description.extra[i].text;
+            }
+          } else {
+            for (var i = 0; i < response.description.extra[0].extra.length; i++) {
+              description += response.description.extra[0].extra[i].text;
+            }
           }
         } else if (response.description.text != null) {
           description = response.description.text;
@@ -48,7 +54,7 @@ module.exports = {
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */})
           .addFields(
             { name: 'ip', value: ip },
-            { name: 'port', value: port },
+            { name: 'port', value: String(port) },
             { name: 'version', value: response.version.name },
             { name: 'description', value: description },
             { name: 'players', value: response.players.online + '/' + response.players.max }
