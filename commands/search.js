@@ -365,10 +365,6 @@ module.exports = {
                   maxPlayers: response.players.max
                 }
 
-                if (response.version.name.includes('§')) {
-                  newResult.version = 'bad character';
-                }
-
                 results.push(newResult);
 
                 searchFound = true;
