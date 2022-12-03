@@ -85,6 +85,10 @@ module.exports = {
       var currentEmbed = 0;
       const lastResultID = 'searchLastResult' + interaction.id;
       const nextResultID = 'searchNextResult' + interaction.id;
+      const searchNextResultFilter = interaction => interaction.customId == nextResultID;
+      const searchLastResultFilter = interaction => interaction.customId == lastResultID;
+      const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
+      const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
 
       if (interaction.options.getString("minonline") != null) {
         args.push("minOnline:" + interaction.options.getString("minonline"));
@@ -463,14 +467,6 @@ module.exports = {
                 );
             }
 
-            const searchNextResultFilter = interaction => interaction.customId == nextResultID;
-
-            const searchLastResultFilter = interaction => interaction.customId == lastResultID;
-
-            const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
-
-            const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
-
             searchNextResultCollector.on('collect', async interaction => {
               lastButtonPress = new Date();
               
@@ -585,9 +581,6 @@ module.exports = {
           
           function buttonTimeoutCheck() {
             if (timeSinceDate(lastButtonPress) >= (buttonTimeout / 1000) - 1) {
-              searchNextResultCollector.stop();
-              searchLastResultCollector.stop();
-              
               console.log("button timed out");
               buttons = new ActionRowBuilder()
                 .addComponents(
@@ -603,6 +596,9 @@ module.exports = {
                     .setDisabled(true)
                 );
               interaction.editReply({ components: [buttons] });
+
+              searchNextResultCollector.stop();
+              searchLastResultCollector.stop();
             } else {
               setTimeout(function() {buttonTimeoutCheck()}, 500);
             }
