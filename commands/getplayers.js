@@ -20,8 +20,6 @@ module.exports = {
     MinecraftServerListPing.ping(0, ip, port, 3000)
       .then(response => {
         if (response.players.sample != null) {
-          console.log(response.players.sample);
-          
           var newEmbed = new EmbedBuilder()
 	          .setColor("#02a337")
           	.setTitle('Online Players')
