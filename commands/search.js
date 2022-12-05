@@ -42,7 +42,11 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName("strictdescription")
-        .setDescription("Whether or not the description has to be an exact match")),
+        .setDescription("Whether or not the description has to be an exact match"))
+    .addStringOption(option =>
+      option
+        .setName("player")
+        .setDescription("The name of a player to search for")),
   async execute(interaction) {
     await interaction.reply("Searching...");
 
@@ -74,6 +78,10 @@ module.exports = {
       var description = {
         value: "false",
         strict: "false",
+        consider: false
+      };
+      var player = {
+        value: "Steve",
         consider: false
       };
 
@@ -114,6 +122,9 @@ module.exports = {
       if (interaction.options.getString("strictdescription") != null) {
         args.push("strictDescription:" + interaction.options.getString("strictdescription"));
       }
+      if (interaction.options.getString("player") != null) {
+        args.push("player:" + interaction.options.getString("player"));
+      }
 
       if (args.length == 0) {
         errors.push("No arguments specified. Use /help for correct usage.");
@@ -122,6 +133,10 @@ module.exports = {
         for (var i = 0; i < args.length; i++) {
           if (args[0].includes(":")) {
             function isCorrectArgument(argument, value) {
+              if (argument == "description" || argument == "player") {
+                return true;
+              }
+
               if (isNaN(value) || argument == "version") {
                 //value isn't a number
                 if (value == "any") {
@@ -157,9 +172,7 @@ module.exports = {
                     return false;
                   }
                 }
-                else if (argument == "description") {
-                  return true;
-                } else {
+                else {
                   errors.push("Invalid value \"" + value + "\"");
                   return false;
                 }
@@ -183,7 +196,7 @@ module.exports = {
             var argument = args[i].split(":")[0];
             var value = args[i].split(":")[1];
 
-            if (argument != "minOnline" && argument != "maxOnline" && argument != "playerCap" && argument != "isFull" && argument != "version" && argument != "hasImage" && argument != "description" && argument != "strictDescription") {
+            if (argument != "minOnline" && argument != "maxOnline" && argument != "playerCap" && argument != "isFull" && argument != "version" && argument != "hasImage" && argument != "description" && argument != "strictDescription" && argument != "player") {
               errors.push("invalid argument \"" + argument + "\"");
             } else {
               if (isCorrectArgument(argument, value)) {
@@ -230,6 +243,11 @@ module.exports = {
 
                   if (argument == "strictDescription") {
                     description.strict = value;
+                  }
+
+                  if (argument == "player") {
+                    player.consider = true;
+                    player.value = value;
                   }
                 }
               } else {
@@ -300,6 +318,10 @@ module.exports = {
           argumentList += " **(not strict)**"
         }
 
+        if (player.consider) {
+          argumentList += "\n" + "**Player: **" + player.value;
+        }
+
         interaction.editReply(argumentList);
 
         function getDescription(response) {
@@ -341,8 +363,77 @@ module.exports = {
               var versionRequirement = response.version.name == version.value || (response.version.name + "E").includes(version.value + "E") || version.consider == false;
               var hasImageRequirement = response.favicon != null || hasImage.value == "false" || hasImage.consider == false;
               var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(response).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(response) == description.value) || description.value == "any" || description.consider == false;
+              var playerRequirement;
 
-              if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement) {
+              if (player.consider) {
+                playerRequirement = false;  
+
+                if (response.players.sample != null) {
+                  if (response.players.sample.length >= 1 && response.players.sample[0].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 2 && response.players.sample[1].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 3 && response.players.sample[2].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 4 && response.players.sample[3].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 5 && response.players.sample[4].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 6 && response.players.sample[5].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 7 && response.players.sample[6].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 8 && response.players.sample[7].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 9 && response.players.sample[8].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 10 && response.players.sample[9].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 11 && response.players.sample[10].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 12 && response.players.sample[11].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 13 && response.players.sample[12].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 14 && response.players.sample[13].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 15 && response.players.sample[14].name == player.value) {
+                    playerRequirement = true;
+                  }
+                }
+              } else {
+                playerRequirement = true;
+              }
+
+              if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement) {
                 var versionString;
 
                 if (response.version.name.length > 100) {
@@ -362,7 +453,7 @@ module.exports = {
                   version: versionString,
                   description: getDescription(response),
                   onlinePlayers: response.players.online,
-                  maxPlayers: response.players.max
+                  maxPlayers: response.players.max,
                 }
 
                 results.push(newResult);
@@ -376,6 +467,76 @@ module.exports = {
             .catch(error => {
               //console.log(error);
             });
+          
+          /*
+          setTimeout(function() {
+            if (gotResponse) {
+              var response = pingResponse;
+              console.log()
+              console.log(response.players);
+              
+              var minOnlineRequirement = response.players.online >= minOnline.value || minOnline.consider == false;
+              var maxOnlineRequirement = response.players.online <= maxOnline.value || maxOnline.consider == false;
+              var playerCapRequirement = response.players.max == playerCap.value || playerCap.consider == false;
+              var isFullRequirement = (isFull.value == "false" && response.players.online != response.players.max) || (isFull.value == "true" && response.players.online == response.players.max) || isFull.consider == false;
+              var versionRequirement = response.version.name == version.value || (response.version.name + "E").includes(version.value + "E") || version.consider == false;
+              var hasImageRequirement = response.favicon != null || hasImage.value == "false" || hasImage.consider == false;
+              var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(response).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(response) == description.value) || description.value == "any" || description.consider == false;
+              
+              var playerRequirement = true;
+
+              /*
+              if (player.consider) {
+                playerRequirement = false;
+                if (response.players.sample != null) {
+                  if (response.players.sample.length > 0) {
+                    for (var i = 0; i < response.players.sample.length; i++) {
+                      if (response.players.sample[i].name == player.value) {
+                        console.log(successIPs[i]);
+                        console.log(response.players.sample);
+                        playerRequirement = true;
+                      }
+                    }
+                  }
+                }
+              } else {
+                playerRequirement = true;
+              }
+              */
+
+              /*
+  
+              if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement) {
+                var versionString;
+  
+                if (response.version.name.length > 100) {
+                  versionString = response.version.name.substring(0, 100) + "...";
+                } else if (response.version.name == null) {
+                  versionString = "couldn't get version";
+                } else if (response.version.name == "") {
+                  versionString = "ㅤ";
+                } else {
+                  versionString = response.version.name;
+                }
+  
+                var newResult = {
+                    ip: successIPs[i],
+                    port: String(successPorts[i]),
+                    version: versionString,
+                    description: getDescription(response),
+                    onlinePlayers: response.players.online,
+                    maxPlayers: response.players.max
+                }
+  
+                results.push(newResult);
+  
+                searchFound = true;
+              } else {
+  
+              }
+            }
+          }, 3100); 
+          */
         }
 
         activeSearch = true;
@@ -465,7 +626,7 @@ module.exports = {
 
             searchNextResultCollector.on('collect', async interaction => {
               lastButtonPress = new Date();
-              
+
               if (currentEmbed + 1 < embeds.length) {
                 currentEmbed++;
                 if (currentEmbed + 1 == embeds.length) {
@@ -515,7 +676,7 @@ module.exports = {
 
             searchLastResultCollector.on('collect', async interaction => {
               lastButtonPress = new Date();
-              
+
               if (currentEmbed != 0) {
                 currentEmbed--;
                 if (currentEmbed + 1 == embeds.length) {
@@ -574,10 +735,10 @@ module.exports = {
             var date2 = new Date();
             var date1Total = date1.getSeconds() + date1.getMinutes() * 60 + date1.getHours() * 3600 + date1.getDay() * 86400;
             var date2Total = date2.getSeconds() + date2.getMinutes() * 60 + date2.getHours() * 3600 + date2.getDay() * 86400;
-          
+
             return date2Total - date1Total;
           }
-          
+
           function buttonTimeoutCheck() {
             if (timeSinceDate(lastButtonPress) >= (buttonTimeout / 1000) - 1) {
               console.log("button timed out");
@@ -599,12 +760,12 @@ module.exports = {
               searchNextResultCollector.stop();
               searchLastResultCollector.stop();
             } else {
-              setTimeout(function() {buttonTimeoutCheck()}, 500);
+              setTimeout(function() { buttonTimeoutCheck() }, 500);
             }
           }
 
           buttonTimeoutCheck();
-          
+
         }, (3500 * Math.ceil(totalServers / maxPings)))
 
         setTimeout(function() {
