@@ -62,3 +62,6 @@ The description of the server
 
 ##### strictDescription (true/false)
 (Used with the description argument) If true, the server's description has to perfectly match the description argument. If false, the server's description only has to contain the description argument.
+
+##### player (player name)
+Searches for the server a player is currently playing on.
