@@ -22,6 +22,9 @@ If you want to host the bot yourself, make sure to update the config.json file t
 ### /help
 Sends the bot's list of commands
 
+### /stats
+Sends some stats about the bot
+
 ### /randserver
 Gets a random Minecraft server
 ㅤ
@@ -38,8 +41,10 @@ The port of the server
 ### /search [minonline] [maxonline] [playerCap] [isfull] [version] [hasImage] [description] [strictDescription]
 searches for a server with specific properties
 
-#### arguments:    
-#####minonline (integer)
+#### arguments:
+##### scan (integer)
+How many servers to scan in the search. Use /stats to find the total servers available for scan.
+##### minonline (integer)
 The minimum number of players online
 
 ##### maxonline (integer)
