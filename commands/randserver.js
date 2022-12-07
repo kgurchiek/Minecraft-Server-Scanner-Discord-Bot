@@ -12,11 +12,11 @@ module.exports = {
         
         function sendMessage() {
           var matchNumber = Math.round((Math.random() * totalServers));
-          //console.log(successIPs[matchNumber] + ":" + successPorts[matchNumber]);
+          console.log(successIPs[matchNumber] + ":" + successPorts[matchNumber]);
 
           MinecraftServerListPing.ping(0, successIPs[matchNumber], successPorts[matchNumber], 1500)
           .then(response => {
-            //console.log(response);
+            console.log(response);
 
             var description = "";
             if (response.description.extra != null) {
@@ -55,7 +55,7 @@ module.exports = {
             interaction.editReply({ content:'', embeds: [newEmbed] });
           })
           .catch(error => {
-            //console.log(error);
+            console.log(error);
             sendMessage();
           });
         }

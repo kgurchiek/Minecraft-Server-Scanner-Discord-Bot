@@ -23,14 +23,8 @@ module.exports = {
       .then(response => {
         var description = "";
         if (response.description.extra != null) {
-          if (response.description.extra[0].extra == null) {
-            for (var i = 0; i < response.description.extra.length; i++) {
-              description += response.description.extra[i].text;
-            }
-          } else {
-            for (var i = 0; i < response.description.extra[0].extra.length; i++) {
-              description += response.description.extra[0].extra[i].text;
-            }
+          for (var i = 0; i < response.description.extra.length; i++) {
+            description += response.description.extra[i].text;
           }
         } else if (response.description.text != null) {
           description = response.description.text;

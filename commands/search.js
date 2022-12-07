@@ -1,17 +1,23 @@
 const wait = require('node:timers/promises').setTimeout;
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteractionOptionResolver } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
-const { totalServers, successIPs, successPorts } = require("../serverList.json");
+const { successIPs, successPorts } = require("../serverList.json");
+var { totalServers } = require("../serverList.json");
 var activeSearch = false;
 var wrappingUpSearch = false;
 const buttonTimeout = 30000;
-var maxPings = 5000;
+const { maxPings, pingTimeout } = require('../config.json');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("search")
     .setDescription("Searches for a server with specific properties")
-    .addStringOption(option =>
+    .addIntegerOption(option =>
+      option
+        .setName("scan")
+        .setDescription("The amount of servers to scan")
+        .setRequired(true))
+      .addStringOption(option =>
       option
         .setName("minonline")
         .setDescription("The minimum number of online players"))
@@ -98,6 +104,13 @@ module.exports = {
       const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
       const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
 
+      if (interaction.options.getInteger("scan") != null) {
+         if (interaction.options.getInteger("scan") < 0) {
+          totalServers = interaction.options.getInteger("scan") * -1;
+        } else if (interaction.options.getInteger("scan") < totalServers) {
+        	totalServers = interaction.options.getInteger("scan");
+        }
+      }
       if (interaction.options.getString("minonline") != null) {
         args.push("minOnline:" + interaction.options.getString("minonline"));
       }
@@ -350,11 +363,16 @@ module.exports = {
             description = 'ㅤ';
           }
 
+          if (description.length > 150) {
+            description = description.substring(0, 150) + "...";
+          }
+
           return String(description);
         }
 
-        function searchForServer(i, current) {
-          MinecraftServerListPing.ping(0, successIPs[i], successPorts[i], 3000)
+        function searchForServer(i) {
+
+          MinecraftServerListPing.ping(0, successIPs[i], successPorts[i], pingTimeout)
             .then(response => {
               var minOnlineRequirement = response.players.online >= minOnline.value || minOnline.consider == false;
               var maxOnlineRequirement = response.players.online <= maxOnline.value || maxOnline.consider == false;
@@ -459,84 +477,12 @@ module.exports = {
                 results.push(newResult);
 
                 searchFound = true;
-              } else {
-
               }
             })
 
             .catch(error => {
-              //console.log(error);
+
             });
-          
-          /*
-          setTimeout(function() {
-            if (gotResponse) {
-              var response = pingResponse;
-              console.log()
-              console.log(response.players);
-              
-              var minOnlineRequirement = response.players.online >= minOnline.value || minOnline.consider == false;
-              var maxOnlineRequirement = response.players.online <= maxOnline.value || maxOnline.consider == false;
-              var playerCapRequirement = response.players.max == playerCap.value || playerCap.consider == false;
-              var isFullRequirement = (isFull.value == "false" && response.players.online != response.players.max) || (isFull.value == "true" && response.players.online == response.players.max) || isFull.consider == false;
-              var versionRequirement = response.version.name == version.value || (response.version.name + "E").includes(version.value + "E") || version.consider == false;
-              var hasImageRequirement = response.favicon != null || hasImage.value == "false" || hasImage.consider == false;
-              var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(response).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(response) == description.value) || description.value == "any" || description.consider == false;
-              
-              var playerRequirement = true;
-
-              /*
-              if (player.consider) {
-                playerRequirement = false;
-                if (response.players.sample != null) {
-                  if (response.players.sample.length > 0) {
-                    for (var i = 0; i < response.players.sample.length; i++) {
-                      if (response.players.sample[i].name == player.value) {
-                        console.log(successIPs[i]);
-                        console.log(response.players.sample);
-                        playerRequirement = true;
-                      }
-                    }
-                  }
-                }
-              } else {
-                playerRequirement = true;
-              }
-              */
-
-              /*
-  
-              if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement) {
-                var versionString;
-  
-                if (response.version.name.length > 100) {
-                  versionString = response.version.name.substring(0, 100) + "...";
-                } else if (response.version.name == null) {
-                  versionString = "couldn't get version";
-                } else if (response.version.name == "") {
-                  versionString = "ㅤ";
-                } else {
-                  versionString = response.version.name;
-                }
-  
-                var newResult = {
-                    ip: successIPs[i],
-                    port: String(successPorts[i]),
-                    version: versionString,
-                    description: getDescription(response),
-                    onlinePlayers: response.players.online,
-                    maxPlayers: response.players.max
-                }
-  
-                results.push(newResult);
-  
-                searchFound = true;
-              } else {
-  
-              }
-            }
-          }, 3100); 
-          */
         }
 
         activeSearch = true;
@@ -546,23 +492,26 @@ module.exports = {
             searchForServer(i, totalServers);
           }
         } else {
-          for (var i; i < maxPings; i++) {
+          for (var i = 0; i < maxPings; i++) {
             searchForServer(i, maxPings);
           }
+
+          setTimeout(function() { scanChunk(maxPings); }, 3500);
         }
 
         function scanChunk(current) {
+          interaction.editReply(argumentList + "\n" + "**" + (Math.round((current / totalServers) * 10000) / 100) + "% complete**");
           if (current < totalServers) {
-            if (totalServers < maxPings) {
-              for (var i = 0; i < totalServers; i++) {
-                searchForServer(i, totalServers);
+            if (totalServers - current < maxPings) {
+              for (var i = 0; i < totalServers - current; i++) {
+                searchForServer(i + current);
               }
             } else {
-              for (var i; i < maxPings; i++) {
-                searchForServer(i, maxPings);
+              for (var i = 0; i < maxPings; i++) {
+                searchForServer(i + current);
               }
 
-              setTimeout(function() { scanChunk(current) }, 3500);
+              setTimeout(function() { scanChunk(current + maxPings); }, 3500);
             }
           }
         }
@@ -570,30 +519,66 @@ module.exports = {
         setTimeout(function() {
           wrappingUpSearch = true;
           activeSearch = false;
-        }, 3000)
 
-        setTimeout(function() {
+          if (interaction.options.getInteger("scan") == 0) {
+            var newEmbed = new EmbedBuilder()
+              .setColor("#02a337")
+              .setTitle('Search Results')
+              .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
+              .addFields(
+                  { name: 'Result ' + '0/0' , value: 'ㅤ' },
+                  { name: 'ip', value: "0.0.0.0" },
+                  { name: 'port', value: "0" },
+                  { name: 'version', value: "0.00.0" },
+                  { name: 'description', value: "Bro actually just scanned 0 servers🤦‍♂️" },
+                  { name: 'players', value: '0/0' }
+              )
+              .setTimestamp()
+  
+            embeds.push(newEmbed);
+            searchFound = true
+          } else if (interaction.options.getInteger("scan") < 0) {
+            var newEmbed = new EmbedBuilder()
+              .setColor("#02a337")
+              .setTitle('Search Results')
+              .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
+              .addFields(
+                  { name: 'Result ' + '-0/' , value: 'ㅤ' },
+                  { name: 'ip', value: "?.?.?.?" },
+                  { name: 'port', value: "25565" },
+                  { name: 'version', value: "ඞ" },
+                  { name: 'description', value: "omg it's the secret negative seerver!!!1!1!!11!" },
+                  { name: 'players', value: "∞" + '/' + "-1" }
+              )
+              .setTimestamp()
+  
+            embeds.push(newEmbed);
+            searchFound = true;
+          }
+
+          interaction.editReply(argumentList + "\n" + "**Loading results, please wait...**");
+
           if (searchFound) {
             var lastButtonPress = new Date();
             for (var i = 0; i < results.length; i++) {
               var newEmbed = new EmbedBuilder()
-                .setColor("#02a337")
-                .setTitle('Search Results')
-                .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
-                .addFields(
+              .setColor("#02a337")
+              .setTitle('Search Results')
+              .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
+              .addFields(
                   { name: 'Result ' + (i + 1) + '/' + results.length, value: 'ㅤ' },
                   { name: 'ip', value: results[i].ip },
                   { name: 'port', value: results[i].port },
                   { name: 'version', value: results[i].version },
                   { name: 'description', value: results[i].description },
                   { name: 'players', value: results[i].onlinePlayers + '/' + results[i].maxPlayers }
-                )
-                .setTimestamp()
+              )
+              .setTimestamp()
 
               embeds.push(newEmbed);
             }
 
-            var buttons
+            var buttons;
 
             if (embeds.length > 1) {
               buttons = new ActionRowBuilder()
@@ -741,7 +726,6 @@ module.exports = {
 
           function buttonTimeoutCheck() {
             if (timeSinceDate(lastButtonPress) >= (buttonTimeout / 1000) - 1) {
-              console.log("button timed out");
               buttons = new ActionRowBuilder()
                 .addComponents(
                   new ButtonBuilder()
@@ -766,7 +750,7 @@ module.exports = {
 
           buttonTimeoutCheck();
 
-        }, (3500 * Math.ceil(totalServers / maxPings)))
+        }, (pingTimeout * Math.ceil(totalServers / maxPings)) + 500)
 
         setTimeout(function() {
           if (!searchFound) {
@@ -775,7 +759,7 @@ module.exports = {
 
           wrappingUpSearch = false;
           activeSearch = false;
-        }, (3500 * Math.ceil(totalServers / maxPings)))
+        }, (pingTimeout * Math.ceil(totalServers / maxPings)) + 1500)
       }
     } else {
       if (wrappingUpSearch) {

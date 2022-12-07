@@ -1,4 +1,6 @@
 {
 	"clientId": "YOUR CLIENT ID",
-  	"token": "YOUR BOT TOKEN"
+  	"token": "YOUR BOT TOKEN",
+	"maxPings":3000,
+	"pingTimeout":5000
 }
