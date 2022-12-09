@@ -10,34 +10,48 @@ module.exports = {
 	async execute(interaction) {
 		await interaction.reply("Getting a server, please wait...");
         
-        function sendMessage() {
-          var matchNumber = Math.round((Math.random() * totalServers));
-          console.log(successIPs[matchNumber] + ":" + successPorts[matchNumber]);
-
-          MinecraftServerListPing.ping(0, successIPs[matchNumber], successPorts[matchNumber], 1500)
-          .then(response => {
-            console.log(response);
-
-            var description = "";
-            if (response.description.extra != null) {
+        function getDescription(response) {
+          var description = "";
+          if (response.description.extra != null) {
+            if (response.description.extra[0].extra == null) {
               for (var i = 0; i < response.description.extra.length; i++) {
                 description += response.description.extra[i].text;
               }
-            } else if (response.description.text != null) {
-              description = response.description.text;
-            } else if (response.description.translate != null) {
-              description = response.description.translate;
-            } else if ("description: " + response.description != null) {
-              description = response.description;
             } else {
-              description = "Couldn't get description";
+              for (var i = 0; i < response.description.extra[0].extra.length; i++) {
+                description += response.description.extra[0].extra[i].text;
+              }
             }
+          } else if (response.description.text != null) {
+            description = response.description.text;
+          } else if (response.description.translate != null) {
+            description = response.description.translate;
+          } else if ("description: " + response.description != null) {
+            description = response.description;
+          } else {
+            description = "Couldn't get description";
+          }
 
-            if (description == '') {
-              description = 'ㅤ';
-            }
+          if (description == '') {
+            description = 'ㅤ';
+          }
 
-            description = String(description);
+          if (description.length > 150) {
+            description = description.substring(0, 150) + "...";
+          }
+
+          return String(description);
+        }
+        
+        function sendMessage() {
+          var matchNumber = Math.round((Math.random() * totalServers));
+          //console.log(successIPs[matchNumber] + ":" + successPorts[matchNumber]);
+
+          MinecraftServerListPing.ping(0, successIPs[matchNumber], successPorts[matchNumber], 1500)
+          .then(response => {
+            //console.log(response);
+
+            var description = getDescription(response);
 
             var newEmbed = new EmbedBuilder()
               .setColor("#02a337")
@@ -55,7 +69,7 @@ module.exports = {
             interaction.editReply({ content:'', embeds: [newEmbed] });
           })
           .catch(error => {
-            console.log(error);
+            //console.log(error);
             sendMessage();
           });
         }
