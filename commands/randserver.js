@@ -21,25 +21,42 @@ module.exports = {
             description += response.description.extra[0].extra[i].text;
           }
         }
-      } else if (response.description.text != null) {
-        description = response.description.text;
-      } else if (response.description.translate != null) {
-        description = response.description.translate;
-      } else if ("description: " + response.description != null) {
-        description = response.description;
-      } else {
-        description = "Couldn't get description";
-      }
+        } else if (response.description.text != null) {
+          description = response.description.text;
+        } else if (response.description.translate != null) {
+          description = response.description.translate;
+        } else if ("description: " + response.description != null) {
+          description = response.description;
+        } else {
+          description = "Couldn't get description";
+        }
 
-      if (description == '') {
-        description = 'ㅤ';
-      }
+        if (description.length > 150) {
+          description = description.substring(0, 150) + "...";
+        }
 
-      if (description.length > 150) {
-        description = description.substring(0, 150) + "...";
-      }
+        console.log(description);
 
-      return String(description);
+        //remove Minecraft color/formatting codes
+        while (description.startsWith('§')) {
+          description = description.substring(2, description.length);
+        }
+
+        if (description.split('§').length > 1) {
+          var splitDescription = description.split('§');
+          console.log(splitDescription);
+
+          description = splitDescription[0];
+          for (var i = 1; i < splitDescription.length; i++) { //skip the first one
+            description += splitDescription[i].substring(1, splitDescription[i].length);
+          }
+        }
+
+        if (description == '') {
+          description = 'ㅤ';
+        }
+
+        return String(description);
     }
         
     function sendMessage() {

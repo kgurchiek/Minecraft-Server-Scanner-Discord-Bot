@@ -41,10 +41,6 @@ module.exports = {
         description = "Couldn't get description";
       }
 
-      if (description == '') {
-        description = 'ㅤ';
-      }
-
       if (description.length > 150) {
         description = description.substring(0, 150) + "...";
       }
@@ -57,10 +53,14 @@ module.exports = {
       if (description.split('§').length > 1) {
         var splitDescription = description.split('§');
 
-        description = '';
-        for (var i = 0; i < splitDescription.length; i++) {
+        description = splitDescription[0];
+        for (var i = 1; i < splitDescription.length; i++) {
           description += splitDescription[i].substring(1, splitDescription[i].length);
         }
+      }
+
+      if (description == '') {
+        description = 'ㅤ';
       }
 
       return String(description);
