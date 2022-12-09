@@ -105,7 +105,7 @@ module.exports = {
       const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
 
       if (interaction.options.getString("scan") != null) {
-        if (!interaction.options.getString("scan").isNaN()) {
+        if (!isNaN(interaction.options.getString("scan"))) {
           if (interaction.options.getString("scan") < 0) {
             totalServers = interaction.options.getInteger("scan") * -1;
           } else if (interaction.options.getInteger("scan") < totalServers) {
