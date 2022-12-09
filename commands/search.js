@@ -104,12 +104,18 @@ module.exports = {
       const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
       const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
 
+      var scan;
+
       if (interaction.options.getString("scan") != null) {
+        scan = interaction.options.getString("scan");
+
         if (!isNaN(interaction.options.getString("scan"))) {
+          scan = parseInt(scan);
+
           if (interaction.options.getString("scan") < 0) {
-            totalServers = interaction.options.getInteger("scan") * -1;
-          } else if (interaction.options.getInteger("scan") < totalServers) {
-            totalServers = interaction.options.getInteger("scan");
+            totalServers = interaction.options.getScan("scan") * -1;
+          } else if (interaction.options.getString("scan") < totalServers) {
+            totalServers = interaction.options.getString("scan");
           }
         }
       }
@@ -302,6 +308,39 @@ module.exports = {
 
         interaction.editReply(argumentList);
 
+        function getMessyDescription(response) {
+          var description = "";
+          if (response.description.extra != null) {
+            if (response.description.extra[0].extra == null) {
+              for (var i = 0; i < response.description.extra.length; i++) {
+                description += response.description.extra[i].text;
+              }
+            } else {
+              for (var i = 0; i < response.description.extra[0].extra.length; i++) {
+                description += response.description.extra[0].extra[i].text;
+              }
+            }
+          } else if (response.description.text != null) {
+            description = response.description.text;
+          } else if (response.description.translate != null) {
+            description = response.description.translate;
+          } else if ("description: " + response.description != null) {
+            description = response.description;
+          } else {
+            description = "Couldn't get description";
+          }
+
+          if (description == '') {
+            description = 'ㅤ';
+          }
+
+          if (description.length > 150) {
+            description = description.substring(0, 150) + "...";
+          }
+
+          return String(description);
+        }
+
         function getDescription(response) {
           var description = "";
           if (response.description.extra != null) {
@@ -330,6 +369,22 @@ module.exports = {
 
           if (description.length > 150) {
             description = description.substring(0, 150) + "...";
+          }
+
+          console.log(description);
+
+          //remove Minecraft color/formatting codes
+          while (description.startsWith('§')) {
+            description = description.substring(2, description.length);
+          }
+
+          if (description.split('§').length > 1) {
+            var splitDescription = description.split('§');
+
+            description = '';
+            for (var i = 0; i < splitDescription.length; i++) {
+              description += splitDescription[i].substring(1, splitDescription[i].length);
+            }
           }
 
           return String(description);
@@ -485,7 +540,7 @@ module.exports = {
           wrappingUpSearch = true;
           activeSearch = false;
 
-          if (interaction.options.getInteger("scan") == 0) {
+          if (scan == 0) {
             var newEmbed = new EmbedBuilder()
               .setColor("#02a337")
               .setTitle('Search Results')
@@ -502,7 +557,7 @@ module.exports = {
   
             embeds.push(newEmbed);
             searchFound = true
-          } else if (interaction.options.getInteger("scan") < 0) {
+          } else if (scan < 0) {
             var newEmbed = new EmbedBuilder()
               .setColor("#02a337")
               .setTitle('Search Results')
