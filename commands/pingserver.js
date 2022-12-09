@@ -49,6 +49,20 @@ module.exports = {
         description = description.substring(0, 150) + "...";
       }
 
+      //remove Minecraft color/formatting codes
+      while (description.startsWith('§')) {
+        description = description.substring(2, description.length);
+      }
+
+      if (description.split('§').length > 1) {
+        var splitDescription = description.split('§');
+
+        description = '';
+        for (var i = 0; i < splitDescription.length; i++) {
+          description += splitDescription[i].substring(1, splitDescription[i].length);
+        }
+      }
+
       return String(description);
     }
     
