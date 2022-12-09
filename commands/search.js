@@ -53,8 +53,8 @@ module.exports = {
         .setName("player")
         .setDescription("The name of a player to search for")),
   async execute(interaction) {
-    await interaction.reply("Searching...");
     var { totalServers } = require("../serverList.json");
+    await interaction.reply("Searching...");
 
     if (!activeSearch && !wrappingUpSearch) {
       var minOnline = {
@@ -363,10 +363,6 @@ module.exports = {
             description = "Couldn't get description";
           }
 
-          if (description == '') {
-            description = 'ㅤ';
-          }
-
           if (description.length > 150) {
             description = description.substring(0, 150) + "...";
           }
@@ -383,6 +379,10 @@ module.exports = {
             for (var i = 0; i < splitDescription.length; i++) {
               description += splitDescription[i].substring(1, splitDescription[i].length);
             }
+          }
+            
+          if (description == '') {
+            description = 'ㅤ';
           }
 
           return String(description);
