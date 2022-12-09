@@ -2,7 +2,6 @@ const wait = require('node:timers/promises').setTimeout;
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteractionOptionResolver } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
 const { successIPs, successPorts } = require("../serverList.json");
-var { totalServers } = require("../serverList.json");
 var activeSearch = false;
 var wrappingUpSearch = false;
 const buttonTimeout = 30000;
@@ -55,6 +54,7 @@ module.exports = {
         .setDescription("The name of a player to search for")),
   async execute(interaction) {
     await interaction.reply("Searching...");
+    var { totalServers } = require("../serverList.json");
 
     if (!activeSearch && !wrappingUpSearch) {
       var minOnline = {
