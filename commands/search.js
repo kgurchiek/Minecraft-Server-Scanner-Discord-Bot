@@ -12,24 +12,24 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("search")
     .setDescription("Searches for a server with specific properties")
-    .addIntegerOption(option =>
+    .addStringOption(option =>
       option
         .setName("scan")
         .setDescription("The amount of servers to scan")
         .setRequired(true))
-      .addStringOption(option =>
+      .addIntegerOption(option =>
       option
         .setName("minonline")
         .setDescription("The minimum number of online players"))
-    .addStringOption(option =>
+    .addIntegerOption(option =>
       option
         .setName("maxonline")
         .setDescription("The maximum number of online players"))
-    .addStringOption(option =>
+    .addIntegerOption(option =>
       option
         .setName("playercap")
         .setDescription("The server's maximum player capacity"))
-    .addStringOption(option =>
+    .addBooleanOption(option =>
       option
         .setName("isfull")
         .setDescription("whether or not the server is full"))
@@ -37,7 +37,7 @@ module.exports = {
       option
         .setName("version")
         .setDescription("The version of the server"))
-    .addStringOption(option =>
+    .addBooleanOption(option =>
       option
         .setName("hasimage")
         .setDescription("Whether or not the server has a custom image"))
@@ -45,7 +45,7 @@ module.exports = {
       option
         .setName("description")
         .setDescription("The description of the server"))
-    .addStringOption(option =>
+    .addBooleanOption(option =>
       option
         .setName("strictdescription")
         .setDescription("Whether or not the description has to be an exact match"))
@@ -104,36 +104,38 @@ module.exports = {
       const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
       const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
 
-      if (interaction.options.getInteger("scan") != null) {
-         if (interaction.options.getInteger("scan") < 0) {
-          totalServers = interaction.options.getInteger("scan") * -1;
-        } else if (interaction.options.getInteger("scan") < totalServers) {
-        	totalServers = interaction.options.getInteger("scan");
+      if (interaction.options.getString("scan") != null) {
+        if (!interaction.options.getString("scan") == 'all') {
+          if (interaction.options.getString("scan") < 0) {
+            totalServers = interaction.options.getInteger("scan") * -1;
+          } else if (interaction.options.getInteger("scan") < totalServers) {
+            totalServers = interaction.options.getInteger("scan");
+          }
         }
       }
-      if (interaction.options.getString("minonline") != null) {
-        args.push("minOnline:" + interaction.options.getString("minonline"));
+      if (interaction.options.getInteger("minonline") != null) {
+        args.push("minOnline:" + interaction.options.getInteger("minonline"));
       }
-      if (interaction.options.getString("maxonline") != null) {
-        args.push("maxOnline:" + interaction.options.getString("maxonline"));
+      if (interaction.options.getInteger("maxonline") != null) {
+        args.push("maxOnline:" + interaction.options.getInteger("maxonline"));
       }
-      if (interaction.options.getString("playercap") != null) {
-        args.push("playerCap:" + interaction.options.getString("playercap"));
+      if (interaction.options.getInteger("playercap") != null) {
+        args.push("playerCap:" + interaction.options.getInteger("playercap"));
       }
-      if (interaction.options.getString("isfull") != null) {
-        args.push("isFull:" + interaction.options.getString("isfull"));
+      if (interaction.options.getBoolean("isfull") != null) {
+        args.push("isFull:" + interaction.options.getBoolean("isfull"));
       }
       if (interaction.options.getString("version") != null) {
         args.push("version:" + interaction.options.getString("version"));
       }
-      if (interaction.options.getString("hasimage") != null) {
-        args.push("hasImage:" + interaction.options.getString("hasimage"));
+      if (interaction.options.getBoolean("hasimage") != null) {
+        args.push("hasImage:" + interaction.options.getBoolean("hasimage"));
       }
       if (interaction.options.getString("description") != null) {
         args.push("description:" + interaction.options.getString("description"));
       }
-      if (interaction.options.getString("strictdescription") != null) {
-        args.push("strictDescription:" + interaction.options.getString("strictdescription"));
+      if (interaction.options.getBoolean("strictdescription") != null) {
+        args.push("strictDescription:" + interaction.options.getBoolean("strictdescription"));
       }
       if (interaction.options.getString("player") != null) {
         args.push("player:" + interaction.options.getString("player"));
@@ -146,63 +148,26 @@ module.exports = {
         for (var i = 0; i < args.length; i++) {
           if (args[0].includes(":")) {
             function isCorrectArgument(argument, value) {
-              if (argument == "description" || argument == "player") {
-                return true;
-              }
+              if (argument == 'version') {
+                if (value.split(".").length == 2 || value.split(".").length == 3) {
+                  var isValidVersion = true;
 
-              if (isNaN(value) || argument == "version") {
-                //value isn't a number
-                if (value == "any") {
-                  return true;
-                }
-                else if (value == "true" || value == "false") {
-                  if (argument == "isFull" || argument == "hasImage" || argument == "strictDescription") {
-                    return true;
-                  } else {
-                    return false;
-                  }
-                }
-                else if (value.includes(".")) {
-                  if (argument == "version") {
-                    if (value.split(".").length == 2 || value.split(".").length == 3) {
-                      var isValidVersion = true;
-                      for (var i = 0; i < value.split(".").length; i++) {
-                        if (isNaN(value.split(".")[i])) {
-                          isValidVersion = false;
-                        }
-                      }
-
-                      if (isValidVersion) {
-                        return true
-                      } else {
-                        return false;
-                      }
-                    } else {
-                      return false;
+                  for (var i = 0; i < value.split(".").length; i++) {
+                    if (isNaN(value.split(".")[i])) {
+                      isValidVersion = false;
                     }
                   }
-                  else {
-                    return false;
-                  }
-                }
-                else {
-                  errors.push("Invalid value \"" + value + "\"");
-                  return false;
-                }
-              }
-              else {
-                //value is a number
-                if (Number.isInteger(parseFloat(value))) {
-                  value = parseInt(value);
-                  if (value >= 0 && (argument == "minOnline" || argument == "maxOnline" || argument == "playerCap")) {
+
+                  if (isValidVersion) {
                     return true;
                   } else {
-                    return false
+                    return false;
                   }
-                }
-                else {
+                } else {
                   return false;
                 }
+              } else {
+                return true;
               }
             }
 
