@@ -14,8 +14,21 @@ If you find any bugs, please report them in the official discord (link above).
 
 You can contact me via discord: Cornbread 2100#8668
 
-## Usage
-If you want to host the bot yourself, make sure to update the config.json file to include your bot's token and client ID. When you first run the bot, run `node deploy-commands.js`. That will register the slash commands, otherwise they won't appear in discord. After that, run `node index.js` to run the bot.
+## Running the bot yourself
+**If you just want to use the bot, you don't have to host it, click on the discord button above to join it's official server** 
+
+### Configuration
+In config.json, fill in the bot's client id and token, found in the [Discord Developer Portal](https://discord.com/developers/applications). Then you'll want to change maxPings and pingTImeout to your liking:
+#### maxPings
+#####(how many servers are pinged at once)
+If you have fast internet, you can set this pretty high (around 5000). If you have slower internet, you'll want it lower (around 1000). The higher it is, the less time a /search will take, but it will also be less accurate, especially if you have slower internet.
+
+#### pingTimeout
+#####(how long to wait for a response before deciding a server is offline)
+about 2000-3000 (2-3 seconds) is recommmended. Setting this lower will make a /search faster, but you might leave out some slower servers that take a bit longer to respond.
+
+### Usage
+To run the bot, you'll need Node.js version 16.9.0 or higher. Before you host the bot, run `node deploy-commands.js` in your terminal. That will register the slash commands, otherwise they won't appear in discord. After that, run `node index.js` to run the bot.
 
 ## Commands
 
