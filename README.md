@@ -20,11 +20,11 @@ You can contact me via discord: Cornbread 2100#8668
 ### Configuration
 In config.json, fill in the bot's client id and token, found in the [Discord Developer Portal](https://discord.com/developers/applications). Then you'll want to change maxPings and pingTimeout to your liking:
 #### maxPings
-#####(how many servers are pinged at once)
+##### (how many servers are pinged at once)
 If you have fast internet, you can set this pretty high (around 5000). If you have slower internet, you'll want it lower (around 1000). The higher it is, the less time a /search will take, but it will also be less accurate, especially if you have slower internet.
 
 #### pingTimeout
-#####(how long to wait for a response before deciding a server is offline)
+##### (how long to wait for a response before deciding a server is offline)
 about 2000-3000 (2-3 seconds) is recommmended. Setting this lower will make a /search faster, but you might leave out some slower servers that take a bit longer to respond.
 
 ### Usage
