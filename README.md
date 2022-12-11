@@ -14,7 +14,7 @@ If you find any bugs, please report them in the [official discord](https://disco
 
 You can contact me via discord: Cornbread 2100#8668
 
-## Running the bot yourself
+## Hosting the bot yourself
 **If you just want to use the bot, you don't have to host it, you can try it out in its [official Discord server](https://discord.gg/TSWcF2m67m)** 
 
 ### Configuration
@@ -51,7 +51,7 @@ The ip address of the server
 ##### port
 The port of the server
 ㅤ
-### /search <scan> [minonline] [maxonline] [playercap] [isfull] [version] [hasImage] [description] [strictDescription] [player]
+### /search <scan> [minonline] [maxonline] [playercap] [isfull] [version] [hasimage] [description] [strictdescription] [player]
 searches for a server with specific properties
 
 #### arguments:
@@ -73,13 +73,13 @@ Whether or not the server is full
 ##### version (version number)
 The version of the server
 
-##### hasImage (true/false)
+##### hasimage (true/false)
 Whether or not the server has a custom thumbnail image
 
 ##### description (text)
 The description of the server
 
-##### strictDescription (true/false)
+##### strictdescription (true/false)
 (Used with the description argument) If true, the server's description has to perfectly match the description argument. If false, the server's description only has to contain the description argument.
 
 ##### player (player name)
