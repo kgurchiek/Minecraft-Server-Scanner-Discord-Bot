@@ -10,12 +10,12 @@
 
 This is the full code for a Node.js Minecraft server scanner Discord bot I made. This bot itself doesn't do the scanning, it just pings servers in the existing database, which is actively expanded by a seperate scanning program. (The code for the server scanner can be found here: https://github.com/kgurchiek/Minecraft-Server-IP-Scanner)
 
-If you find any bugs, please report them in the official discord (link above).
+If you find any bugs, please report them in the [official discord](https://discord.gg/TSWcF2m67m).
 
 You can contact me via discord: Cornbread 2100#8668
 
 ## Running the bot yourself
-**If you just want to use the bot, you don't have to host it, click on the discord button above to join it's official server** 
+**If you just want to use the bot, you don't have to host it, you can try it out in its [official Discord server](https://discord.gg/TSWcF2m67m)** 
 
 ### Configuration
 In config.json, fill in the bot's client id and token, found in the [Discord Developer Portal](https://discord.com/developers/applications). Then you'll want to change maxPings and pingTImeout to your liking:
