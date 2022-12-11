@@ -51,12 +51,13 @@ The ip address of the server
 ##### port
 The port of the server
 ㅤ
-### /search [minonline] [maxonline] [playerCap] [isfull] [version] [hasImage] [description] [strictDescription]
+### /search <scan> [minonline] [maxonline] [playercap] [isfull] [version] [hasImage] [description] [strictDescription] [player]
 searches for a server with specific properties
 
 #### arguments:
 ##### scan (integer)
 How many servers to scan in the search. Use /stats to find the total servers available for scan.
+
 ##### minonline (integer)
 The minimum number of players online
 
