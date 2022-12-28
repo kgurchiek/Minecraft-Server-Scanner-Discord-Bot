@@ -35,8 +35,6 @@ module.exports = {
           description = description.substring(0, 150) + "...";
         }
 
-        console.log(description);
-
         //remove Minecraft color/formatting codes
         while (description.startsWith('§')) {
           description = description.substring(2, description.length);
@@ -44,7 +42,6 @@ module.exports = {
 
         if (description.split('§').length > 1) {
           var splitDescription = description.split('§');
-          console.log(splitDescription);
 
           description = splitDescription[0];
           for (var i = 1; i < splitDescription.length; i++) { //skip the first one

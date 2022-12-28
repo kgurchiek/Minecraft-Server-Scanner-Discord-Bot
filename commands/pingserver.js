@@ -86,7 +86,6 @@ module.exports = {
         interaction.editReply({ content:'', embeds:[newEmbed] });
       })
       .catch(error => {
-        console.log(error);
         interaction.editReply("ip is invalid or server is offline");
       });
   }

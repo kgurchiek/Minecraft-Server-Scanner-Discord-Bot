@@ -37,7 +37,6 @@ module.exports = {
       })
       .catch(error => {
         interaction.reply('ip is invalid or server is offline');
-        console.log(error);
       })
 	},
 };
