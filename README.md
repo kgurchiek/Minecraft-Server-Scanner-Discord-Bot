@@ -20,14 +20,18 @@ You can contact me via discord: Cornbread 2100#8668
 **If you just want to use the bot, you don't have to host it, you can try it out in its [official Discord server](https://discord.gg/TSWcF2m67m)** 
 
 ### Configuration
-In config.json, fill in the bot's client id and token, found in the [Discord Developer Portal](https://discord.com/developers/applications). Then you'll want to change maxPings and pingTimeout to your liking:
+In config.json, fill in the bot's client id and token, found in the [Discord Developer Portal](https://discord.com/developers/applications). Then you'll want to change maxPings, pingTimeout, and refreshSearchTime to your liking:
 #### maxPings
 ##### (how many servers are pinged at once)
 If you have fast internet, you can set this pretty high (around 5000). If you have slower internet, you'll want it lower (around 1000). The higher it is, the less time a /search will take, but it will also be less accurate, especially if you have slower internet.
 
 #### pingTimeout
 ##### (how long to wait for a response before deciding a server is offline)
-about 2000-3000 (2-3 seconds) is recommmended. Setting this lower will make a /search faster, but you might leave out some slower servers that take a bit longer to respond.
+about 2000-3000 (2-3 seconds) is recommmended. Setting this lower will make a /search faster, but you might leave out some slower servers that take a bit longer to respond. **Note: this is in milleseconds**
+
+#### refreshSearchTime
+##### (how long /search results are saved)
+/search results are temporarily saved so that searches soon after can be much faster. The results will be re-scanned if it's been a while, which is set by refreshSearchTime. 300 (5 minutes) is recommended. Keep in mind that the longer this is, the more likely it is to be inaccurate, but the shorter it is, the more you'll have to wait for a long scan. **Note: this is in seconds**
 
 ### Usage
 To run the bot, you'll need Node.js version 16.9.0 or higher. Before you host the bot, run `node deploy-commands.js` in your terminal. That will register the slash commands, otherwise they won't appear in discord. After that, run `node index.js` to run the bot.
@@ -45,6 +49,16 @@ Gets a random Minecraft server
 ㅤ
 ### /pingserver \<ip\> \<port\>
 gets info from a server
+
+#### arguments:
+##### ip
+The ip address of the server
+    
+##### port
+The port of the server
+
+### /getplayers \<ip\> \<port\>
+attempts to get a list of players on a server
 
 #### arguments:
 ##### ip
