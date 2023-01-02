@@ -20,21 +20,21 @@ You can contact me via discord: Cornbread 2100#8668
 **If you just want to use the bot, you don't have to host it, you can try it out in its [official Discord server](https://discord.gg/TSWcF2m67m)** 
 
 ### Configuration
-In config.json, fill in the bot's client id and token, found in the [Discord Developer Portal](https://discord.com/developers/applications). Then you'll want to change maxPings, pingTimeout, and refreshSearchTime to your liking:
+Enter the client id and token for the bot from the Discord Developer Portal in config.json. Then, adjust maxPings, pingTimeout, and refreshSearchTime as necessary:
 #### maxPings
-##### (how many servers are pinged at once)
+##### (How many servers are pinged at once)
 If you have fast internet, you can set this pretty high (around 5000). If you have slower internet, you'll want it lower (around 1000). The higher it is, the less time a /search will take, but it will also be less accurate, especially if you have slower internet.
 
 #### pingTimeout
-##### (how long to wait for a response before deciding a server is offline)
-about 2000-3000 (2-3 seconds) is recommmended. Setting this lower will make a /search faster, but you might leave out some slower servers that take a bit longer to respond. **Note: this is in milleseconds**
+##### (How long to wait for a response before deciding a server is offline)
+A range of 2000–3000 (2–3 seconds) is advised. Setting this lower will speed up a /search, but you risk excluding some slower servers whose responses take a little longer. Please note that this is in milliseconds, to prevent any confusion.
 
 #### refreshSearchTime
-##### (how long /search results are saved)
-/search results are temporarily saved so that searches soon after can be much faster. The results will be re-scanned if it's been a while, which is set by refreshSearchTime. 300 (5 minutes) is recommended. Keep in mind that the longer this is, the more likely it is to be inaccurate, but the shorter it is, the more you'll have to wait for a long scan. **Note: this is in seconds**
+##### (How long /search results are saved in memory)
+In order to make subsequent searches considerably faster, search results are momentarily saved. If it has been a while, as determined by refreshSearchTime, the results will be re-scanned. The advised number is 300 (5 minutes). Remember that the longer this is, the more inaccurate the results are likely to be, but the shorter it is, the longer the gap between scans will be. Remember that this is in seconds.
 
 ### Usage
-To run the bot, you'll need Node.js version 16.9.0 or higher. Before you host the bot, run `node deploy-commands.js` in your terminal. That will register the slash commands, otherwise they won't appear in discord. After that, run `node index.js` to run the bot.
+You'll need Node.js version 16.9.0 or later to operate the bot. Run "node deploy-commands.js" in your terminal before launching the bot. The slash instructions will then be registered; otherwise, they won't show up in Discord. Run "node index.js" to start the bot once you're ready.
 
 ## Commands
 
@@ -45,10 +45,10 @@ Sends the bot's list of commands
 Sends some stats about the bot
 
 ### /randserver
-Gets a random Minecraft server
-ㅤ
+Fetches a random Minecraft server
+
 ### /pingserver \<ip\> \<port\>
-gets info from a server
+Fetches the current status of a server
 
 #### arguments:
 ##### ip
@@ -58,7 +58,7 @@ The ip address of the server
 The port of the server
 
 ### /getplayers \<ip\> \<port\>
-attempts to get a list of players on a server
+Attempts to fetch a list of players on a server
 
 #### arguments:
 ##### ip
@@ -68,20 +68,20 @@ The ip address of the server
 The port of the server
 ㅤ
 ### /search <scan> [minonline] [maxonline] [playercap] [isfull] [version] [hasimage] [description] [strictdescription] [player]
-searches for a server with specific properties
+Searches the database for a server with specific properties
 
 #### arguments:
 ##### scan (integer)
 How many servers to scan in the search. Use /stats to find the total servers available for scan.
 
+##### playerCap (integer)
+The maximum player capacity of the server
+
 ##### minonline (integer)
 The minimum number of players online
 
 ##### maxonline (integer)
-The maximum number of players online (not to be confused with the server's maximum player capacity (playerCap))
-
-##### playerCap (integer)
-The maximum player capacity of the server
+The maximum number of players online (Not to be confused with the server's maximum player capacity (playerCap))
 
 ##### isfull (true/false)
 Whether or not the server is full
@@ -96,7 +96,7 @@ Whether or not the server has a custom thumbnail image
 The description of the server
 
 ##### strictdescription (true/false)
-(Used with the description argument) If true, the server's description has to perfectly match the description argument. If false, the server's description only has to contain the description argument.
+(Used with the description argument) If true, the server's description has to perfectly match the description argument. If false, the server's description only has to contain the description argument
 
 ##### player (player name)
-Searches for the server a player is currently playing on.
+Searches for the server a player is currently playing on
