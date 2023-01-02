@@ -1,3 +1,4 @@
+//Fectches dependencies and inits variables
 const wait = require('node:timers/promises').setTimeout;
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteractionOptionResolver } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
@@ -8,6 +9,7 @@ var lastSearchDate = null;
 var lastSearchLength = 0;
 var lastSearchResults = [];
 
+//Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {
   if (date1 == null) {
     date1 = new Date();
@@ -19,6 +21,7 @@ function timeSinceDate(date1) {
   return date2Total - date1Total;
 }
 
+//Exports an object with the parameters for the target server
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("search")
@@ -67,7 +70,8 @@ module.exports = {
   async execute(interaction) {
     var { totalServers } = require("../serverList.json");
     await interaction.reply("Searching...");
-
+    
+    //Stores progress of user inputs
     const lastResultID = 'searchLastResult' + interaction.id;
     const nextResultID = 'searchNextResult' + interaction.id;
     const searchNextResultFilter = interaction => interaction.customId == nextResultID;
@@ -77,7 +81,7 @@ module.exports = {
     var lastButtonPress = new Date();
     var hasFinished = false;
 
-    //get arguments
+    //Gets arguments
     var minOnline = {
       value: 0,
       consider: false
@@ -112,6 +116,7 @@ module.exports = {
       consider: false
     };
 
+    //Inits some more variables
     var errors = [];
     var searchFound = false;
     var args = [];
@@ -121,9 +126,9 @@ module.exports = {
     var currentEmbed = 0;
     var scan;
 
+    //Creates interactable buttons
     function createButtons(embeds) {
       var buttons;
-    
       if (embeds.length > 1) {
         buttons = new ActionRowBuilder()
           .addComponents(
@@ -153,9 +158,11 @@ module.exports = {
           );
       }
     
+      //Event listener for 'Next Page' button
       searchNextResultCollector.on('collect', async interaction => {
         lastButtonPress = new Date();
     
+        //Updates UI when 'Next Page' pressed
         if (currentEmbed + 1 < embeds.length) {
           currentEmbed++;
           if (currentEmbed + 1 == embeds.length) {
@@ -203,9 +210,11 @@ module.exports = {
         }
       });
     
+      //Event listener for 'Last Page' button
       searchLastResultCollector.on('collect', async interaction => {
         lastButtonPress = new Date();
     
+        //Updates UI when 'Last Page' pressed
         if (currentEmbed != 0) {
           currentEmbed--;
           if (currentEmbed + 1 == embeds.length) {
@@ -257,6 +266,7 @@ module.exports = {
       return buttons;
     }
     
+    //Checks if the user passed a value for how many servers to scan
     if (interaction.options.getString("scan") != null) {
       scan = interaction.options.getString("scan");
 
@@ -270,6 +280,8 @@ module.exports = {
         }
       }
     }
+    
+    //Checks which values were provided
     if (interaction.options.getInteger("minonline") != null) {
       args.push("minOnline:" + interaction.options.getInteger("minonline"));
     }
@@ -298,6 +310,7 @@ module.exports = {
       args.push("player:" + interaction.options.getString("player"));
     }
 
+    //Handles when no args provided
     if (args.length == 0) {
       errors.push("No arguments specified. Use /help for correct usage.");
     } else {
@@ -314,6 +327,7 @@ module.exports = {
                   }
                 }
 
+                //Checks if code is up to date
                 if (isValidVersion) {
                   return true;
                 } else {
@@ -330,6 +344,7 @@ module.exports = {
           var argument = args[i].split(":")[0];
           var value = args[i].split(":")[1];
 
+          //Handles when a value is passed that is not supported
           if (argument != "minOnline" && argument != "maxOnline" && argument != "playerCap" && argument != "isFull" && argument != "version" && argument != "hasImage" && argument != "description" && argument != "strictDescription" && argument != "player") {
             errors.push("invalid argument \"" + argument + "\"");
           } else {
