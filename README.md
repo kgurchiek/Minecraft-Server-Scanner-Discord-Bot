@@ -50,7 +50,7 @@ Fetches a random Minecraft server
 ### /pingserver \<ip\> \<port\>
 Fetches the current status of a server
 
-#### arguments:
+#### Arguments:
 ##### ip
 The ip address of the server
     
