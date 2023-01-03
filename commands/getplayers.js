@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
 
 module.exports = {
+	// The command has two options: an IP and a port, both of which are required
 	 data: new SlashCommandBuilder()
     .setName("getplayers")
     .setDescription("Pings a server for info")
@@ -13,12 +14,16 @@ module.exports = {
       option.setName("port")
         .setDescription("The port of the server")
         .setRequired(true)),
+	// Pings a Minecraft server with the provided IP and port and returns a list of online players
 	async execute(interaction) {
+	// Get the IP and port of the server from the interaction options
     const ip = interaction.options.getString("ip");
     const port = interaction.options.getInteger("port");
     
+      // Ping the server
     MinecraftServerListPing.ping(0, ip, port, 3000)
       .then(response => {
+	    // If the response includes a list of players, create an embed message with the player list
         if (response.players.sample != null) {
           var newEmbed = new EmbedBuilder()
 	          .setColor("#02a337")
@@ -27,15 +32,18 @@ module.exports = {
           	.setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
           	.setTimestamp()
 
+	  // Add a field for each player in the response
           for (var i = 0; i < response.players.sample.length; i++) {
             newEmbed.addFields({ name: String(response.players.sample[i].name), value: String(response.players.sample[i].id) });
           }
+	// Reply to the interaction with the embed message
           interaction.reply({ embeds: [newEmbed] });
         } else {
           interaction.reply('couldn\'t get players (no sample in ping)');
         }
       })
       .catch(error => {
+	    // If the ping is unsuccessful, reply to the interaction with an error message
         interaction.reply('ip is invalid or server is offline');
       })
 	},
