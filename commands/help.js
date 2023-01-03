@@ -1,10 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
+	// Defines help command
 	data: new SlashCommandBuilder()
 		.setName('help')
 		.setDescription('Sends helpful info about the bot'),
+	// Sends command list when triggered
 	async execute(interaction) {
+		// Embed with every command + descriptions
     const exampleEmbed = new EmbedBuilder()
 	    .setColor("#02a337")
     	.setTitle('Help Menu')
