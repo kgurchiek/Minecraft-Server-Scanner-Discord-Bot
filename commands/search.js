@@ -1,3 +1,4 @@
+// Fectches dependencies and inits variables
 const wait = require('node:timers/promises').setTimeout;
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteractionOptionResolver } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
@@ -8,6 +9,7 @@ var lastSearchDate = null;
 var lastSearchLength = 0;
 var lastSearchResults = [];
 
+// Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {
   if (date1 == null) {
     date1 = new Date();
@@ -19,6 +21,7 @@ function timeSinceDate(date1) {
   return date2Total - date1Total;
 }
 
+// Exports an object with the parameters for the target server
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("search")
@@ -68,6 +71,7 @@ module.exports = {
     var { totalServers } = require("../serverList.json");
     await interaction.reply("Searching...");
 
+    //Stores progress of user inputs
     const lastResultID = 'searchLastResult' + interaction.id;
     const nextResultID = 'searchNextResult' + interaction.id;
     const searchNextResultFilter = interaction => interaction.customId == nextResultID;
@@ -77,7 +81,7 @@ module.exports = {
     var lastButtonPress = new Date();
     var hasFinished = false;
 
-    //get arguments
+    // Get arguments
     var minOnline = {
       value: 0,
       consider: false
@@ -112,6 +116,7 @@ module.exports = {
       consider: false
     };
 
+    // Inits some more variables
     var errors = [];
     var searchFound = false;
     var args = [];
@@ -121,6 +126,7 @@ module.exports = {
     var currentEmbed = 0;
     var scan;
 
+    //Creates interactable buttons
     function createButtons(embeds) {
       var buttons;
     
@@ -153,9 +159,10 @@ module.exports = {
           );
       }
     
+      // Event listener for 'Next Page' button
       searchNextResultCollector.on('collect', async interaction => {
         lastButtonPress = new Date();
-    
+        // Updates UI when 'Next Page' pressed
         if (currentEmbed + 1 < embeds.length) {
           currentEmbed++;
           if (currentEmbed + 1 == embeds.length) {
@@ -203,9 +210,11 @@ module.exports = {
         }
       });
     
+      // Event listener for 'Last Page' button
       searchLastResultCollector.on('collect', async interaction => {
         lastButtonPress = new Date();
     
+        // Updates UI when 'Last Page' pressed
         if (currentEmbed != 0) {
           currentEmbed--;
           if (currentEmbed + 1 == embeds.length) {
@@ -257,6 +266,7 @@ module.exports = {
       return buttons;
     }
     
+    // Checks if the user passed a value for how many servers to scan
     if (interaction.options.getString("scan") != null) {
       scan = interaction.options.getString("scan");
 
@@ -270,6 +280,8 @@ module.exports = {
         }
       }
     }
+    
+    // Checks which values were provided
     if (interaction.options.getInteger("minonline") != null) {
       args.push("minOnline:" + interaction.options.getInteger("minonline"));
     }
@@ -298,6 +310,7 @@ module.exports = {
       args.push("player:" + interaction.options.getString("player"));
     }
 
+    // Handles when no args provided
     if (args.length == 0) {
       errors.push("No arguments specified. Use /help for correct usage.");
     } else {
@@ -314,6 +327,7 @@ module.exports = {
                   }
                 }
 
+                // Checks if code is up to date
                 if (isValidVersion) {
                   return true;
                 } else {
@@ -330,6 +344,7 @@ module.exports = {
           var argument = args[i].split(":")[0];
           var value = args[i].split(":")[1];
 
+          // Handles when a value is passed that is not supported
           if (argument != "minOnline" && argument != "maxOnline" && argument != "playerCap" && argument != "isFull" && argument != "version" && argument != "hasImage" && argument != "description" && argument != "strictDescription" && argument != "player") {
             errors.push("invalid argument \"" + argument + "\"");
           } else {
@@ -392,10 +407,12 @@ module.exports = {
       }
     }
 
+    // Checks for any errors
     if (errors.length > 0) {
       interaction.editReply("ERROR: " + errors[0])
     }
       
+    // Handles what would happen if there was an error
     if (errors.length == 0)  {
       var argumentList = "**Searching " + scan + " servers with these arguments:** \n" + "**minOnline:** ";
       if (minOnline.consider) {
@@ -462,7 +479,7 @@ module.exports = {
     }
     
     if (lastSearchDate == null || timeSinceDate(lastSearchDate) >= refreshSearchTime || scan > lastSearchLength) {
-      //scan for new results
+      // Scan for new results
 
       lastSearchDate = new Date();
       lastSearchLength = scan;
@@ -493,7 +510,7 @@ module.exports = {
           description = description.substring(0, 150) + "...";
         }
 
-        //remove Minecraft color/formatting codes
+        // Remove Minecraft color/formatting codes
         while (description.startsWith('§')) {
           description = description.substring(2, description.length);
         }
@@ -514,6 +531,7 @@ module.exports = {
         return String(description);
       }
 
+      // Handles parameters
       function searchForServer(i) {
         MinecraftServerListPing.ping(0, successIPs[i], successPorts[i], pingTimeout)
           .then(response => {
@@ -526,6 +544,7 @@ module.exports = {
             var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(response).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(response) == description.value) || description.value == "any" || description.consider == false;
             var playerRequirement;
 
+          // Checks for a specific player
             if (player.consider) {
               playerRequirement = false;
 
@@ -594,7 +613,7 @@ module.exports = {
               playerRequirement = true;
             }
 
-            //format response
+            // Format response
             var versionString;
 
             if (response.version.name.length > 100) {
@@ -607,6 +626,7 @@ module.exports = {
               versionString = response.version.name;
             }
 
+          // Final result
             var newResult = {
               ip: successIPs[i],
               port: String(successPorts[i]),
@@ -626,10 +646,11 @@ module.exports = {
           })
 
           .catch(error => {
-            //console.log(error); //you probably don't want to log this, it'll just spam timeout errors
+            // console.log(error); / /you probably don't want to log this, it'll just spam timeout errors
           });
       }
 
+      // Handles what happens when more servers are in the pool than the scan maximum
       if (totalServers < maxPings) {
         for (var i = 0; i < totalServers; i++) {
           searchForServer(i, totalServers);
@@ -663,6 +684,7 @@ module.exports = {
         }
       }
 
+      // Results
       function sendResults() {
         if (scan == 0) {
           var newEmbed = new EmbedBuilder()
@@ -679,6 +701,7 @@ module.exports = {
             )
             .setTimestamp()
 
+          // Easter egg ?!?!?!?!
           embeds.push(newEmbed);
           searchFound = true
         } else if (scan < 0) {
@@ -704,6 +727,7 @@ module.exports = {
         
         lastSearchResults = allResults;
 
+        // Handles succesful request
         if (results.length > 0) {
           lastButtonPress = new Date();
           for (var i = 0; i < results.length; i++) {
@@ -735,8 +759,8 @@ module.exports = {
       hasFinished = true;
     }
     else {
-      //use existing results
-
+      
+      // Use existing results
       var filteredResults = [];
 
       for (var i = 0; i < lastSearchResults.length; i++) {
@@ -752,6 +776,7 @@ module.exports = {
         if (player.consider) {
           playerRequirement = false;
   
+          // Handles different possible requests
           if (lastSearchResults[i].playerSample != null) {
             if (lastSearchResults[i].playerSample.length >= 1 && lastSearchResults[i].playerSample[0].name == player.value) {
               playerRequirement = true;
@@ -822,6 +847,7 @@ module.exports = {
         }
       }
 
+      // Filtered results
       for (var i = 0; i < filteredResults.length; i++) {
         var newEmbed = new EmbedBuilder()
           .setColor("#02a337")
@@ -849,6 +875,7 @@ module.exports = {
       hasFinished = true;
     }
 
+    // Times out the buttons after a few seconds
     function buttonTimeoutCheck() {
       if (timeSinceDate(lastButtonPress) >= buttonTimeout && hasFinished) {
         buttons = new ActionRowBuilder()
