@@ -278,6 +278,8 @@ module.exports = {
         } else if (interaction.options.getString("scan") < totalServers) {
           totalServers = interaction.options.getString("scan");
         }
+      } else {
+        scan = totalServers;
       }
     }
     
@@ -317,7 +319,9 @@ module.exports = {
       for (var i = 0; i < args.length; i++) {
         if (args[0].includes(":")) {
           function isCorrectArgument(argument, value) {
-            if (argument == 'version') {
+            if (value == "any") {
+              return true;
+            } else if (argument == 'version') {
               if (value.split(".").length == 2 || value.split(".").length == 3) {
                 var isValidVersion = true;
 
@@ -409,10 +413,8 @@ module.exports = {
 
     // Checks for any errors
     if (errors.length > 0) {
-      interaction.editReply("ERROR: " + errors[0])
-    }
-      
-    if (errors.length == 0)  {
+      await interaction.editReply("ERROR: " + errors[0])
+    } else {
       var argumentList = "**Searching " + scan + " servers with these arguments:** \n" + "**minOnline:** ";
       if (minOnline.consider) {
         argumentList += minOnline.value;
@@ -474,430 +476,432 @@ module.exports = {
         argumentList += "\n" + "**Player: **" + player.value;
       }
 
-      interaction.editReply(argumentList);
-    }
+      await interaction.editReply(argumentList);
     
-    if (lastSearchDate == null || timeSinceDate(lastSearchDate) >= refreshSearchTime || scan > lastSearchLength) {
-      // Scan for new results
+      if (lastSearchDate == null || timeSinceDate(lastSearchDate) >= refreshSearchTime || scan > lastSearchLength) {
+        // Scan for new results
 
-      lastSearchDate = new Date();
-      lastSearchLength = scan;
-      
-      function getDescription(response) {
-        var description = "";
-        if (response.description.extra != null) {
-          if (response.description.extra[0].extra == null) {
-            for (var i = 0; i < response.description.extra.length; i++) {
-              description += response.description.extra[i].text;
-            }
-          } else {
-            for (var i = 0; i < response.description.extra[0].extra.length; i++) {
-              description += response.description.extra[0].extra[i].text;
-            }
-          }
-        } else if (response.description.text != null) {
-          description = response.description.text;
-        } else if (response.description.translate != null) {
-          description = response.description.translate;
-        } else if ("description: " + response.description != null) {
-          description = response.description;
-        } else {
-          description = "Couldn't get description";
-        }
-
-        if (description.length > 150) {
-          description = description.substring(0, 150) + "...";
-        }
-
-        // Remove Minecraft color/formatting codes
-        while (description.startsWith('§')) {
-          description = description.substring(2, description.length);
-        }
-
-        if (description.split('§').length > 1) {
-          var splitDescription = description.split('§');
-
-          description = splitDescription[0];
-          for (var i = 1; i < splitDescription.length; i++) {
-            description += splitDescription[i].substring(1, splitDescription[i].length);
-          }
-        }
-
-        if (description == '') {
-          description = 'ㅤ';
-        }
-
-        return String(description);
-      }
-
-      // Ping all the servers
-      function searchForServer(i) {
-        MinecraftServerListPing.ping(0, successIPs[i], successPorts[i], pingTimeout)
-          .then(response => {
-            // Check if the server meets requirements set by the arguments
-            var minOnlineRequirement = response.players.online >= minOnline.value || minOnline.consider == false;
-            var maxOnlineRequirement = response.players.online <= maxOnline.value || maxOnline.consider == false;
-            var playerCapRequirement = response.players.max == playerCap.value || playerCap.consider == false;
-            var isFullRequirement = (isFull.value == "false" && response.players.online != response.players.max) || (isFull.value == "true" && response.players.online == response.players.max) || isFull.consider == false;
-            var versionRequirement = response.version.name == version.value || (response.version.name + "E").includes(version.value + "E") || version.consider == false;
-            var hasImageRequirement = response.favicon != null || hasImage.value == "false" || hasImage.consider == false;
-            var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(response).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(response) == description.value) || description.value == "any" || description.consider == false;
-            var playerRequirement;
-
-            if (player.consider) {
-              playerRequirement = false;
-
-              if (response.players.sample != null) {
-                if (response.players.sample.length >= 1 && response.players.sample[0].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 2 && response.players.sample[1].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 3 && response.players.sample[2].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 4 && response.players.sample[3].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 5 && response.players.sample[4].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 6 && response.players.sample[5].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 7 && response.players.sample[6].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 8 && response.players.sample[7].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 9 && response.players.sample[8].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 10 && response.players.sample[9].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 11 && response.players.sample[10].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 12 && response.players.sample[11].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 13 && response.players.sample[12].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 14 && response.players.sample[13].name == player.value) {
-                  playerRequirement = true;
-                }
-
-                if (response.players.sample.length >= 15 && response.players.sample[14].name == player.value) {
-                  playerRequirement = true;
-                }
+        lastSearchDate = new Date();
+        lastSearchLength = scan;
+        
+        function getDescription(response) {
+          var description = "";
+          if (response.description.extra != null) {
+            if (response.description.extra[0].extra == null) {
+              for (var i = 0; i < response.description.extra.length; i++) {
+                description += response.description.extra[i].text;
               }
             } else {
-              playerRequirement = true;
+              for (var i = 0; i < response.description.extra[0].extra.length; i++) {
+                description += response.description.extra[0].extra[i].text;
+              }
             }
-
-            // Format version in case there's a custom version
-            var versionString;
-
-            if (response.version.name.length > 100) {
-              versionString = response.version.name.substring(0, 100) + "...";
-            } else if (response.version.name == null) {
-              versionString = "couldn't get version";
-            } else if (response.version.name == "") {
-              versionString = "ㅤ";
-            } else {
-              versionString = response.version.name;
-            }
-
-            // Final formatted result to be used in the embed
-            var newResult = {
-              ip: successIPs[i],
-              port: String(successPorts[i]),
-              version: versionString,
-              description: getDescription(response),
-              onlinePlayers: response.players.online,
-              maxPlayers: response.players.max,
-              playerSample: response.players.sample,
-              favicon: response.favicon
-            }
-
-            allResults.push(newResult);
-
-            if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement) {
-              results.push(newResult);
-            }
-          })
-
-          .catch(error => {
-            // console.log(error); //you probably don't want to log this, it'll just spam timeout errors
-          });
-      }
-
-      // Scans the servers in big chunks (size set by maxPings)
-      if (totalServers < maxPings) {
-        for (var i = 0; i < totalServers; i++) {
-          searchForServer(i, totalServers);
-        }
-
-        setTimeout(function() { sendResults(); }, 3500);
-      } else {
-        for (var i = 0; i < maxPings; i++) {
-          searchForServer(i, maxPings);
-        }
-
-        setTimeout(function() { scanChunk(maxPings); }, 3500);
-      }
-
-      function scanChunk(current) {
-        interaction.editReply(argumentList + "\n" + "**" + (Math.round((current / totalServers) * 10000) / 100) + "% complete**");
-        if (current < totalServers) {
-          if (totalServers - current < maxPings) {
-            for (var i = 0; i < totalServers - current; i++) {
-              searchForServer(i + current);
-            }
-
-            setTimeout(function() { sendResults(); }, 3500);
+          } else if (response.description.text != null) {
+            description = response.description.text;
+          } else if (response.description.translate != null) {
+            description = response.description.translate;
+          } else if ("description: " + response.description != null) {
+            description = response.description;
           } else {
-            for (var i = 0; i < maxPings; i++) {
-              searchForServer(i + current);
-            }
+            description = "Couldn't get description";
+          }
 
-            setTimeout(function() { scanChunk(current + maxPings); }, 3500);
+          if (description.length > 150) {
+            description = description.substring(0, 150) + "...";
+          }
+
+          // Remove Minecraft color/formatting codes
+          while (description.startsWith('§')) {
+            description = description.substring(2, description.length);
+          }
+
+          if (description.split('§').length > 1) {
+            var splitDescription = description.split('§');
+
+            description = splitDescription[0];
+            for (var i = 1; i < splitDescription.length; i++) {
+              description += splitDescription[i].substring(1, splitDescription[i].length);
+            }
+          }
+
+          if (description == '') {
+            description = 'ㅤ';
+          }
+
+          return String(description);
+        }
+
+        // Ping all the servers
+        function searchForServer(i) {
+          MinecraftServerListPing.ping(0, successIPs[i], successPorts[i], pingTimeout)
+            .then(response => {
+              // Check if the server meets requirements set by the arguments
+              var minOnlineRequirement = response.players.online >= minOnline.value || minOnline.consider == false;
+              var maxOnlineRequirement = response.players.online <= maxOnline.value || maxOnline.consider == false;
+              var playerCapRequirement = response.players.max == playerCap.value || playerCap.consider == false;
+              var isFullRequirement = (isFull.value == "false" && response.players.online != response.players.max) || (isFull.value == "true" && response.players.online == response.players.max) || isFull.consider == false;
+              var versionRequirement = response.version.name == version.value || (response.version.name + "E").includes(version.value + "E") || version.consider == false;
+              var hasImageRequirement = response.favicon != null || hasImage.value == "false" || hasImage.consider == false;
+              var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(response).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(response) == description.value) || description.value == "any" || description.consider == false;
+              var playerRequirement;
+
+              if (player.consider) {
+                playerRequirement = false;
+
+                if (response.players.sample != null) {
+                  if (response.players.sample.length >= 1 && response.players.sample[0].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 2 && response.players.sample[1].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 3 && response.players.sample[2].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 4 && response.players.sample[3].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 5 && response.players.sample[4].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 6 && response.players.sample[5].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 7 && response.players.sample[6].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 8 && response.players.sample[7].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 9 && response.players.sample[8].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 10 && response.players.sample[9].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 11 && response.players.sample[10].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 12 && response.players.sample[11].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 13 && response.players.sample[12].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 14 && response.players.sample[13].name == player.value) {
+                    playerRequirement = true;
+                  }
+
+                  if (response.players.sample.length >= 15 && response.players.sample[14].name == player.value) {
+                    playerRequirement = true;
+                  }
+                }
+              } else {
+                playerRequirement = true;
+              }
+
+              // Format version in case there's a custom version
+              var versionString;
+
+              if (response.version.name.length > 100) {
+                versionString = response.version.name.substring(0, 100) + "...";
+              } else if (response.version.name == null) {
+                versionString = "couldn't get version";
+              } else if (response.version.name == "") {
+                versionString = "ㅤ";
+              } else {
+                versionString = response.version.name;
+              }
+
+              // Final formatted result to be used in the embed
+              var newResult = {
+                ip: successIPs[i],
+                port: String(successPorts[i]),
+                version: versionString,
+                description: getDescription(response),
+                onlinePlayers: response.players.online,
+                maxPlayers: response.players.max,
+                playerSample: response.players.sample,
+                favicon: response.favicon
+              }
+
+              allResults.push(newResult);
+
+              if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement) {
+                results.push(newResult);
+              }
+            })
+
+            .catch(error => {
+              // console.log(error); //you probably don't want to log this, it'll just spam timeout errors
+            });
+        }
+
+        // Scans the servers in big chunks (size set by maxPings)
+        if (totalServers < maxPings) {
+          for (var i = 0; i < totalServers; i++) {
+            searchForServer(i, totalServers);
+          }
+
+          setTimeout(function() { sendResults(); }, 3500);
+        } else {
+          for (var i = 0; i < maxPings; i++) {
+            searchForServer(i, maxPings);
+          }
+
+          setTimeout(function() { scanChunk(maxPings); }, 3500);
+        }
+
+        async function scanChunk(current) {
+          await interaction.editReply(argumentList + "\n" + "**" + (Math.round((current / totalServers) * 10000) / 100) + "% complete**");
+          if (current < totalServers) {
+            if (totalServers - current < maxPings) {
+              for (var i = 0; i < totalServers - current; i++) {
+                searchForServer(i + current);
+              }
+
+              setTimeout(function() { 
+                sendResults();
+              }, 3500);
+            } else {
+              for (var i = 0; i < maxPings; i++) {
+                searchForServer(i + current);
+              }
+
+              setTimeout(function() { scanChunk(current + maxPings); }, 3500);
+            }
           }
         }
-      }
 
-      // Send final results in embed
-      function sendResults() {
-        // Easter eggs cuz I was bored
-        if (scan == 0) {
-          var newEmbed = new EmbedBuilder()
-            .setColor("#02a337")
-            .setTitle('Search Results')
-            .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
-            .addFields(
-              { name: 'Result ' + '0/0', value: 'ㅤ' },
-              { name: 'ip', value: "0.0.0.0" },
-              { name: 'port', value: "0" },
-              { name: 'version', value: "0.00.0" },
-              { name: 'description', value: "Bro actually just scanned 0 servers🤦‍♂️" },
-              { name: 'players', value: '0/0' }
-            )
-            .setTimestamp()
-
-          embeds.push(newEmbed);
-          searchFound = true
-        } else if (scan < 0) {
-          var newEmbed = new EmbedBuilder()
-            .setColor("#02a337")
-            .setTitle('Search Results')
-            .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
-            .addFields(
-              { name: 'Result ' + '-0/', value: 'ㅤ' },
-              { name: 'ip', value: "?.?.?.?" },
-              { name: 'port', value: "25565" },
-              { name: 'version', value: "ඞ" },
-              { name: 'description', value: "omg it's the secret negative seerver!!!1!1!!11!" },
-              { name: 'players', value: "∞" + '/' + "-1" }
-            )
-            .setTimestamp()
-
-          embeds.push(newEmbed);
-          searchFound = true;
-        }
-
-        interaction.editReply(argumentList + "\n" + "**Loading results, please wait...**");
-        
-        lastSearchResults = allResults;
-
-        // If at least one server was found, send the embed
-        if (results.length > 0) {
-          lastButtonPress = new Date();
-          for (var i = 0; i < results.length; i++) {
+        // Send final results in embed
+        async function sendResults() {
+          // Easter eggs cuz I was bored
+          if (scan == 0) {
             var newEmbed = new EmbedBuilder()
               .setColor("#02a337")
               .setTitle('Search Results')
               .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
               .addFields(
-                { name: 'Result ' + (i + 1) + '/' + results.length, value: 'ㅤ' },
-                { name: 'ip', value: results[i].ip },
-                { name: 'port', value: results[i].port },
-                { name: 'version', value: results[i].version },
-                { name: 'description', value: results[i].description },
-                { name: 'players', value: results[i].onlinePlayers + '/' + results[i].maxPlayers }
+                { name: 'Result ' + '0/0', value: 'ㅤ' },
+                { name: 'ip', value: "0.0.0.0" },
+                { name: 'port', value: "0" },
+                { name: 'version', value: "0.00.0" },
+                { name: 'description', value: "Bro actually just scanned 0 servers🤦‍♂️" },
+                { name: 'players', value: '0/0' }
               )
               .setTimestamp()
 
             embeds.push(newEmbed);
+            searchFound = true
+          } else if (scan < 0) {
+            var newEmbed = new EmbedBuilder()
+              .setColor("#02a337")
+              .setTitle('Search Results')
+              .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
+              .addFields(
+                { name: 'Result ' + '-0/', value: 'ㅤ' },
+                { name: 'ip', value: "?.?.?.?" },
+                { name: 'port', value: "25565" },
+                { name: 'version', value: "ඞ" },
+                { name: 'description', value: "omg it's the secret negative seerver!!!1!1!!11!" },
+                { name: 'players', value: "∞" + '/' + "-1" }
+              )
+              .setTimestamp()
+
+            embeds.push(newEmbed);
+            searchFound = true;
           }
 
+          await interaction.editReply(argumentList + "\n" + "**Loading results, please wait...**");
+          
+          lastSearchResults = allResults;
+
+          // If at least one server was found, send the embed
+          if (results.length > 0) {
+            for (var i = 0; i < results.length; i++) {
+              var newEmbed = new EmbedBuilder()
+                .setColor("#02a337")
+                .setTitle('Search Results')
+                .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
+                .addFields(
+                  { name: 'Result ' + (i + 1) + '/' + results.length, value: 'ㅤ' },
+                  { name: 'ip', value: results[i].ip },
+                  { name: 'port', value: results[i].port },
+                  { name: 'version', value: results[i].version },
+                  { name: 'description', value: results[i].description },
+                  { name: 'players', value: results[i].onlinePlayers + '/' + results[i].maxPlayers }
+                )
+                .setTimestamp()
+
+              embeds.push(newEmbed);
+            }
+
+            var buttons = createButtons(embeds);
+
+            await interaction.editReply({ content: '', embeds: [embeds[0]], components: [buttons] });
+          } else {
+            await interaction.editReply("no matches could be found");
+          }
+          lastButtonPress = new Date();
+          hasFinished = true;
+        }
+      }
+      else {
+        // Use existing results (saved from previous search)
+        var filteredResults = [];
+
+        for (var i = 0; i < lastSearchResults.length; i++) {
+          // Check if the server meets the requirements set by the arguments
+          var minOnlineRequirement = lastSearchResults[i].onlinePlayers >= minOnline.value || minOnline.consider == false;
+          var maxOnlineRequirement = lastSearchResults[i].onlinePlayers <= maxOnline.value || maxOnline.consider == false;
+          var playerCapRequirement = lastSearchResults[i].maxPlayers == playerCap.value || playerCap.consider == false;
+          var isFullRequirement = (isFull.value == "false" && lastSearchResults[i].onlinePlayers != lastSearchResults[i].maxPlayers) || (isFull.value == "true" && lastSearchResults[i].onlinePlayers == lastSearchResults[i].maxPlayers) || isFull.consider == false;
+          var versionRequirement = lastSearchResults[i].version == version.value || (lastSearchResults[i].version + "E").includes(version.value + "E") || version.consider == false;
+          var hasImageRequirement = lastSearchResults[i].favicon != null || hasImage.value == "false" || hasImage.consider == false;
+          var descriptionRequirement = (description.consider && description.strict == "false" && lastSearchResults[i].description.includes(description.value)) || (description.consider && description.strict == "true" && lastSearchResults[i].description == description.value) || description.value == "any" || description.consider == false;
+          var playerRequirement;
+    
+          if (player.consider) {
+            playerRequirement = false;
+    
+            if (lastSearchResults[i].playerSample != null) {
+              if (lastSearchResults[i].playerSample.length >= 1 && lastSearchResults[i].playerSample[0].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 2 && lastSearchResults[i].playerSample[1].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 3 && lastSearchResults[i].playerSample[2].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 4 && lastSearchResults[i].playerSample[3].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 5 && lastSearchResults[i].playerSample[4].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 6 && lastSearchResults[i].playerSample[5].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 7 && lastSearchResults[i].playerSample[6].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 8 && lastSearchResults[i].playerSample[7].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 9 && lastSearchResults[i].playerSample[8].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 10 && lastSearchResults[i].playerSample[9].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 11 && lastSearchResults[i].playerSample[10].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 12 && lastSearchResults[i].playerSample[11].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 13 && lastSearchResults[i].playerSample[12].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 14 && lastSearchResults[i].playerSample[13].name == player.value) {
+                playerRequirement = true;
+              }
+    
+              if (lastSearchResults[i].playerSample.length >= 15 && lastSearchResults[i].playerSample[14].name == player.value) {
+                playerRequirement = true;
+              }
+            }
+          } else {
+            playerRequirement = true;
+          }
+
+          if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement) {
+            filteredResults.push(lastSearchResults[i]);
+          }
+        }
+
+        // Convert the results into Discord embeds to be sent as the message
+        for (var i = 0; i < filteredResults.length; i++) {
+          var newEmbed = new EmbedBuilder()
+            .setColor("#02a337")
+            .setTitle('Search Results')
+            .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+            .addFields(
+              { name: 'Result ' + (i + 1) + '/' + filteredResults.length, value: 'ㅤ' },
+              { name: 'ip', value: filteredResults[i].ip },
+              { name: 'port', value: filteredResults[i].port },
+              { name: 'version', value: filteredResults[i].version },
+              { name: 'description', value: filteredResults[i].description },
+              { name: 'players', value: filteredResults[i].onlinePlayers + '/' + filteredResults[i].maxPlayers }
+            )
+            .setTimestamp()
+
+          embeds.push(newEmbed);
+        }
+
+        // If at least one server was found, send the message
+        if (embeds.length > 0) {
           var buttons = createButtons(embeds);
-
-          interaction.editReply({ content: '', embeds: [embeds[0]], components: [buttons] });
+          await interaction.editReply({ content: '', embeds: [embeds[0]], components: [buttons] });
         } else {
-          interaction.editReply("no matches could be found");
+          await interaction.editReply("no matches could be found");
         }
+        lastButtonPress = new Date();
+        hasFinished = true;
       }
 
-      hasFinished = true;
-    }
-    else {
-      // Use existing results (saved from previous search)
-      var filteredResults = [];
+      // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
+      async function buttonTimeoutCheck() {
+        if (timeSinceDate(lastButtonPress) >= buttonTimeout && hasFinished) {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('Last Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('Next Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+          await interaction.editReply({ content: '', components: [buttons] });
 
-      for (var i = 0; i < lastSearchResults.length; i++) {
-        // Check if the server meets the requirements set by the arguments
-        var minOnlineRequirement = lastSearchResults[i].onlinePlayers >= minOnline.value || minOnline.consider == false;
-        var maxOnlineRequirement = lastSearchResults[i].onlinePlayers <= maxOnline.value || maxOnline.consider == false;
-        var playerCapRequirement = lastSearchResults[i].maxPlayers == playerCap.value || playerCap.consider == false;
-        var isFullRequirement = (isFull.value == "false" && lastSearchResults[i].onlinePlayers != lastSearchResults[i].maxPlayers) || (isFull.value == "true" && lastSearchResults[i].onlinePlayers == lastSearchResults[i].maxPlayers) || isFull.consider == false;
-        var versionRequirement = lastSearchResults[i].version == version.value || (lastSearchResults[i].version + "E").includes(version.value + "E") || version.consider == false;
-        var hasImageRequirement = lastSearchResults[i].favicon != null || hasImage.value == "false" || hasImage.consider == false;
-        var descriptionRequirement = (description.consider && description.strict == "false" && lastSearchResults[i].description.includes(description.value)) || (description.consider && description.strict == "true" && lastSearchResults[i].description == description.value) || description.value == "any" || description.consider == false;
-        var playerRequirement;
-  
-        if (player.consider) {
-          playerRequirement = false;
-  
-          if (lastSearchResults[i].playerSample != null) {
-            if (lastSearchResults[i].playerSample.length >= 1 && lastSearchResults[i].playerSample[0].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 2 && lastSearchResults[i].playerSample[1].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 3 && lastSearchResults[i].playerSample[2].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 4 && lastSearchResults[i].playerSample[3].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 5 && lastSearchResults[i].playerSample[4].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 6 && lastSearchResults[i].playerSample[5].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 7 && lastSearchResults[i].playerSample[6].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 8 && lastSearchResults[i].playerSample[7].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 9 && lastSearchResults[i].playerSample[8].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 10 && lastSearchResults[i].playerSample[9].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 11 && lastSearchResults[i].playerSample[10].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 12 && lastSearchResults[i].playerSample[11].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 13 && lastSearchResults[i].playerSample[12].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 14 && lastSearchResults[i].playerSample[13].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 15 && lastSearchResults[i].playerSample[14].name == player.value) {
-              playerRequirement = true;
-            }
-          }
+          searchNextResultCollector.stop();
+          searchLastResultCollector.stop();
         } else {
-          playerRequirement = true;
-        }
-
-        if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement) {
-          filteredResults.push(lastSearchResults[i]);
+          setTimeout(function() { buttonTimeoutCheck() }, 500);
         }
       }
-
-      // Convert the results into Discord embeds to be sent as the message
-      for (var i = 0; i < filteredResults.length; i++) {
-        var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
-          .setTitle('Search Results')
-          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-          .addFields(
-            { name: 'Result ' + (i + 1) + '/' + filteredResults.length, value: 'ㅤ' },
-            { name: 'ip', value: filteredResults[i].ip },
-            { name: 'port', value: filteredResults[i].port },
-            { name: 'version', value: filteredResults[i].version },
-            { name: 'description', value: filteredResults[i].description },
-            { name: 'players', value: filteredResults[i].onlinePlayers + '/' + filteredResults[i].maxPlayers }
-          )
-          .setTimestamp()
-
-        embeds.push(newEmbed);
-      }
-
-      // If at least one server was found, send the message
-      if (embeds.length > 0) {
-        var buttons = createButtons(embeds);
-        interaction.editReply({ content: '', embeds: [embeds[0]], components: [buttons] });
-      } else {
-        interaction.editReply("no matches could be found");
-      }
-      hasFinished = true;
+      buttonTimeoutCheck();
     }
-
-    // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
-    function buttonTimeoutCheck() {
-      if (timeSinceDate(lastButtonPress) >= buttonTimeout && hasFinished) {
-        buttons = new ActionRowBuilder()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId(lastResultID)
-              .setLabel('Last Page')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true),
-            new ButtonBuilder()
-              .setCustomId(nextResultID)
-              .setLabel('Next Page')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true)
-          );
-        interaction.editReply({ content: '', components: [buttons] });
-
-        searchNextResultCollector.stop();
-        searchLastResultCollector.stop();
-      } else {
-        setTimeout(function() { buttonTimeoutCheck() }, 500);
-      }
-    }
-    buttonTimeoutCheck();
   },
 };
