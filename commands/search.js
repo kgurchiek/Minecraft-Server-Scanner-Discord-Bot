@@ -118,7 +118,6 @@ module.exports = {
 
     // Inits some more variables
     var errors = [];
-    var searchFound = false;
     var args = [];
     var allResults = [];
     var results = [];
@@ -269,12 +268,12 @@ module.exports = {
     // Checks if the user passed a value for how many servers to scan
     if (interaction.options.getString("scan") != null) {
       scan = interaction.options.getString("scan");
-
+      
       if (!isNaN(interaction.options.getString("scan"))) {
         scan = parseInt(scan);
 
         if (interaction.options.getString("scan") < 0) {
-          totalServers = interaction.options.getScan("scan") * -1;
+          totalServers = interaction.options.getString("scan") * -1;
         } else if (interaction.options.getString("scan") < totalServers) {
           totalServers = interaction.options.getString("scan");
         }
@@ -690,6 +689,7 @@ module.exports = {
         async function sendResults() {
           // Easter eggs cuz I was bored
           if (scan == 0) {
+            console.log(scan);
             var newEmbed = new EmbedBuilder()
               .setColor("#02a337")
               .setTitle('Search Results')
@@ -705,7 +705,6 @@ module.exports = {
               .setTimestamp()
 
             embeds.push(newEmbed);
-            searchFound = true
           } else if (scan < 0) {
             var newEmbed = new EmbedBuilder()
               .setColor("#02a337")
@@ -722,7 +721,6 @@ module.exports = {
               .setTimestamp()
 
             embeds.push(newEmbed);
-            searchFound = true;
           }
 
           await interaction.editReply(argumentList + "\n" + "**Loading results, please wait...**");
@@ -730,7 +728,7 @@ module.exports = {
           lastSearchResults = allResults;
 
           // If at least one server was found, send the embed
-          if (results.length > 0) {
+          if (embeds.length > 0) {
             for (var i = 0; i < results.length; i++) {
               var newEmbed = new EmbedBuilder()
                 .setColor("#02a337")
@@ -866,6 +864,42 @@ module.exports = {
           embeds.push(newEmbed);
         }
 
+        // Easter eggs
+        if (scan == 0) {
+          console.log(scan);
+          var newEmbed = new EmbedBuilder()
+            .setColor("#02a337")
+            .setTitle('Search Results')
+            .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
+            .addFields(
+              { name: 'Result ' + '0/0', value: 'ㅤ' },
+              { name: 'ip', value: "0.0.0.0" },
+              { name: 'port', value: "0" },
+              { name: 'version', value: "0.00.0" },
+              { name: 'description', value: "Bro actually just scanned 0 servers🤦‍♂️" },
+              { name: 'players', value: '0/0' }
+            )
+            .setTimestamp()
+
+          embeds.push(newEmbed);
+        } else if (scan < 0) {
+          var newEmbed = new EmbedBuilder()
+            .setColor("#02a337")
+            .setTitle('Search Results')
+            .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
+            .addFields(
+              { name: 'Result ' + '-0/', value: 'ㅤ' },
+              { name: 'ip', value: "?.?.?.?" },
+              { name: 'port', value: "25565" },
+              { name: 'version', value: "ඞ" },
+              { name: 'description', value: "omg it's the secret negative seerver!!!1!1!!11!" },
+              { name: 'players', value: "∞" + '/' + "-1" }
+            )
+            .setTimestamp()
+
+          embeds.push(newEmbed);
+        }
+
         // If at least one server was found, send the message
         if (embeds.length > 0) {
           var buttons = createButtons(embeds);
@@ -879,7 +913,7 @@ module.exports = {
 
       // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
       async function buttonTimeoutCheck() {
-        if (timeSinceDate(lastButtonPress) >= buttonTimeout && hasFinished) {
+        if (timeSinceDate(lastButtonPress) >= buttonTimeout && hasFinished && embeds.length > 0) {
           buttons = new ActionRowBuilder()
             .addComponents(
               new ButtonBuilder()
