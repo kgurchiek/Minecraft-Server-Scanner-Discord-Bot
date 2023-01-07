@@ -728,7 +728,7 @@ module.exports = {
           lastSearchResults = allResults;
 
           // If at least one server was found, send the embed
-          if (embeds.length > 0) {
+          if (results.length > 0 || scan <= 0) {
             for (var i = 0; i < results.length; i++) {
               var newEmbed = new EmbedBuilder()
                 .setColor("#02a337")
