@@ -672,7 +672,6 @@ module.exports = {
         async function scanChunk(current) {
           scanPercentage = (Math.round((current / totalServers) * 10000) / 100);
           await interaction.editReply(argumentList + "\n" + "**" + scanPercentage + "% complete**");
-          console.log(current < totalServers);
           if (current < totalServers) {
             if (totalServers - current < maxPings) {
               for (var i = 0; i < totalServers - current; i++) {
@@ -698,7 +697,6 @@ module.exports = {
 
           // Easter eggs cuz I was bored
           if (scan == 0) {
-            console.log(scan);
             var newEmbed = new EmbedBuilder()
               .setColor("#02a337")
               .setTitle('Search Results')
@@ -881,7 +879,6 @@ module.exports = {
 
         // Easter eggs
         if (scan == 0) {
-          console.log(scan);
           var newEmbed = new EmbedBuilder()
             .setColor("#02a337")
             .setTitle('Search Results')
