@@ -672,7 +672,7 @@ module.exports = {
         async function scanChunk(current) {
           scanPercentage = (Math.round((current / totalServers) * 10000) / 100);
           await interaction.editReply(argumentList + "\n" + "**" + scanPercentage + "% complete**");
-          if (current < totalServers) {
+          if (current <= totalServers) {
             if (totalServers - current < maxPings) {
               for (var i = 0; i < totalServers - current; i++) {
                 searchForServer(i + current);
