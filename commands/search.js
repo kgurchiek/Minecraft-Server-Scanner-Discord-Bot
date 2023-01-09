@@ -8,6 +8,8 @@ const { maxPings, pingTimeout, refreshSearchTime } = require('../config.json');
 var lastSearchDate = null;
 var lastSearchLength = 0;
 var lastSearchResults = [];
+var scanning = false;
+var scanPercentage = 0;
 
 // Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {
@@ -276,6 +278,8 @@ module.exports = {
           totalServers = interaction.options.getString("scan") * -1;
         } else if (interaction.options.getString("scan") < totalServers) {
           totalServers = interaction.options.getString("scan");
+        } else {
+          scan = totalServers;
         }
       } else {
         scan = totalServers;
@@ -480,12 +484,13 @@ module.exports = {
       if (lastSearchDate == null || timeSinceDate(lastSearchDate) >= refreshSearchTime || scan > lastSearchLength) {
         // Scan for new results
 
+        scanning = true;
         lastSearchDate = new Date();
         lastSearchLength = scan;
         
         function getDescription(response) {
           var description = "";
-          if (response.description.extra != null) {
+          if (response.description.extra != null && response.description.extra.length > 0) {
             if (response.description.extra[0].extra == null) {
               for (var i = 0; i < response.description.extra.length; i++) {
                 description += response.description.extra[i].text;
@@ -655,17 +660,19 @@ module.exports = {
             searchForServer(i, totalServers);
           }
 
-          setTimeout(function() { sendResults(); }, 3500);
+          setTimeout(function() { sendResults(); }, pingTimeout + 500);
         } else {
           for (var i = 0; i < maxPings; i++) {
             searchForServer(i, maxPings);
           }
 
-          setTimeout(function() { scanChunk(maxPings); }, 3500);
+          setTimeout(function() { scanChunk(maxPings); }, pingTimeout + 500);
         }
 
         async function scanChunk(current) {
-          await interaction.editReply(argumentList + "\n" + "**" + (Math.round((current / totalServers) * 10000) / 100) + "% complete**");
+          scanPercentage = (Math.round((current / totalServers) * 10000) / 100);
+          await interaction.editReply(argumentList + "\n" + "**" + scanPercentage + "% complete**");
+          console.log(current < totalServers);
           if (current < totalServers) {
             if (totalServers - current < maxPings) {
               for (var i = 0; i < totalServers - current; i++) {
@@ -674,19 +681,21 @@ module.exports = {
 
               setTimeout(function() { 
                 sendResults();
-              }, 3500);
+              }, pingTimeout + 500);
             } else {
               for (var i = 0; i < maxPings; i++) {
                 searchForServer(i + current);
               }
 
-              setTimeout(function() { scanChunk(current + maxPings); }, 3500);
+              setTimeout(function() { scanChunk(current + maxPings); }, pingTimeout + 500);
             }
           }
         }
 
         // Send final results in embed
         async function sendResults() {
+          await interaction.editReply(argumentList + "\n" + "**Loading results, please wait...**");
+
           // Easter eggs cuz I was bored
           if (scan == 0) {
             console.log(scan);
@@ -722,8 +731,6 @@ module.exports = {
 
             embeds.push(newEmbed);
           }
-
-          await interaction.editReply(argumentList + "\n" + "**Loading results, please wait...**");
           
           lastSearchResults = allResults;
 
@@ -754,11 +761,19 @@ module.exports = {
             await interaction.editReply("no matches could be found");
           }
           lastButtonPress = new Date();
+          scanning = false;
           hasFinished = true;
         }
       }
       else {
+        while (scanning) {
+          // if another scan is running, show it's progress until it finishes
+
+          await interaction.editReply(argumentList + "\n" + "**" + scanPercentage + "% complete**");
+        }
+
         // Use existing results (saved from previous search)
+
         var filteredResults = [];
 
         for (var i = 0; i < lastSearchResults.length; i++) {
