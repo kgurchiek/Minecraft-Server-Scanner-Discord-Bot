@@ -19,6 +19,6 @@ module.exports = {
 		)
     	.setTimestamp()
       // Send the embed back to the user
-      interaction.reply({ embeds: [exampleEmbed] });
+      interaction.reply({ embeds: [exampleEmbed], ephemeral:true });
     },
 };
