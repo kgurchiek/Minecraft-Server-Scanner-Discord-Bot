@@ -736,6 +736,7 @@ module.exports = {
                 .setColor("#02a337")
                 .setTitle('Search Results')
                 .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */ })
+                .setThumbnail("https://api.mcstatus.io/v2/icon/" + results[i].ip)
                 .addFields(
                   { name: 'Result ' + (i + 1) + '/' + results.length, value: 'ㅤ' },
                   { name: 'ip', value: results[i].ip },
@@ -861,6 +862,7 @@ module.exports = {
             .setColor("#02a337")
             .setTitle('Search Results')
             .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+            .setThumbnail("https://api.mcstatus.io/v2/icon/" + filteredResults[i].ip)
             .addFields(
               { name: 'Result ' + (i + 1) + '/' + filteredResults.length, value: 'ㅤ' },
               { name: 'ip', value: filteredResults[i].ip },
