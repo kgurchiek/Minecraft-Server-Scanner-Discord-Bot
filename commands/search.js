@@ -325,7 +325,7 @@ module.exports = {
             if (value == "any") {
               return true;
             } else if (argument == 'version') {
-                // Checks if the version parameter is the right format
+              // Checks if the version parameter is the right format
 
               if (value.split(".").length == 2 || value.split(".").length == 3) {
                 var isValidVersion = true;
