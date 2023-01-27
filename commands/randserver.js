@@ -13,9 +13,9 @@ module.exports = {
 		// Status message
 		await interaction.reply("Getting a server, please wait..."); 
     function getDescription(response) {
-	// Parse description of the server
+	  // Parse description of the server
       var description = "";
-	// Init description
+	    // Init description
       if (response.description.extra != null) {
         if (response.description.extra[0].extra == null) {
           for (var i = 0; i < response.description.extra.length; i++) {
@@ -26,7 +26,7 @@ module.exports = {
             description += response.description.extra[0].extra[i].text;
           }
         }
-	// If the response doesn't have an 'extra' field, check for other possible fields that might contain the description
+	      // If the response doesn't have an 'extra' field, check for other possible fields that might contain the description
         } else if (response.description.text != null) {
           description = response.description.text;
         } else if (response.description.translate != null) {
@@ -65,7 +65,7 @@ module.exports = {
     function sendMessage() {
       var matchNumber = Math.round((Math.random() * totalServers));
       //console.log(successIPs[matchNumber] + ":" + successPorts[matchNumber]);
-	// Generate a random number to select a server from the list of successful pings
+	    // Generate a random number to select a server from the list of successful pings
 
       MinecraftServerListPing.ping(0, successIPs[matchNumber], successPorts[matchNumber], 1500)
       .then(response => {
@@ -91,7 +91,7 @@ module.exports = {
       })
       .catch(error => {
         //console.log(error);
-	// If the ping request fails, try again with a different server
+	      // If the ping request fails, try again with a different server
         sendMessage();
       });
     }
