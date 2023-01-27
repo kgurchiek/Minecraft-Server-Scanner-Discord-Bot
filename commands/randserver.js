@@ -12,55 +12,6 @@ module.exports = {
 	async execute(interaction) {
 		// Status message
 		await interaction.reply("Getting a server, please wait..."); 
-    function getDescription(response) {
-	  // Parse description of the server
-      var description = "";
-	    // Init description
-      if (response.description.extra != null) {
-        if (response.description.extra[0].extra == null) {
-          for (var i = 0; i < response.description.extra.length; i++) {
-            description += response.description.extra[i].text;
-          }
-        } else {
-          for (var i = 0; i < response.description.extra[0].extra.length; i++) {
-            description += response.description.extra[0].extra[i].text;
-          }
-        }
-	      // If the response doesn't have an 'extra' field, check for other possible fields that might contain the description
-        } else if (response.description.text != null) {
-          description = response.description.text;
-        } else if (response.description.translate != null) {
-          description = response.description.translate;
-        } else if ("description: " + response.description != null) {
-          description = response.description;
-        } else {
-          description = "Couldn't get description";
-        }
-
-        if (description.length > 150) {
-          description = description.substring(0, 150) + "...";
-        }
-
-        //remove Minecraft color/formatting codes
-        while (description.startsWith('§')) {
-          description = description.substring(2, description.length);
-        }
-
-        if (description.split('§').length > 1) {
-          var splitDescription = description.split('§');
-
-          description = splitDescription[0];
-          for (var i = 1; i < splitDescription.length; i++) { //skip the first one
-            description += splitDescription[i].substring(1, splitDescription[i].length);
-          }
-        }
-
-        if (description == '') {
-          description = 'ㅤ';
-        }
-
-        return String(description);
-    }
         
     function sendMessage() {
       var matchNumber = Math.round((Math.random() * totalServers));
@@ -72,6 +23,12 @@ module.exports = {
       .then(response => {
         //console.log(response);
 
+        var description = response.motd.clean;
+
+        if (description = '') {
+          description = 'ㅤ';
+        }
+
         if (response.online) {
           var newEmbed = new EmbedBuilder()
             .setColor("#02a337")
@@ -82,7 +39,7 @@ module.exports = {
               { name: 'ip', value: successIPs[matchNumber] },
               { name: 'port', value: String(successPorts[matchNumber]) },
               { name: 'version', value: response.version.name_clean },
-              { name: 'description', value: response.motd.clean },
+              { name: 'description', value: description },
               { name: 'players', value: response.players.online + '/' + response.players.max }
             )
             .setTimestamp()
