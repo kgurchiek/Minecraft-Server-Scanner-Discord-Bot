@@ -4,7 +4,7 @@ const { MinecraftServerListPing, MinecraftQuery } = require("minecraft-status");
 module.exports = {
 	// Command options
 	data: new SlashCommandBuilder()
-		.setName("pingserver")
+		.setName("ping")
 		.setDescription("Pings a server for info")
     .addStringOption(option =>
 			option.setName("ip")
@@ -12,16 +12,15 @@ module.exports = {
         .setRequired(true))
     .addIntegerOption(option =>
 			option.setName("port")
-				.setDescription("The port of the server to ping")
-        .setRequired(true)),
+				.setDescription("The port of the server to ping")),
 	// Execute the command
 	async execute(interaction) {
 	// Ping status
-    await interaction.reply("pinging...");
+    await interaction.reply("Pinging, Please wait.");
     
 	// Fetch IP and Port from the command
     const ip = interaction.options.getString("ip");
-    const port = interaction.options.getInteger("port");
+    const port = interaction.options.getInteger("port") || 25565;
         
 	// Parse the server's description
     function getDescription(response) {
@@ -42,7 +41,7 @@ module.exports = {
         description = response.description.text;
       } else if (response.description.translate != null) {
         description = response.description.translate;
-      } else if ("description: " + response.description != null) {
+      } else if ("Description: " + response.description != null) {
         description = response.description;
 	// if none of the above cases apply, set the description to a default value
       } else {
@@ -90,11 +89,11 @@ module.exports = {
           .setThumbnail("https://api.mcstatus.io/v2/icon/" + ip)
           .addFields(
 		// Add all fields to embed
-            { name: 'ip', value: ip },
-            { name: 'port', value: String(port) },
-            { name: 'version', value: response.version.name },
-            { name: 'description', value: description },
-            { name: 'players', value: response.players.online + '/' + response.players.max }
+            { name: 'Ip', value: ip },
+            { name: 'Port', value: String(port) },
+            { name: 'Version', value: response.version.name },
+            { name: 'Description', value: description },
+            { name: 'Players', value: response.players.online + '/' + response.players.max }
           )
           .setTimestamp()
         
@@ -102,7 +101,7 @@ module.exports = {
       })
 	// If any errors occur, send to channel
       .catch(error => {
-        interaction.editReply("ip is invalid or server is offline");
+        interaction.editReply("Ip is invalid or server is offline");
       });
   }
 }

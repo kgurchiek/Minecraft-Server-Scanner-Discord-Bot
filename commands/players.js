@@ -4,7 +4,7 @@ const { MinecraftServerListPing } = require("minecraft-status");
 module.exports = {
 	// The command has two options: an IP and a port, both of which are required
 	 data: new SlashCommandBuilder()
-    .setName("getplayers")
+    .setName("players")
     .setDescription("Pings a server for info")
     .addStringOption(option =>
       option.setName("ip")
@@ -12,13 +12,12 @@ module.exports = {
         .setRequired(true))
     .addIntegerOption(option =>
       option.setName("port")
-        .setDescription("The port of the server")
-        .setRequired(true)),
+        .setDescription("The port of the server")),
 	// Pings a Minecraft server with the provided IP and port and returns a list of online players
 	async execute(interaction) {
 	// Get the IP and port of the server from the interaction options
     const ip = interaction.options.getString("ip");
-    const port = interaction.options.getInteger("port");
+    const port = interaction.options.getInteger("port") || 25565;
     
       // Ping the server
     MinecraftServerListPing.ping(0, ip, port, 3000)
@@ -39,12 +38,12 @@ module.exports = {
 	// Reply to the interaction with the embed message
           interaction.reply({ embeds: [newEmbed] });
         } else {
-          interaction.reply('couldn\'t get players (no sample in ping)');
+          interaction.reply('Couldn\'t get players (no sample in ping)');
         }
       })
       .catch(error => {
 	    // If the ping is unsuccessful, reply to the interaction with an error message
-        interaction.reply('ip is invalid or server is offline');
+        interaction.reply('Ip is invalid or server is offline');
       })
 	},
 };

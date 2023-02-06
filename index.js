@@ -1,10 +1,9 @@
-const { token } = require("./config.json");
+require("dotenv").config()
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 
 //Init Discord.js and the commands
-var isReady = false;
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.commands = new Collection();
 
@@ -32,7 +31,6 @@ client.once(Events.ClientReady, () => {
     console.log("Logged into " + client.guilds.cache.size + " servers");
   }
   
-  isReady = true;
 });
 
 // When a chat input command is received, try to execute it
@@ -52,4 +50,4 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 // Log the bot in to the Discord API
-client.login(token);
+client.login(process.env.token);

@@ -1,0 +1,24 @@
+{
+  "name": "minecraft-server-scanner-discord-bot",
+  "version": "1.0.0",
+  "description": "This is the full code for a Node.js Minecraft server scanner Discord bot I made. This bot itself doesn't do the scanning, it just pings servers in the existing database, which is actively expanded by a seperate scanning program. (The code for the server scanner can be found here: https://github.com/kgurchiek/Minecraft-Server-IP-Scanner)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kgurchiek/Minecraft-Server-Scanner-Discord-Bot.git"
+  },
+  "author": "Cornbread 2100",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kgurchiek/Minecraft-Server-Scanner-Discord-Bot/issues"
+  },
+  "homepage": "https://github.com/kgurchiek/Minecraft-Server-Scanner-Discord-Bot#readme",
+  "dependencies": {
+    "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3",
+    "minecraft-status": "^1.1.0"
+  }
+}

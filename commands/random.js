@@ -7,7 +7,7 @@ const { totalServers, successIPs, successPorts } = require("../serverList.json")
 module.exports = {
 	// Define 'randserver' command
 	data: new SlashCommandBuilder()
-		.setName('randserver')
+		.setName('random')
 		.setDescription('Gets a random Minecraft server'),
 	async execute(interaction) {
 		// Status message
@@ -23,24 +23,24 @@ module.exports = {
       .then(response => {
         //console.log(response);
 
-        var description = response.motd.clean;
-
-        if (description = '') {
-          description = 'ㅤ';
-        }
-
+        
         if (response.online) {
+          var description = response.motd.clean;
+  
+          if (description == '') {
+            description = 'ㅤ';
+          }
           var newEmbed = new EmbedBuilder()
             .setColor("#02a337")
             .setTitle('Random Server')
             .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */})
             .setThumbnail("https://api.mcstatus.io/v2/icon/" + successIPs[matchNumber])
             .addFields(
-              { name: 'ip', value: successIPs[matchNumber] },
-              { name: 'port', value: String(successPorts[matchNumber]) },
-              { name: 'version', value: response.version.name_clean },
-              { name: 'description', value: description },
-              { name: 'players', value: response.players.online + '/' + response.players.max }
+              { name: 'Ip', value: successIPs[matchNumber] },
+              { name: 'Port', value: String(successPorts[matchNumber]) },
+              { name: 'Version', value: response.version.name_clean },
+              { name: 'Description', value: description },
+              { name: 'Players', value: response.players.online + '/' + response.players.max }
             )
             .setTimestamp()
 
