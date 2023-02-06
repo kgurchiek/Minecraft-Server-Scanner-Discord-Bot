@@ -19,7 +19,7 @@ module.exports = {
     		{ name: 'ip', value: 'The ip address of the server', inline: true },
 			{ name: 'port', value: 'The port of the server\n' + 'ㅤ', inline: true },
 			{ name: '/scan <scan> [minonline] [maxonline] [playerCap] [isfull] [version] [hasImage] [description] [strictDescription]', value: 'searches for a server with specific properties'},
-			{ name: 'scan (integer)', value: 'How many servers to scan in the search. Use /stats to find the total servers available for scan.', inline: true },
+			{ name: 'servers (integer)', value: 'How many servers to scan in the search. Use /stats to find the total servers available for scan.', inline: true },
 			{ name: 'minonline (integer)', value: 'The minimum number of players online', inline: true },
 			{ name: 'maxonline (integer)', value: 'The maximum number of players online (not to be confused with the server\'s maximum player capacity (playerCap))', inline: true },
 			{ name: 'playerCap (integer)', value: 'The maximum player capacity of the server', inline: true },
