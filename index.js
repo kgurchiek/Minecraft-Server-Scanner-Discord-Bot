@@ -16,21 +16,15 @@ for (const file of commandFiles) {
 	const filePath = path.join(commandsPath, file);
 	const command = require(filePath);
 	client.commands.set(command.data.name, command);
-  console.log("loaded " + file);
+  console.log("[Loaded]: " + file);
 }
 
 // When the client is ready, log a message to the console (NOT in the Discord server)
 client.once(Events.ClientReady, () => {
-	console.log("Bot online");
-  
-	// Log how many servers the bot is logged in to
-  if (client.guilds.cache.size == 1)
-  {
-    console.log("Logged into 1 server");
-  } else {
-    console.log("Logged into " + client.guilds.cache.size + " servers");
-  }
-  
+  // Log how many servers the bot is logged in to
+  console.log(`[Bot]: ${client.user.tag}`)
+  console.log("[Servers]: " + client.guilds.cache.size);
+
 });
 
 // When a chat input command is received, try to execute it
@@ -44,7 +38,7 @@ client.on(Events.InteractionCreate, async interaction => {
 	try {
 		await command.execute(interaction);
 	} catch (error) {
-		console.error(error);
+		console.error("[Error]: " + error);
 		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 	}
 });
