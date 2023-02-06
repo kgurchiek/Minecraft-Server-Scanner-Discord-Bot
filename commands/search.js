@@ -26,8 +26,8 @@ function timeSinceDate(date1) {
 // Exports an object with the parameters for the target server
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("scan")
-    .setDescription("Scans for a server with specific properties")
+    .setName("search")
+    .setDescription("Searches the current database for a server with specific properties")
     .addStringOption(option =>
       option
         .setName("servers")
