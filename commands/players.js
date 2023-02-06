@@ -17,7 +17,10 @@ module.exports = {
 	async execute(interaction) {
 	// Get the IP and port of the server from the interaction options
     const ip = interaction.options.getString("ip");
-    const port = interaction.options.getInteger("port") || 25565;
+    var port = 25565;
+    if (interaction.options.getInteger("port") != null) {
+    	const port = interaction.options.getInteger("port");
+    }
     
       // Ping the server
     MinecraftServerListPing.ping(0, ip, port, 3000)
