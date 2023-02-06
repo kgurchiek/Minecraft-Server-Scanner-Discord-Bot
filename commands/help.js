@@ -28,8 +28,8 @@ module.exports = {
 			{ name: 'hasImage (true/false)', value: 'Whether or not the server has a custom thumbnail image', inline: true },
 			{ name: 'description (text)', value: 'The description of the server', inline: true },
 			{ name: 'strictDescription (true/false)', value: 'If true, the server\'s description has to perfectly match the description argument. If false, the server\'s description only has to contain the description argument.', inline: true },
-			{ name: 'player (player name)', value: 'The name of a player to search for\n' + 'ㅤ', inline: true }
-			{ name: '/uptime', value: "Sends how long the bot has been online."}
+			{ name: 'player (player name)', value: 'The name of a player to search for\n' + 'ㅤ', inline: true },
+			{ name: '/uptime', value: "Sends how long the bot has been online,"}
 		)
     	.setTimestamp()
     interaction.reply({ embeds: [exampleEmbed], ephemeral:true });
