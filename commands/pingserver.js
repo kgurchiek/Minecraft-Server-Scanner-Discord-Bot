@@ -4,7 +4,7 @@ const { MinecraftServerListPing, MinecraftQuery } = require("minecraft-status");
 module.exports = {
 	// Command options
 	data: new SlashCommandBuilder()
-		.setName("pingserver")
+		.setName("ping")
 		.setDescription("Pings a server for info")
     .addStringOption(option =>
 			option.setName("ip")
