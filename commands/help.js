@@ -12,7 +12,7 @@ module.exports = {
     	.addFields(
     		{ name: '/stats', value: 'Sends some stats about the bot\n' + 'ㅤ' },
 			{ name: '/randserver', value: 'Gets a random Minecraft server\n' + 'ㅤ' },
-    		{ name: '/pingserver <ip> <port>', value: 'gets info from a server'},
+    		{ name: '/ping <ip> <port>', value: 'gets info from a server'},
     		{ name: 'ip', value: 'The ip address of the server', inline: true },
 			{ name: 'port', value: 'The port of the server\n' + 'ㅤ', inline: true },
 			{ name: '/getplayers <ip> <port>', value: 'attampts to get a list of players on a server'},
