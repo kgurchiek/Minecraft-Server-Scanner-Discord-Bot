@@ -2,27 +2,25 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { MinecraftServerListPing, MinecraftQuery } = require("minecraft-status");
 
 module.exports = {
-	// Command options
-	data: new SlashCommandBuilder()
-		.setName("ping")
-		.setDescription("Pings a server for info")
+    // Command options
+    data: new SlashCommandBuilder()
+        .setName("ping")
+	.setDescription("Pings a server for info")
     .addStringOption(option =>
-			option.setName("ip")
-				.setDescription("The ip of the server to ping")
+	option.setName("ip")
+	.setDescription("The ip of the server to ping")
         .setRequired(true))
     .addIntegerOption(option =>
-			option.setName("port")
-				.setDescription("The port of the server to ping")),
-	// Execute the command
-	async execute(interaction) {
-	// Ping status
+        option.setName("port")
+	.setDescription("The port of the server to ping")),
+    async execute(interaction) {
+    // Ping status
     await interaction.reply("Pinging, Please wait.");
-    
 	// Fetch IP and Port from the command
     const ip = interaction.options.getString("ip");
     const port = interaction.options.getInteger("port") || 25565;
         
-	// Parse the server's description
+    // Parse the server's description
     function getDescription(response) {
       var description = "";
       if (response.description.extra != null) {
