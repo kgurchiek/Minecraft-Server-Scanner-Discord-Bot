@@ -1,7 +1,7 @@
-require("dotenv").config()
+const config = require("./config.json");
 const { REST, Routes } = require('discord.js');
 const { clientId } = require('./config.json');
-const token = process.env.token
+const token = config.token;
 const fs = require('node:fs');
 
 const commands = [];
