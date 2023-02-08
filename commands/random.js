@@ -5,7 +5,7 @@ const { MinecraftServerListPing, MinecraftQuery } = require("minecraft-status");
 const { totalServers, successIPs, successPorts } = require("../serverList.json");
 
 module.exports = {
-	// Define 'randserver' command
+    // Define 'randserver' command
     data: new SlashCommandBuilder()
         .setName('random')
 	.setDescription('Gets a random Minecraft server'),
@@ -14,14 +14,15 @@ module.exports = {
 	await interaction.reply("Getting a server, please wait..."); 
         
     function sendMessage() {
-    	var matchNumber = Math.round((Math.random() * totalServers));
-      	//console.log(successIPs[matchNumber] + ":" + successPorts[matchNumber]);
-      	// Generate a random number to select a server from the list of successful pings
+      // Generate a random number to select a server from the list of successful pings
+      var matchNumber = Math.round((Math.random() * totalServers));
+	    
+      //console.log(successIPs[matchNumber] + ":" + successPorts[matchNumber]);
 
-      	fetch("https://api.mcstatus.io/v2/status/java/" + successIPs[matchNumber])
-      	.then(text => text.json())
-      	.then(response => {
-          //console.log(response);
+      fetch("https://api.mcstatus.io/v2/status/java/" + successIPs[matchNumber])
+      .then(text => text.json())
+      .then(response => {
+        //console.log(response);
         
         if (response.online) {
           var description = response.motd.clean;
@@ -50,8 +51,7 @@ module.exports = {
         }
       })
       .catch(error => {
-        //console.log(error);
-	      // If the ping fails, try again with a different server
+	// If the ping fails, try again with a different server
         sendMessage();
       });
     }
