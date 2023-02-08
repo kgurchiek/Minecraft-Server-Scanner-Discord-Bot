@@ -25,7 +25,6 @@ module.exports = {
     	    { name: 'Total Servers', value: String(totalServers) },
 	    { name: 'Uptime:', value: `${hours}:${minutes}:${seconds}  ${days} Days`}
 	  )
-    	  .setTimestamp()
       	// Send the embed to the user
         interaction.reply({ embeds: [exampleEmbed], ephemeral:true });
     },
