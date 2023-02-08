@@ -19,7 +19,7 @@ module.exports = {
     const ip = interaction.options.getString("ip");
     var port = 25565;
     if (interaction.options.getInteger("port") != null) {
-    	const port = interaction.options.getInteger("port");
+    	port = interaction.options.getInteger("port");
     }
     
     // Ping the server
