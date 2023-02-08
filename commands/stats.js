@@ -16,17 +16,17 @@ module.exports = {
         totalSeconds %= 3600;
         let minutes = Math.floor(totalSeconds / 60);
         let seconds = Math.floor(totalSeconds % 60);
-      const exampleEmbed = new EmbedBuilder()
-	.setColor("#02a337")
-    	.setTitle('Statistics')
-    	.setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
-      	// Adds more fields to the embed
-    	.addFields(
-    		{ name: 'Total Servers', value: String(totalServers) },
-		{ name: 'Uptime:', value: `${hours}:${minutes}:${seconds}  ${days} Days`}
-	)
-    	.setTimestamp()
-      	// Send the embed back to the user
+        const exampleEmbed = new EmbedBuilder()
+	  .setColor("#02a337")
+    	  .setTitle('Statistics')
+    	  .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
+      	  // Adds more fields to the embed
+    	  .addFields(
+    	    { name: 'Total Servers', value: String(totalServers) },
+	    { name: 'Uptime:', value: `${hours}:${minutes}:${seconds}  ${days} Days`}
+	  )
+    	  .setTimestamp()
+      	// Send the embed to the user
         interaction.reply({ embeds: [exampleEmbed], ephemeral:true });
     },
 };
