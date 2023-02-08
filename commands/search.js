@@ -268,16 +268,16 @@ module.exports = {
     }
     
     // Checks if the user passed a value for how many servers to scan
-    if (interaction.options.getString("scan") != null) {
-      scan = interaction.options.getString("scan");
+    if (interaction.options.getString("servers") != null) {
+      scan = interaction.options.getString("servers");
       
-      if (!isNaN(interaction.options.getString("scan"))) {
+      if (!isNaN(interaction.options.getString("servers"))) {
         scan = parseInt(scan);
 
-        if (interaction.options.getString("scan") < 0) {
-          totalServers = interaction.options.getString("scan") * -1;
-        } else if (interaction.options.getString("scan") < totalServers) {
-          totalServers = interaction.options.getString("scan");
+        if (interaction.options.getString("servers") < 0) {
+          totalServers = interaction.options.getString("servers") * -1;
+        } else if (interaction.options.getString("servers") < totalServers) {
+          totalServers = interaction.options.getString("servers");
         } else {
           scan = totalServers;
         }
