@@ -10,7 +10,7 @@
 
 ## About
 
-This is the full code for a Node.js Minecraft server scanner Discord bot I made. This bot itself doesn't do the scanning, it just pings servers in the existing database, which is actively expanded by a seperate scanning program. (The code for the server scanner can be found here: https://github.com/kgurchiek/Minecraft-Server-IP-Scanner)
+This is the full code for a Node.js Minecraft server scanner Discord bot I made. This bot itself doesn't do the scanning, it just pings servers in the existing database, which is actively expanded by a seperate scanning program. (The code for the server scanner can be found here: https://github.com/kgurchiek/New-Minecraft-Server-IP-Scanner)
 
 If you find any bugs, please report them in the [official discord](https://discord.gg/TSWcF2m67m).
 
