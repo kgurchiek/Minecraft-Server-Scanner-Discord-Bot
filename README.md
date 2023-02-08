@@ -20,7 +20,7 @@ You can contact me via discord: Cornbread 2100#0001
 **If you just want to use the bot, you don't have to host it, you can try it out in its [official Discord server](https://discord.gg/TSWcF2m67m)** 
 
 ### Configuration
-Enter the client id and token for the bot from the [Discord Developer Portal](https://discord.com/developers/) in config.json. Then, adjust maxPings, pingTimeout, and refreshSearchTime as necessary:
+Enter the client id for the bot from the [Discord Developer Portal](https://discord.com/developers/) in config.json. Then, Create a file called .env and then add `token="<token>"` to .env and replace \<token\> with the token to your bot, adjust maxPings, pingTimeout, and refreshSearchTime as necessary:
 #### maxPings
 ##### (How many servers are pinged at once)
 If you have fast internet, you can set this pretty high (around 5000). If you have slower internet, you'll want it lower (around 1000). The higher it is, the less time a /search will take, but it will also be less accurate, especially if you have slower internet.

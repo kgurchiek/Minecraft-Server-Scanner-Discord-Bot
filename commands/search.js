@@ -27,10 +27,10 @@ function timeSinceDate(date1) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("search")
-    .setDescription("Searches for a server with specific properties")
+    .setDescription("Searches the current database for a server with specific properties")
     .addStringOption(option =>
       option
-        .setName("scan")
+        .setName("servers")
         .setDescription("The amount of servers to scan")
         .setRequired(true))
     .addIntegerOption(option =>
