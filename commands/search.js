@@ -71,7 +71,7 @@ module.exports = {
         .setDescription("The name of a player to search for")),
   async execute(interaction) {
     var { totalServers } = require("../serverList.json");
-    await interaction.reply("Searching...");
+    const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
 
     // Create unique IDs for each button
     const lastResultID = 'searchLastResult' + interaction.id;
@@ -413,7 +413,7 @@ module.exports = {
 
     // Checks for any errors
     if (errors.length > 0) {
-      await interaction.editReply("ERROR: " + errors[0])
+      await interactReplyMessage.edit("ERROR: " + errors[0])
     } else {
       var argumentList = "**Searching " + scan + " servers with these arguments:** \n" + "**minOnline:** ";
       if (minOnline.consider) {
@@ -476,7 +476,7 @@ module.exports = {
         argumentList += "\n" + "**Player: **" + player.value;
       }
 
-      await interaction.editReply(argumentList);
+      await interactReplyMessage.edit(argumentList);
     
       if (lastSearchDate == null || timeSinceDate(lastSearchDate) >= refreshSearchTime || scan > lastSearchLength) {
         // Scan for new results
@@ -668,7 +668,7 @@ module.exports = {
 
         async function scanChunk(current) {
           scanPercentage = (Math.round((current / totalServers) * 10000) / 100);
-          await interaction.editReply(argumentList + "\n" + "**" + scanPercentage + "% complete**");
+          await interactReplyMessage.edit(argumentList + "\n" + "**" + scanPercentage + "% complete**");
           if (current <= totalServers) {
             if (totalServers - current < maxPings) {
               for (var i = 0; i < totalServers - current; i++) {
@@ -690,7 +690,7 @@ module.exports = {
 
         // Send final results in embed
         async function sendResults() {
-          await interaction.editReply(argumentList + "\n" + "**Loading results, please wait...**");
+          await interactReplyMessage.edit(argumentList + "\n" + "**Loading results, please wait...**");
 
           // Easter eggs cuz I was bored
           if (scan == 0) {
@@ -752,9 +752,9 @@ module.exports = {
 
             var buttons = createButtons(embeds);
 
-            await interaction.editReply({ content: '', embeds: [embeds[0]], components: [buttons] });
+            await interactReplyMessage.edit({ content: '', embeds: [embeds[0]], components: [buttons] });
           } else {
-            await interaction.editReply("no matches could be found");
+            await interactReplyMessage.edit("no matches could be found");
           }
           lastButtonPress = new Date();
           scanning = false;
@@ -765,7 +765,7 @@ module.exports = {
         while (scanning) {
           // if another scan is running, show it's progress until it finishes
 
-          await interaction.editReply(argumentList + "\n" + "**" + scanPercentage + "% complete**");
+          await interactReplyMessage.edit(argumentList + "\n" + "**" + scanPercentage + "% complete**");
         }
 
         // Use existing results (saved from previous search)
@@ -914,9 +914,9 @@ module.exports = {
         // If at least one server was found, send the message
         if (embeds.length > 0) {
           var buttons = createButtons(embeds);
-          await interaction.editReply({ content: '', embeds: [embeds[0]], components: [buttons] });
+          await interactReplyMessage.edit({ content: '', embeds: [embeds[0]], components: [buttons] });
         } else {
-          await interaction.editReply("no matches could be found");
+          await interactReplyMessage.edit("no matches could be found");
         }
         lastButtonPress = new Date();
         hasFinished = true;
@@ -938,7 +938,7 @@ module.exports = {
                 .setStyle(ButtonStyle.Secondary)
                 .setDisabled(true)
             );
-          await interaction.editReply({ content: '', components: [buttons] });
+          await interactReplyMessage.edit({ content: '', components: [buttons] });
 
           searchNextResultCollector.stop();
           searchLastResultCollector.stop();
