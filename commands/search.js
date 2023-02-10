@@ -728,6 +728,7 @@ module.exports = {
           }
           
           lastSearchResults = allResults;
+          allResults = [];
 
           // If at least one server was found, send the embed
           if (results.length > 0 || scan <= 0) {
@@ -750,6 +751,7 @@ module.exports = {
               embeds.push(newEmbed);
             }
 
+            results = []; // results are no longer needed
             var buttons = createButtons(embeds);
 
             await interactReplyMessage.edit({ content: '', embeds: [embeds[0]], components: [buttons] });
@@ -856,26 +858,6 @@ module.exports = {
           }
         }
 
-        // Convert the results into Discord embeds to be sent as the message
-        for (var i = 0; i < filteredResults.length; i++) {
-          var newEmbed = new EmbedBuilder()
-            .setColor("#02a337")
-            .setTitle('Search Results')
-            .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-            .setThumbnail("https://api.mcstatus.io/v2/icon/" + filteredResults[i].ip)
-            .addFields(
-              { name: 'Result ' + (i + 1) + '/' + filteredResults.length, value: 'ㅤ' },
-              { name: 'ip', value: filteredResults[i].ip },
-              { name: 'port', value: filteredResults[i].port },
-              { name: 'version', value: filteredResults[i].version },
-              { name: 'description', value: filteredResults[i].description },
-              { name: 'players', value: filteredResults[i].onlinePlayers + '/' + filteredResults[i].maxPlayers }
-            )
-            .setTimestamp()
-
-          embeds.push(newEmbed);
-        }
-
         // Easter eggs
         if (scan == 0) {
           var newEmbed = new EmbedBuilder()
@@ -911,6 +893,28 @@ module.exports = {
           embeds.push(newEmbed);
         }
 
+        // Convert the results into Discord embeds to be sent as the message
+        for (var i = 0; i < filteredResults.length; i++) {
+          var newEmbed = new EmbedBuilder()
+            .setColor("#02a337")
+            .setTitle('Search Results')
+            .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+            .setThumbnail("https://api.mcstatus.io/v2/icon/" + filteredResults[i].ip)
+            .addFields(
+              { name: 'Result ' + (i + 1) + '/' + filteredResults.length, value: 'ㅤ' },
+              { name: 'ip', value: filteredResults[i].ip },
+              { name: 'port', value: filteredResults[i].port },
+              { name: 'version', value: filteredResults[i].version },
+              { name: 'description', value: filteredResults[i].description },
+              { name: 'players', value: filteredResults[i].onlinePlayers + '/' + filteredResults[i].maxPlayers }
+            )
+            .setTimestamp()
+
+          embeds.push(newEmbed);
+        }
+
+        filteredResults = []; // filtered results are no longer needed
+
         // If at least one server was found, send the message
         if (embeds.length > 0) {
           var buttons = createButtons(embeds);
@@ -942,6 +946,8 @@ module.exports = {
 
           searchNextResultCollector.stop();
           searchLastResultCollector.stop();
+
+          embeds = []; // embeds are no longer needed
         } else {
           setTimeout(function() { buttonTimeoutCheck() }, 500);
         }
