@@ -2,7 +2,7 @@
 const wait = require('node:timers/promises').setTimeout;
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteractionOptionResolver } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
-const { successIPs, successPorts } = require("../serverList.json");
+const { totalServers, successIPs, successPorts } = require("../serverList.json");
 const buttonTimeout = 60; // In seconds
 const { maxPings, pingTimeout, refreshSearchTime } = require('../config.json');
 var lastSearchDate = null;
@@ -70,7 +70,6 @@ module.exports = {
         .setName("player")
         .setDescription("The name of a player to search for")),
   async execute(interaction) {
-    var { totalServers } = require("../serverList.json");
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
 
     // Create unique IDs for each button
