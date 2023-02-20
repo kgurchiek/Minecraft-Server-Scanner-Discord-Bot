@@ -2,7 +2,8 @@
 const wait = require('node:timers/promises').setTimeout;
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteractionOptionResolver } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
-const { totalServers, successIPs, successPorts } = require("../serverList.json");
+const { successIPs, successPorts } = require("../serverList.json");
+var { totalServers } = require("../serverList.json");
 const buttonTimeout = 60; // In seconds
 const { maxPings, pingTimeout, refreshSearchTime } = require('../config.json');
 var lastSearchDate = null;
