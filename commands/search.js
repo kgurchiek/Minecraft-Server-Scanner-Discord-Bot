@@ -70,7 +70,7 @@ module.exports = {
         .setName("player")
         .setDescription("The name of a player to search for")),
   async execute(interaction) {
-    const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
+    var interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
 
     // Create unique IDs for each button
     const lastResultID = 'searchLastResult' + interaction.id;
