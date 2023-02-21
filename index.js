@@ -1,10 +1,10 @@
 const config = require("./config.json");
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { Client, Partials, Collection, Events, GatewayIntentBits } = require('discord.js');
 
 //Init Discord.js and the commands
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
+const client = new Client({ partials: [Partials.Channel], intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
 client.commands = new Collection();
 
 // Reads the files in the 'commands' dir
