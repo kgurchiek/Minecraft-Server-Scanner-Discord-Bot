@@ -2,8 +2,7 @@
 const wait = require('node:timers/promises').setTimeout;
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteractionOptionResolver } = require('discord.js');
 const { MinecraftServerListPing } = require("minecraft-status");
-const { successIPs, successPorts } = require("../serverList.json");
-var { totalServers } = require("../serverList.json");
+const { totalServers, successIPs, successPorts } = require("../serverList.json");
 const buttonTimeout = 60; // In seconds
 const { maxPings, pingTimeout, refreshSearchTime } = require('../config.json');
 var lastSearchDate = null;
@@ -272,14 +271,10 @@ module.exports = {
       scan = interaction.options.getString("servers");
       
       if (!isNaN(interaction.options.getString("servers"))) {
-        scan = parseInt(scan);
+        scan = Math.abs(parseInt(scan));
 
-        if (interaction.options.getString("servers") < 0) {
-          totalServers = interaction.options.getString("servers") * -1;
-        } else if (interaction.options.getString("servers") < totalServers) {
-          totalServers = interaction.options.getString("servers");
-        } else {
-          scan = totalServers;
+        if (interaction.options.getString("servers") > totalServers) {
+            scan = totalServers;
         }
       } else {
         scan = totalServers;
@@ -652,9 +647,9 @@ module.exports = {
         }
 
         // Scans the servers in big chunks (size set by maxPings)
-        if (totalServers < maxPings) {
-          for (var i = 0; i < totalServers; i++) {
-            searchForServer(i, totalServers);
+        if (scan < maxPings) {
+          for (var i = 0; i < scan; i++) {
+            searchForServer(i, scan);
           }
 
           setTimeout(function() { sendResults(); }, pingTimeout + 500);
@@ -667,11 +662,11 @@ module.exports = {
         }
 
         async function scanChunk(current) {
-          scanPercentage = (Math.round((current / totalServers) * 10000) / 100);
+          scanPercentage = (Math.round((current / scan) * 10000) / 100);
           await interactReplyMessage.edit(argumentList + "\n" + "**" + scanPercentage + "% complete**");
-          if (current <= totalServers) {
-            if (totalServers - current < maxPings) {
-              for (var i = 0; i < totalServers - current; i++) {
+          if (current <= scan) {
+            if (scan - current < maxPings) {
+              for (var i = 0; i < scan - current; i++) {
                 searchForServer(i + current);
               }
 
@@ -709,7 +704,7 @@ module.exports = {
               .setTimestamp()
 
             embeds.push(newEmbed);
-          } else if (scan < 0) {
+          } else if (interaction.options.getString("servers") < 0) {
             var newEmbed = new EmbedBuilder()
               .setColor("#02a337")
               .setTitle('Search Results')
@@ -875,7 +870,7 @@ module.exports = {
             .setTimestamp()
 
           embeds.push(newEmbed);
-        } else if (scan < 0) {
+        } else if (interaction.options.getString("servers") < 0) {
           var newEmbed = new EmbedBuilder()
             .setColor("#02a337")
             .setTitle('Search Results')
