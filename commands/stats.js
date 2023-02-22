@@ -1,7 +1,12 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { totalServers } = require('../serverList.json');
-const { maxPings, pingTimeout } = require('../config.json');
+const { MongoClient } = require('mongodb');
+const client = new MongoClient("mongodb://localhost");
+const MCSS = client.db("MCSS");
+const servers = MCSS.collection("servers");
+
+var totalServers;
+servers.find({ }).toArray().then((data) => {(totalServers = data.length)});
 
 module.exports = {
 	// Sets up the command
