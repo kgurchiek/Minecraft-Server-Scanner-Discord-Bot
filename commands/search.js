@@ -631,7 +631,7 @@ module.exports = {
                 onlinePlayers: response.players.online,
                 maxPlayers: response.players.max,
                 playerSample: response.players.sample,
-                favicon: response.favicon
+                hasFavicon: (response.favicon != null)
               }
 
               allResults.push(newResult);
@@ -776,7 +776,7 @@ module.exports = {
           var playerCapRequirement = lastSearchResults[i].maxPlayers == playerCap.value || playerCap.consider == false;
           var isFullRequirement = (isFull.value == "false" && lastSearchResults[i].onlinePlayers != lastSearchResults[i].maxPlayers) || (isFull.value == "true" && lastSearchResults[i].onlinePlayers == lastSearchResults[i].maxPlayers) || isFull.consider == false;
           var versionRequirement = lastSearchResults[i].version == version.value || (lastSearchResults[i].version + "E").includes(version.value + "E") || version.consider == false;
-          var hasImageRequirement = lastSearchResults[i].favicon != null || hasImage.value == "false" || hasImage.consider == false;
+          var hasImageRequirement = lastSearchResults[i].hasFavicon || hasImage.value == "false" || hasImage.consider == false;
           var descriptionRequirement = (description.consider && description.strict == "false" && lastSearchResults[i].description.includes(description.value)) || (description.consider && description.strict == "true" && lastSearchResults[i].description == description.value) || description.value == "any" || description.consider == false;
           var playerRequirement;
     
