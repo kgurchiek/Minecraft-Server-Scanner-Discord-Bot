@@ -1,5 +1,5 @@
 {
 	"clientId": "YOUR CLIENT ID",
   	"token": "YOUR BOT TOKEN",
-	"refreshDelay":300
+	"refreshDelay":600
 }
