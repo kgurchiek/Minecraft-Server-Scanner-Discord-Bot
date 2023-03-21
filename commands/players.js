@@ -1,53 +1,143 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { MinecraftServerListPing } = require("minecraft-status");
+const fetch = require('node-fetch');
 
-// Pings a Minecraft server with the provided IP and port and returns a list of online players
+function getDescription(response) {
+  var description = "";
+  if (response == null) {
+    description = '​'; // zero width space
+  } else if (response.extra != null && response.extra.length > 0) {
+    if (response.extra[0].extra == null) {
+      for (var i = 0; i < response.extra.length; i++) {
+        description += response.extra[i].text;
+      }
+    } else {
+      for (var i = 0; i < response.extra[0].extra.length; i++) {
+        description += response.extra[0].extra[i].text;
+      }
+    }
+  } else if (response.text != null) {
+    description = response.text;
+  } else if (response.translate != null) {
+    description = response.translate;
+  } else if (response[0] != null) {
+    for (var i = 0; i < response.length; i++) {
+      description += response[i].text;
+    }
+  } else if (response != null) {
+    description = response;
+  } else {
+    description = "Couldn't get description";
+  }
+
+  if (description.length > 150) {
+    description = description.substring(0, 150) + "...";
+  }
+
+  // Remove Minecraft color/formatting codes
+  while (description.startsWith('§')) {
+    description = description.substring(2, description.length);
+  }
+
+  if (description.split('§').length > 1) {
+    var splitDescription = description.split('§');
+
+    description = splitDescription[0];
+    for (var i = 1; i < splitDescription.length; i++) {
+      description += splitDescription[i].substring(1, splitDescription[i].length);
+    }
+  }
+
+  if (description == '') {
+    description = '​'; // zero width space
+  }
+
+  return String(description);
+}
+
+function cleanVersion(version) {
+  version += "";
+  if (version.length > 150) {
+    version = version.substring(0, 150) + "...";
+  }
+
+  // Remove Minecraft color/formatting codes
+  while (version.startsWith('§')) {
+    version = version.substring(2, version.length);
+  }
+
+  if (version.split('§').length > 1) {
+    var splitVersion = version.split('§');
+
+    version = splitVersion[0];
+    for (var i = 1; i < splitVersion.length; i++) {
+      version += splitVersion[i].substring(1, splitVersion[i].length);
+    }
+  }
+
+  if (version == '') {
+    version = 'ㅤ';
+  }
+
+  return String(version);
+}
+
 module.exports = {
-  // The command has two options: an IP and a port, both of which are required
+  // Command options
   data: new SlashCommandBuilder()
     .setName("players")
-    .setDescription("Pings a server for info")
+    .setDescription("Gets a list of players on a server")
     .addStringOption(option =>
       option.setName("ip")
-        .setDescription("The ip of the server")
-        .setRequired(true))
+	    .setDescription("The ip of the server to ping")
+      .setRequired(true))
     .addIntegerOption(option =>
       option.setName("port")
-        .setDescription("The port of the server")),
-  async execute(interaction) {
-	// Get the IP and port of the server from the interaction options
-    const ip = interaction.options.getString("ip");
-    var port = 25565;
-    if (interaction.options.getInteger("port") != null) {
-    	port = interaction.options.getInteger("port");
-    }
+	    .setDescription("The port of the server to ping")),
+    async execute(interaction) {
+      // Ping status
+      await interaction.reply("Pinging, Please wait.");
+  	  // Fetch IP and Port from the command
+      const ip = interaction.options.getString("ip");
+      const port = interaction.options.getInteger("port") || 25565;
+  
+      fetch(`https://ping.cornbread2100.com/ping/?ip=${ip}&port=${port}`)
+        .then(rawtext => rawtext.text())
+        .then(text => {
+          if (text == 'timeout') {
+            var errorEmbed = new EmbedBuilder()
+              .setColor("#ff0000")
+              .addFields({ name: 'Error', value: 'IP is invalid or server is offline' })
+            interaction.editReply({ content: '', embeds: [errorEmbed] })
+          } else {
+            response = JSON.parse(text);
+            if (response.players.sample != null && response.players.sample.length > 0) {
+              var newEmbed = new EmbedBuilder()
+    	          .setColor("#02a337")
+                .setTitle('Online Players')
+                .setDescription(`${ip}:${port}`)
+                .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
+                .setTimestamp()
     
-    // Ping the server
-    MinecraftServerListPing.ping(0, ip, port, 3000)
-      .then(response => {
-	// If the response includes a list of players, create an embed message with the player list
-        if (response.players.sample != null) {
-          var newEmbed = new EmbedBuilder()
-	    .setColor("#02a337")
-            .setTitle('Online Players')
-            .setDescription(ip + ' : ' + port)
-              .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
-              .setTimestamp()
-
-	  // Add a field for each player in the response
-          for (var i = 0; i < response.players.sample.length; i++) {
-            newEmbed.addFields({ name: String(response.players.sample[i].name), value: String(response.players.sample[i].id) });
+              // Add a field for each player in the response
+              for (var i = 0; i < response.players.sample.length; i++) {
+                newEmbed.addFields({ name: String(response.players.sample[i].name), value: String(response.players.sample[i].id) });
+              }
+    
+              interaction.editReply({ content:'', embeds: [newEmbed] });
+            } else {
+              var errorEmbed = new EmbedBuilder()
+              .setColor("#ff0000")
+              .addFields({ name: 'Error', value: 'No player sample in ping response' })
+            interaction.editReply({ content: '', embeds: [errorEmbed] })
+            }
           }
-	  
-	  // Reply to the interaction with the embed message
-          interaction.reply({ embeds: [newEmbed] });
-        } else {
-          interaction.reply('Couldn\'t get players (no sample in ping)');
-        }
-      })
-      .catch(error => {
-	// If the ping is unsuccessful, reply to the interaction with an error message
-        interaction.reply('Ip is invalid or server is offline');
-      })
-  }
-};
+        })
+        .catch(error => {
+          console.log(error);
+          var errorEmbed = new EmbedBuilder()
+            .setColor("#ff0000")
+            .addFields({ name: 'Error', value: error.toString() })
+          interaction.editReply({ content: '', embeds: [errorEmbed] })
+        });
+    }
+}
