@@ -20,10 +20,7 @@ You can contact me via discord: Cornbread 2100#0001
 **If you just want to use the bot, you don't have to host it, you can try it out in its [official Discord server](https://discord.gg/TSWcF2m67m)** 
 
 ### Configuration
-Enter the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers/) in config.json. Then, adjust refreshDelay as necessary:
-#### refreshDelay
-##### (How long /search results are saved in memory)
-In order to make subsequent searches considerably faster, search results are temporarily saved. If it has been a while, as determined by refreshDelay, the results will be fetched again. About 300 (5 minutes) is recommended. Remember that the longer this is, the more inaccurate the results are likely to be, but the shorter it is, the more likely you are to have to wait for the api to be fetched again.
+Enter the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers/) in config.json. In order to make subsequent searches considerably faster, search results are temporarily saved. If it has been a while, the results will be fetched again. In the config, refreshDelay controlls how many seconds to wait before fetching the database again. About 600 (10 minutes) is recommended.
 
 ### Usage
 You'll need Node.js version 16.9.0 or later to operate the bot. Run "node deploy-commands.js" in your terminal before launching the bot. The slash instructions will then be registered; otherwise, they won't show up in Discord. Run "node index.js" to start the bot once you're ready. You'll also need to install discord.js v14 and node-fetch version 2.6.6.
