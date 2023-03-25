@@ -1,5 +1,12 @@
 {
+<<<<<<< Updated upstream
 	"clientId": "YOUR CLIENT ID",
   	"token": "YOUR BOT TOKEN",
 	"refreshDelay":600
 }
+=======
+	"clientId": "1037250630475059211",
+  "token": "MTAxMzY4MzE0MDk1MjMyNjE1NA.GDhkFb.YEqxn_fCHP3Q6TgFFSRzkilGK6F0sUoG37td_o",
+	"refreshDelay":300
+}
+>>>>>>> Stashed changes
