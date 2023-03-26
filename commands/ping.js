@@ -104,7 +104,10 @@ module.exports = {
       .then(rawtext => rawtext.text())
       .then(text => {
         if (text == 'timeout') {
-          sendMessage();
+          var errorEmbed = new EmbedBuilder()
+            .setColor("#ff0000")
+            .addFields({ name: 'Error', value: "Timeout (is the server offline?)" })
+          interaction.editReply({ content: '', embeds: [errorEmbed] })
         } else {
           response = JSON.parse(text);
           var newEmbed = new EmbedBuilder()
