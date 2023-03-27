@@ -120,7 +120,7 @@ module.exports = {
               { name: 'Port', value: port.toString() },
               { name: 'Version', value: cleanVersion(response.version.name) },
               { name: 'Description', value: getDescription(response.description) },
-              { name: 'Players', value: response.onlinePlayers + '/' + response.maxPlayers }
+              { name: 'Players', value: response.players.online + '/' + response.players.max }
             )
             .setTimestamp()
 
