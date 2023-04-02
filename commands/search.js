@@ -81,18 +81,15 @@ function getVersion(response) {
     version = response;
   }
 
+  version += ''; // make sure version is a string
+
   if (version.length > 150) {
     version = version.substring(0, 150) + "...";
   }
 
   // Remove Minecraft color/formatting codes
-  try {
-    while (version.startsWith('§')) {
-      version = version.substring(2, version.length);
-    }
-  } catch (error) {
-    console.log('Error with description:');
-    console.log(response);
+  while (version.startsWith('§')) {
+    version = version.substring(2, version.length);
   }
 
   if (version.split('§').length > 1) {
