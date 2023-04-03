@@ -549,7 +549,8 @@ module.exports = {
         // filter servers
         console.log("getting results");
         const lastSearchResultsRaw = await fetch('https://api.cornbread2100.com/scannedServers');
-        
+        var lastSearchResults;
+          
         try {
           lastSearchResults = await lastSearchResultsRaw.json();
           lastFetch = new Date();
