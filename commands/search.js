@@ -159,7 +159,7 @@ module.exports = {
     const searchLastResultFilter = interaction => interaction.customId == lastResultID;
     const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
     const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
-    var lastButtonPress = new Date();
+    var lastButtonPress = null;
 
     // Get arguments
     var minOnline = {
@@ -549,7 +549,7 @@ module.exports = {
         // filter servers
         console.log("getting results");
         const lastSearchResultsRaw = await fetch('https://api.cornbread2100.com/scannedServers');
-        
+          
         try {
           lastSearchResults = await lastSearchResultsRaw.json();
           lastFetch = new Date();
@@ -676,7 +676,7 @@ module.exports = {
 
       // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
       async function buttonTimeoutCheck() {
-        if (timeSinceDate(lastButtonPress) >= buttonTimeout) {
+        if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
           buttons = new ActionRowBuilder()
             .addComponents(
               new ButtonBuilder()
