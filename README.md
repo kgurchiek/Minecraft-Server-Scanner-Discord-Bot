@@ -46,12 +46,25 @@ The ip address of the server
 ##### port
 The port of the server. Defaults to 25565.
 
-### /getplayers \<ip\> \[port\]
+### /players \<ip\> \[port\]
 Attempts to fetch a list of players on a server
 
 #### arguments:
 ##### ip
 The ip address of the server
+    
+##### port
+The port of the server. Defaults to 25565
+
+### /auth \<ip\> \<version\> \[port\]
+Checks if a server requires account authentication
+
+#### arguments:
+##### ip
+The ip address of the server.
+
+##### version
+The Minecraft version to attempt a join from
     
 ##### port
 The port of the server. Defaults to 25565
