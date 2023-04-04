@@ -211,8 +211,7 @@ module.exports = {
             new ButtonBuilder()
               .setCustomId(lastResultID)
               .setLabel('Last Page')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true),
+              .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
               .setCustomId(nextResultID)
               .setLabel('Next Page')
@@ -237,136 +236,53 @@ module.exports = {
       // Event listener for 'Next Page' button
       searchNextResultCollector.on('collect', async interaction => {
         lastButtonPress = new Date();
+
+        currentEmbed++;
+        if (currentEmbed == filteredResults.length) currentEmbed = 0;
+
         // Updates UI when 'Next Page' pressed
-        if (currentEmbed + 1 < filteredResults.length) {
-          currentEmbed++;
-          if (currentEmbed + 1 == filteredResults.length) {
-            buttons = new ActionRowBuilder()
-              .addComponents(
-                new ButtonBuilder()
-                  .setCustomId(lastResultID)
-                  .setLabel('Last Page')
-                  .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                  .setCustomId(nextResultID)
-                  .setLabel('Next Page')
-                  .setStyle(ButtonStyle.Secondary)
-                  .setDisabled(true)
-              );
-          } else if (currentEmbed == 0) {
-            buttons = new ActionRowBuilder()
-              .addComponents(
-                new ButtonBuilder()
-                  .setCustomId(lastResultID)
-                  .setLabel('Last Page')
-                  .setStyle(ButtonStyle.Secondary)
-                  .setDisabled(true),
-                new ButtonBuilder()
-                  .setCustomId(nextResultID)
-                  .setLabel('Next Page')
-                  .setStyle(ButtonStyle.Primary)
-              );
-          } else {
-            buttons = new ActionRowBuilder()
-              .addComponents(
-                new ButtonBuilder()
-                  .setCustomId(lastResultID)
-                  .setLabel('Last Page')
-                  .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                  .setCustomId(nextResultID)
-                  .setLabel('Next Page')
-                  .setStyle(ButtonStyle.Primary)
-              );
-          }
+        var newEmbed = new EmbedBuilder()
+          .setColor("#02a337")
+          .setTitle('Search Results')
+          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[currentEmbed].ip}&port=${filteredResults[currentEmbed].port}`)
+          .addFields(
+            { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: 'ㅤ' },
+            { name: 'ip', value: filteredResults[currentEmbed].ip },
+            { name: 'port', value: (filteredResults[currentEmbed].port + '') },
+            { name: 'version', value: getVersion(filteredResults[currentEmbed].version) },
+            { name: 'description', value: getDescription(filteredResults[currentEmbed].description) },
+            { name: 'players', value: filteredResults[currentEmbed].players.online + '/' + filteredResults[currentEmbed].players.max }
+          )
+          .setTimestamp();
 
-          var newEmbed = new EmbedBuilder()
-            .setColor("#02a337")
-            .setTitle('Search Results')
-            .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-            .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[currentEmbed].ip}&port=${filteredResults[currentEmbed].port}`)
-            .addFields(
-              { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: 'ㅤ' },
-              { name: 'ip', value: filteredResults[currentEmbed].ip },
-              { name: 'port', value: (filteredResults[currentEmbed].port + '') },
-              { name: 'version', value: getVersion(filteredResults[currentEmbed].version) },
-              { name: 'description', value: getDescription(filteredResults[currentEmbed].description) },
-              { name: 'players', value: filteredResults[currentEmbed].players.online + '/' + filteredResults[currentEmbed].players.max }
-            )
-            .setTimestamp();
-
-          await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
-        } else {
-          await interaction.update({ content: '', embeds: [], components: [] });
-        }
+        await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       // Event listener for 'Last Page' button
       searchLastResultCollector.on('collect', async interaction => {
         lastButtonPress = new Date();
+
+        currentEmbed--;
+        if (currentEmbed == -1) currentEmbed = filteredResults.length - 1;
     
         // Updates UI when 'Last Page' pressed
-        if (currentEmbed != 0) {
-          currentEmbed--;
-          if (currentEmbed + 1 == filteredResults.length) {
-            buttons = new ActionRowBuilder()
-              .addComponents(
-                new ButtonBuilder()
-                  .setCustomId(lastResultID)
-                  .setLabel('Last Page')
-                  .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                  .setCustomId(nextResultID)
-                  .setLabel('Next Page')
-                  .setStyle(ButtonStyle.Secondary)
-                  .setDisabled(true)
-              );
-          } else if (currentEmbed == 0) {
-            buttons = new ActionRowBuilder()
-              .addComponents(
-                new ButtonBuilder()
-                  .setCustomId(lastResultID)
-                  .setLabel('Last Page')
-                  .setStyle(ButtonStyle.Secondary)
-                  .setDisabled(true),
-                new ButtonBuilder()
-                  .setCustomId(nextResultID)
-                  .setLabel('Next Page')
-                  .setStyle(ButtonStyle.Primary)
-              );
-          } else {
-            buttons = new ActionRowBuilder()
-              .addComponents(
-                new ButtonBuilder()
-                  .setCustomId(lastResultID)
-                  .setLabel('Last Page')
-                  .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                  .setCustomId(nextResultID)
-                  .setLabel('Next Page')
-                  .setStyle(ButtonStyle.Primary)
-              );
-          }
-
-          var newEmbed = new EmbedBuilder()
-            .setColor("#02a337")
-            .setTitle('Search Results')
-            .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-            .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[currentEmbed].ip}&port=${filteredResults[currentEmbed].port}`)
-            .addFields(
-              { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: 'ㅤ' },
-              { name: 'ip', value: filteredResults[currentEmbed].ip },
-              { name: 'port', value: (filteredResults[currentEmbed].port + '') },
-              { name: 'version', value: getVersion(filteredResults[currentEmbed].version) },
-              { name: 'description', value: getDescription(filteredResults[currentEmbed].description) },
-              { name: 'players', value: filteredResults[currentEmbed].players.online + '/' + filteredResults[currentEmbed].players.max }
-            )
-            .setTimestamp();
-    
-          await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
-        } else {
-          await interaction.update({ content: '', embeds: [], components: [] });
-        }
+        var newEmbed = new EmbedBuilder()
+          .setColor("#02a337")
+          .setTitle('Search Results')
+          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[currentEmbed].ip}&port=${filteredResults[currentEmbed].port}`)
+          .addFields(
+            { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: 'ㅤ' },
+            { name: 'ip', value: filteredResults[currentEmbed].ip },
+            { name: 'port', value: (filteredResults[currentEmbed].port + '') },
+            { name: 'version', value: getVersion(filteredResults[currentEmbed].version) },
+            { name: 'description', value: getDescription(filteredResults[currentEmbed].description) },
+            { name: 'players', value: filteredResults[currentEmbed].players.online + '/' + filteredResults[currentEmbed].players.max }
+          )
+          .setTimestamp();
+  
+        await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       return buttons;
