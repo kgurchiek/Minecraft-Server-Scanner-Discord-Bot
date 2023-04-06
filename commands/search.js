@@ -466,13 +466,20 @@ module.exports = {
         
         // filter servers
         console.log("getting results");
-        const lastSearchResultsRaw = await fetch('https://api.cornbread2100.com/scannedServers');
+        const lastSearchResultsRaw = await fetch('https://apiraw.cornbread2100.com/scannedServers');
           
         try {
           lastSearchResults = await lastSearchResultsRaw.json();
           lastFetch = new Date();
         } catch (error) {
-          console.log(error.message);
+          //console.log(error.message);
+          lastSearchResultsRaw = await fetch('https://api.cornbread2100.com/scannedServers');
+          try {
+            lastSearchResults = await lastSearchResultsRaw.json();
+            lastFetch = new Date();
+          } catch (error) {
+            console.log(error.message);
+          }
         }
 
         console.log(`got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
