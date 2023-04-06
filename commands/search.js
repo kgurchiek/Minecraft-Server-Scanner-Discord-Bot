@@ -248,11 +248,12 @@ module.exports = {
           .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[currentEmbed].ip}&port=${filteredResults[currentEmbed].port}`)
           .addFields(
             { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: 'ㅤ' },
-            { name: 'ip', value: filteredResults[currentEmbed].ip },
-            { name: 'port', value: (filteredResults[currentEmbed].port + '') },
-            { name: 'version', value: getVersion(filteredResults[currentEmbed].version) },
-            { name: 'description', value: getDescription(filteredResults[currentEmbed].description) },
-            { name: 'players', value: filteredResults[currentEmbed].players.online + '/' + filteredResults[currentEmbed].players.max }
+            { name: 'IP', value: filteredResults[currentEmbed].ip },
+            { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
+            { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
+            { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) },
+            { name: 'Players', value: filteredResults[currentEmbed].players.online + '/' + filteredResults[currentEmbed].players.max },
+            { name: 'Last Seen:', value: `<t:${filteredResults[currentEmbed].lastSeen}:f>` }
           )
           .setTimestamp();
 
@@ -274,11 +275,12 @@ module.exports = {
           .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[currentEmbed].ip}&port=${filteredResults[currentEmbed].port}`)
           .addFields(
             { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: 'ㅤ' },
-            { name: 'ip', value: filteredResults[currentEmbed].ip },
-            { name: 'port', value: (filteredResults[currentEmbed].port + '') },
-            { name: 'version', value: getVersion(filteredResults[currentEmbed].version) },
-            { name: 'description', value: getDescription(filteredResults[currentEmbed].description) },
-            { name: 'players', value: filteredResults[currentEmbed].players.online + '/' + filteredResults[currentEmbed].players.max }
+            { name: 'IP', value: filteredResults[currentEmbed].ip },
+            { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
+            { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
+            { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) },
+            { name: 'Players', value: filteredResults[currentEmbed].players.online + '/' + filteredResults[currentEmbed].players.max },
+            { name: 'Last Seen:', value: `<t:${filteredResults[currentEmbed].lastSeen}:f>` }
           )
           .setTimestamp();
   
