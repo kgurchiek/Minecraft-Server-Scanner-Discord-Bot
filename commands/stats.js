@@ -1,8 +1,8 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const fetch = require("node-fetch")
-var serverListRaw;
-var serverList;
+var scannedServersRaw;
+var scannedServers;
 var lastFetch;
 
 function timeSinceDate(date1) {
@@ -25,8 +25,8 @@ module.exports = {
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
 		if (lastFetch == null || timeSinceDate(lastFetch) > 600) {
       lastFetch = new Date();
-      serverListRaw = await fetch('https://api.cornbread2100.com/serverList');
-      serverList = await serverListRaw.json();
+      scannedServersRaw = await fetch('https://api.cornbread2100.com/scannedServers');
+      scannedServers = await scannedServersRaw.json();
     }
 		var totalSeconds = (interaction.client.uptime / 1000);
     const days = Math.floor(totalSeconds / 86400);
@@ -41,7 +41,7 @@ module.exports = {
       .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
         // Adds more fields to the embed
       .addFields(
-        { name: 'Total Servers', value: String(serverList.length) },
+        { name: 'Total Servers', value: String(scannedServers.length) },
 	      { name: 'Uptime:', value: `${hours}:${minutes}:${seconds}  ${days} Days`}
 	    )
       	// Send the embed to the user
