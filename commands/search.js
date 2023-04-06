@@ -466,7 +466,7 @@ module.exports = {
         
         // filter servers
         console.log("getting results");
-        const lastSearchResultsRaw = await fetch('https://apiraw.cornbread2100.com/scannedServers');
+        var lastSearchResultsRaw = await fetch('https://apiraw.cornbread2100.com/scannedServers');
           
         try {
           lastSearchResults = await lastSearchResultsRaw.json();
