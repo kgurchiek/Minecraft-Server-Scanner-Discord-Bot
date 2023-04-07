@@ -493,7 +493,7 @@ module.exports = {
         var minOnlineRequirement = lastSearchResults[i].players.online >= minOnline.value || minOnline.consider == false;
         var maxOnlineRequirement = lastSearchResults[i].players.online <= maxOnline.value || maxOnline.consider == false;
         var playerCapRequirement = lastSearchResults[i].players.max == playerCap.value || playerCap.consider == false;
-        var isFullRequirement = (isFull.value == "false" && lastSearchResults[i].onlinePlayers != lastSearchResults[i].maxPlayers) || (isFull.value == "true" && lastSearchResults[i].onlinePlayers == lastSearchResults[i].maxPlayers) || isFull.consider == false;
+        var isFullRequirement = (isFull.value == "false" && lastSearchResults[i].players.online != lastSearchResults[i].players.max) || (isFull.value == "true" && lastSearchResults[i].players.online == lastSearchResults[i].players.max) || isFull.consider == false;
         var versionRequirement = getVersion(lastSearchResults[i].version) == version.value || (getVersion(lastSearchResults[i].version) + "E").includes(version.value + "E") || version.consider == false;
         var hasImageRequirement = lastSearchResults[i].hasFavicon || hasImage.value == "false" || hasImage.consider == false;
         var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(lastSearchResults[i].description).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(lastSearchResults[i].description) == description.value) || description.value == "any" || description.consider == false;
