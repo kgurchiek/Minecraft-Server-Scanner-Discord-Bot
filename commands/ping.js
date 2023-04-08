@@ -75,7 +75,7 @@ function cleanVersion(version) {
   }
 
   if (version == '') {
-    version = 'ㅤ';
+    version = '​'; //zero width space
   }
 
   return String(version);
@@ -85,7 +85,7 @@ module.exports = {
   // Command options
   data: new SlashCommandBuilder()
     .setName("ping")
-    .setDescription("Pings a server for info")
+    .setDescription("Fetches info from a given Minecraft server")
     .addStringOption(option =>
       option.setName("ip")
 	    .setDescription("The ip of the server to ping")
@@ -95,7 +95,7 @@ module.exports = {
 	    .setDescription("The port of the server to ping")),
     async execute(interaction) {
     // Ping status
-    await interaction.reply("Pinging, Please wait.");
+    await interaction.reply("Pinging, please wait...");
 	  // Fetch IP and Port from the command
     const ip = interaction.options.getString("ip");
     const port = interaction.options.getInteger("port") || 25565;
@@ -119,10 +119,18 @@ module.exports = {
               { name: 'IP', value: ip },
               { name: 'Port', value: port.toString() },
               { name: 'Version', value: cleanVersion(response.version.name) },
-              { name: 'Description', value: getDescription(response.description) },
-              { name: 'Players', value: response.players.online + '/' + response.players.max }
+              { name: 'Description', value: getDescription(response.description) }
             )
             .setTimestamp()
+
+          var playersString = `${response.players.online}/${response.players.max}`;
+          if (response.players.sample != null) { 
+            for (var i = 0; i < response.players.sample.length; i++) {
+              playersString += `\n${response.players.sample[i].name} ${response.players.sample[i].id}`;
+              if (i + 1 < response.players.sample.length) playersString += '\n';
+            }
+          }
+          newEmbed.addFields({ name: 'Players', value: playersString })
 
           interaction.editReply({ content:'', embeds: [newEmbed] });
         }

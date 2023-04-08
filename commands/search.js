@@ -251,11 +251,22 @@ module.exports = {
             { name: 'IP', value: filteredResults[currentEmbed].ip },
             { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
             { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
-            { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) },
-            { name: 'Players', value: filteredResults[currentEmbed].players.online + '/' + filteredResults[currentEmbed].players.max },
-            { name: 'Last Seen:', value: `<t:${filteredResults[currentEmbed].lastSeen}:f>` }
+            { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) }
           )
           .setTimestamp();
+
+        var playersString = `${filteredResults[currentEmbed].players.online}/${filteredResults[currentEmbed].players.max}`
+        if (filteredResults[currentEmbed].players.sample != null) {
+          for (var i = 0; i < filteredResults[currentEmbed].players.sample.length; i++) {
+            playersString += `\n${filteredResults[currentEmbed].players.sample[i].name}\n${filteredResults[currentEmbed].players.sample[i].id}`;
+            if (i + 1 < filteredResults[currentEmbed].players.sample.length) playersString += '\n'
+          }
+        }
+
+        newEmbed.addFields(
+          { name: 'Players', value: playersString },
+          { name: 'Last Seen', value: `<t:${filteredResults[currentEmbed].lastSeen}:f>` }
+        )
 
         await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
       });
@@ -278,11 +289,22 @@ module.exports = {
             { name: 'IP', value: filteredResults[currentEmbed].ip },
             { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
             { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
-            { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) },
-            { name: 'Players', value: filteredResults[currentEmbed].players.online + '/' + filteredResults[currentEmbed].players.max },
-            { name: 'Last Seen:', value: `<t:${filteredResults[currentEmbed].lastSeen}:f>` }
+            { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) }
           )
           .setTimestamp();
+
+        var playersString = `${filteredResults[currentEmbed].players.online}/${filteredResults[currentEmbed].players.max}`;
+        if (filteredResults[currentEmbed].players.sample != null) { 
+          for (var i = 0; i < filteredResults[currentEmbed].players.sample.length; i++) {
+            playersString += `\n${filteredResults[currentEmbed].players.sample[i].name} ${filteredResults[currentEmbed].players.sample[i].id}`;
+            if (i + 1 < filteredResults[currentEmbed].players.sample.length) playersString += '\n'
+          }
+        }
+
+        newEmbed.addFields(
+          { name: 'Players', value: playersString },
+          { name: 'Last Seen', value: `<t:${filteredResults[currentEmbed].lastSeen}:f>` }
+        )
   
         await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
       });
@@ -414,15 +436,15 @@ module.exports = {
     } else {
       var argumentList = '**Searching with these arguments:**';
       if (minOnline.consider) {
-        argumentList += `\n**minOnline:** ${minOnline.value}`;
+        argumentList += `\n**minonline:** ${minOnline.value}`;
       }
       
       if (maxOnline.consider) {
-        argumentList += `\n**maxOnline:** ${maxOnline.value}`;
+        argumentList += `\n**maxonline:** ${maxOnline.value}`;
       }
       
       if (playerCap.consider) {
-        argumentList += `\n**playerCap:** ${playerCap.value}`;
+        argumentList += `\n**playercap:** ${playerCap.value}`;
       }
 
       if (isFull.consider) {
@@ -456,7 +478,7 @@ module.exports = {
       }
 
       if (player.consider) {
-        argumentList += "\n**Player: **" + player.value;
+        argumentList += "\n**player: **" + player.value;
       }
 
       await interactReplyMessage.edit(argumentList);
@@ -503,64 +525,8 @@ module.exports = {
           playerRequirement = false;
           
           if (lastSearchResults[i].playerSample != null) {
-            if (lastSearchResults[i].playerSample.length >= 1 && lastSearchResults[i].playerSample[0] != null && lastSearchResults[i].playerSample[0].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 2 && lastSearchResults[i].playerSample[1] != null  && lastSearchResults[i].playerSample[1].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 3 && lastSearchResults[i].playerSample[2] != null  && lastSearchResults[i].playerSample[2].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 4 && lastSearchResults[i].playerSample[3] != null  && lastSearchResults[i].playerSample[3].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 5 && lastSearchResults[i].playerSample[4] != null  && lastSearchResults[i].playerSample[4].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 6 && lastSearchResults[i].playerSample[5] != null  && lastSearchResults[i].playerSample[5].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 7 && lastSearchResults[i].playerSample[6] != null && lastSearchResults[i].playerSample[6].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 8 && lastSearchResults[i].playerSample[7] != null && lastSearchResults[i].playerSample[7].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 9 && lastSearchResults[i].playerSample[8] != null && lastSearchResults[i].playerSample[8].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 10 && lastSearchResults[i].playerSample[9] != null && lastSearchResults[i].playerSample[9].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 11 && lastSearchResults[i].playerSample[10] != null && lastSearchResults[i].playerSample[10].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 12 && lastSearchResults[i].playerSample[11] != null && lastSearchResults[i].playerSample[11].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 13 && lastSearchResults[i].playerSample[12] != null && lastSearchResults[i].playerSample[12].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 14 && lastSearchResults[i].playerSample[13] != null && lastSearchResults[i].playerSample[13].name == player.value) {
-              playerRequirement = true;
-            }
-  
-            if (lastSearchResults[i].playerSample.length >= 15 && lastSearchResults[i].playerSample[14] != null && lastSearchResults[i].playerSample[14].name == player.value) {
-              playerRequirement = true;
+            for (const obj of lastSearchResults[i].playerSample) {
+              if (obj.name == player.value) playerRequirement = true;
             }
           }
         } else {
@@ -585,11 +551,22 @@ module.exports = {
             { name: 'IP', value: filteredResults[0].ip },
             { name: 'Port', value: (filteredResults[0].port + '') },
             { name: 'Version', value: getVersion(filteredResults[0].version) },
-            { name: 'Description', value: getDescription(filteredResults[0].description) },
-            { name: 'Players', value: filteredResults[0].players.online + '/' + filteredResults[0].players.max },
-            { name: 'Last Seen:', value: `<t:${filteredResults[0].lastSeen}:f>` }
+            { name: 'Description', value: getDescription(filteredResults[0].description) }
           )
           .setTimestamp()
+
+        var playersString = `${filteredResults[0].players.online}/${filteredResults[0].players.max}`
+        if (filteredResults[0].players.sample != null) {
+          for (var i = 0; i < filteredResults[0].players.sample.length; i++) {
+            playersString += `\n${filteredResults[0].players.sample[i].name}\n${filteredResults[0].players.sample[i].id}`;
+            if (i + 1 < filteredResults[0].players.sample.length) playersString += '\n'
+          }
+        }
+
+        newEmbed.addFields(
+          { name: 'Players', value: playersString },
+          { name: 'Last Seen', value: `<t:${filteredResults[0].lastSeen}:f>` }
+        )
         
         filteredResults = [];
         buttonTimeoutCheck();
