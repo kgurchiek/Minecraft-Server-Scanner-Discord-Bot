@@ -76,13 +76,13 @@ The maximum number of players online (Not to be confused with the server's maxim
 ##### isfull (true/false)
 Whether or not the server is full
 
-##### version (version number)
+##### version (regex)
 The version of the server
 
 ##### hasimage (true/false)
 Whether or not the server has a custom thumbnail image
 
-##### description (text)
+##### description (regex)
 The description of the server
 
 ##### strictdescription (true/false)

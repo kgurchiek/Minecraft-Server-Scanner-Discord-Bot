@@ -132,7 +132,7 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName("version")
-        .setDescription("The version of the server"))
+        .setDescription("The version of the server (uses regex)"))
     .addBooleanOption(option =>
       option
         .setName("hasimage")
@@ -140,11 +140,7 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName("description")
-        .setDescription("The description of the server"))
-    .addBooleanOption(option =>
-      option
-        .setName("strictdescription")
-        .setDescription("Whether or not the description has to be an exact match"))
+        .setDescription("The description of the server (uses regex)"))
     .addStringOption(option =>
       option
         .setName("player")
@@ -188,7 +184,6 @@ module.exports = {
     };
     var description = {
       value: "false",
-      strict: "false",
       consider: false
     };
     var player = {
@@ -334,9 +329,6 @@ module.exports = {
     if (interaction.options.getString("description") != null) {
       args.push("description:" + interaction.options.getString("description"));
     }
-    if (interaction.options.getBoolean("strictdescription") != null) {
-      args.push("strictDescription:" + interaction.options.getBoolean("strictdescription"));
-    }
     if (interaction.options.getString("player") != null) {
       args.push("player:" + interaction.options.getString("player"));
     }
@@ -412,10 +404,6 @@ module.exports = {
               description.value = value;
             }
 
-            if (argument == "strictDescription") {
-              description.strict = value;
-            }
-
             if (argument == "player") {
               player.consider = true;
               player.value = value;
@@ -435,18 +423,9 @@ module.exports = {
       await interactReplyMessage.edit({ content: '', embeds: [errorEmbed] })
     } else {
       var argumentList = '**Searching with these arguments:**';
-      if (minOnline.consider) {
-        argumentList += `\n**minonline:** ${minOnline.value}`;
-      }
-      
-      if (maxOnline.consider) {
-        argumentList += `\n**maxonline:** ${maxOnline.value}`;
-      }
-      
-      if (playerCap.consider) {
-        argumentList += `\n**playercap:** ${playerCap.value}`;
-      }
-
+      if (minOnline.consider) argumentList += `\n**minonline:** ${minOnline.value}`;
+      if (maxOnline.consider) argumentList += `\n**maxonline:** ${maxOnline.value}`;
+      if (playerCap.consider) argumentList += `\n**playercap:** ${playerCap.value}`;
       if (isFull.consider) {
         if (isFull.value == "true") {
           argumentList += "\n**Is Full**";
@@ -454,11 +433,7 @@ module.exports = {
           argumentList += "\n**Not Full**"
         }
       }
-      
-      if (version.consider) {
-        argumentList += `\n**version:** ${version.value}`;
-      }
-
+      if (version.consider) argumentList += `\n**version:** ${version.value}`;
       if (hasImage.consider) {
         if (hasImage.value == "true") {
           argumentList += "\n**Has Image**";
@@ -466,20 +441,8 @@ module.exports = {
           argumentList += "\n**Doesn't Have Image**"
         }
       }
-
-      if (description.consider) {
-        argumentList += `\n**description:** ${description.value}`;
-
-        if (description.strict == "true") {
-          argumentList += " **(strict)**";
-        } else {
-          argumentList += " **(not strict)**"
-        }
-      }
-
-      if (player.consider) {
-        argumentList += "\n**player: **" + player.value;
-      }
+      if (description.consider) argumentList += `\n**description:** ${description.value}`;
+      if (player.consider) argumentList += "\n**player: **" + player.value;
 
       await interactReplyMessage.edit(argumentList);
 
@@ -516,17 +479,17 @@ module.exports = {
         var maxOnlineRequirement = lastSearchResults[i].players.online <= maxOnline.value || maxOnline.consider == false;
         var playerCapRequirement = lastSearchResults[i].players.max == playerCap.value || playerCap.consider == false;
         var isFullRequirement = (isFull.value == "false" && lastSearchResults[i].players.online != lastSearchResults[i].players.max) || (isFull.value == "true" && lastSearchResults[i].players.online == lastSearchResults[i].players.max) || isFull.consider == false;
-        var versionRequirement = getVersion(lastSearchResults[i].version) == version.value || (getVersion(lastSearchResults[i].version) + "E").includes(version.value + "E") || version.consider == false;
+        var versionRequirement = new RegExp(version.value).test(getVersion(lastSearchResults[i].version)) || version.consider == false;
         var hasImageRequirement = lastSearchResults[i].hasFavicon || hasImage.value == "false" || hasImage.consider == false;
-        var descriptionRequirement = (description.consider && description.strict == "false" && getDescription(lastSearchResults[i].description).includes(description.value)) || (description.consider && description.strict == "true" && getDescription(lastSearchResults[i].description) == description.value) || description.value == "any" || description.consider == false;
+        var descriptionRequirement = new RegExp(description.value).test(getDescription(lastSearchResults[i].description)) || description.consider == false;
         var playerRequirement;
   
         if (player.consider) {
           playerRequirement = false;
           
-          if (lastSearchResults[i].playerSample != null) {
-            for (const obj of lastSearchResults[i].playerSample) {
-              if (obj.name == player.value) playerRequirement = true;
+          if (lastSearchResults[i].players.sample != null) {
+            for (const obj of lastSearchResults[i].players.sample) {
+              if (obj != null && obj.name == player.value) playerRequirement = true;
             }
           }
         } else {

@@ -24,10 +24,9 @@ module.exports = {
 			    { name: 'maxonline (integer)', value: 'The maximum number of players online (not to be confused with the server\'s maximum player capacity (playerCap))', inline: true },
 			    { name: 'playercap (integer)', value: 'The maximum player capacity of the server', inline: true },
           { name: 'isfull (true/false)', value: 'Whether or not the server is full', inline: true },
-			    { name: 'version (version number)', value: 'The version of the server', inline: true },
+			    { name: 'version (regex)', value: 'The version of the server', inline: true },
           { name: 'hasimage (true/false)', value: 'Whether or not the server has a custom thumbnail image', inline: true },
-          { name: 'description (text)', value: 'The description of the server', inline: true },
-          { name: 'strictdescription (true/false)', value: 'If true, the server\'s description has to perfectly match the description argument. If false, the server\'s description only has to contain the description argument.', inline: true },
+          { name: 'description (regex)', value: 'The description of the server', inline: true },
           { name: 'player (player name)', value: 'The name of a player to search for\n' + '​', inline: true }
 		)
     interaction.reply({ embeds: [exampleEmbed], ephemeral:true });
