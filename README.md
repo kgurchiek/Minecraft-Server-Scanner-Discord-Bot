@@ -80,7 +80,7 @@ Whether or not the server is full
 The version of the server
 
 ##### hasimage (true/false)
-Whether or not the server has a custom thumbnail image
+Whether or not the server has a custom favicon
 
 ##### description (regex)
 The description of the server

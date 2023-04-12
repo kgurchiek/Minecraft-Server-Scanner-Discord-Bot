@@ -4,7 +4,6 @@ const { refreshDelay } = require('../config.json');
 const fetch = require("node-fetch");
 const buttonTimeout = 60; // In seconds
 var lastSearchResults;
-var lastFetch;
 
 // Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {
@@ -136,7 +135,7 @@ module.exports = {
     .addBooleanOption(option =>
       option
         .setName("hasimage")
-        .setDescription("Whether or not the server has a custom image"))
+        .setDescription("Whether or not the server has a custom favicon"))
     .addStringOption(option =>
       option
         .setName("description")
@@ -144,7 +143,11 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName("player")
-        .setDescription("The name of a player to search for")),
+        .setDescription("The name of a player to search for"))
+    .addIntegerOption(option =>
+      option
+        .setName("seenafter")
+        .setDescription("The oldest time a sever can be last seen (this doesn't mean it's offline, use /help for more info)")),
   async execute(interaction) {
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
 
@@ -190,9 +193,12 @@ module.exports = {
       value: "Steve",
       consider: false
     };
+    var seenafter = {
+      value: 0,
+      consider: false
+    }
 
     // Inits some more variables
-    var errors = [];
     var args = [];
     var currentEmbed = 0;
 
@@ -230,19 +236,28 @@ module.exports = {
     
       // Event listener for 'Next Page' button
       searchNextResultCollector.on('collect', async interaction => {
+        var newEmbed = new EmbedBuilder()
+          .setColor("#02a337")
+          .setTitle('Search Results')
+          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+          .addFields(
+            { name: 'Updating page...', value: '​' },
+          )
+          .setTimestamp();
+        const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [] });
         lastButtonPress = new Date();
 
         currentEmbed++;
         if (currentEmbed == filteredResults.length) currentEmbed = 0;
 
         // Updates UI when 'Next Page' pressed
-        var newEmbed = new EmbedBuilder()
+        newEmbed = new EmbedBuilder()
           .setColor("#02a337")
           .setTitle('Search Results')
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
           .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[currentEmbed].ip}&port=${filteredResults[currentEmbed].port}`)
           .addFields(
-            { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: 'ㅤ' },
+            { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: '​' },
             { name: 'IP', value: filteredResults[currentEmbed].ip },
             { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
             { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
@@ -263,11 +278,21 @@ module.exports = {
           { name: 'Last Seen', value: `<t:${filteredResults[currentEmbed].lastSeen}:f>` }
         )
 
-        await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
+        await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       // Event listener for 'Last Page' button
       searchLastResultCollector.on('collect', async interaction => {
+        var newEmbed = new EmbedBuilder()
+          .setColor("#02a337")
+          .setTitle('Search Results')
+          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+          .addFields(
+            { name: 'Updating page...', value: '​' },
+          )
+          .setTimestamp();
+        const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [] });
+        
         lastButtonPress = new Date();
 
         currentEmbed--;
@@ -280,7 +305,7 @@ module.exports = {
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
           .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[currentEmbed].ip}&port=${filteredResults[currentEmbed].port}`)
           .addFields(
-            { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: 'ㅤ' },
+            { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: '​' },
             { name: 'IP', value: filteredResults[currentEmbed].ip },
             { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
             { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
@@ -301,7 +326,7 @@ module.exports = {
           { name: 'Last Seen', value: `<t:${filteredResults[currentEmbed].lastSeen}:f>` }
         )
   
-        await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
+        await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       return buttons;
@@ -332,237 +357,202 @@ module.exports = {
     if (interaction.options.getString("player") != null) {
       args.push("player:" + interaction.options.getString("player"));
     }
+    if (interaction.options.getInteger("seenafter") != null) {
+      args.push("seenafter:" + interaction.options.getInteger("seenafter"));
+    }
     
     for (var i = 0; i < args.length; i++) {
       if (args[0].includes(":")) {
-        function isCorrectArgument(argument, value) {
-          if (value == "any") {
-            return true;
-          } else if (argument == 'version') {
-            // Checks if the version parameter is the right format
-            if (value.split(".").length == 2 || value.split(".").length == 3) {
-              var isValidVersion = true;
-
-              for (var i = 0; i < value.split(".").length; i++) {
-                if (isNaN(value.split(".")[i])) {
-                  isValidVersion = false;
-                }
-              }
-
-              return true; // temporarily not using isValidVersion until I make a strictVersion or something like that
-            } else {
-              return true;
-            }
-          } else {
-            return true;
-          }
-        }
-
         var argument = args[i].split(":")[0];
         var value = args[i].split(":")[1];
+        if (argument == "minOnline") {
+          minOnline.consider = true;
+          minOnline.value = value;
+        }
 
-        // Handles when a value is passed that is not supported
-        if (isCorrectArgument(argument, value)) {
-          if (value != "any") {
-            if (argument == "minOnline") {
-              minOnline.consider = true;
-              minOnline.value = value;
-            }
+        if (argument == "maxOnline") {
+          maxOnline.consider = true;
+          maxOnline.value = value;
+        }
 
-            if (argument == "maxOnline") {
-              maxOnline.consider = true;
-              maxOnline.value = value;
-            }
+        if (argument == "playerCap") {
+          playerCap.consider = true;
+          playerCap.value = value;
+        }
 
-            if (argument == "playerCap") {
-              playerCap.consider = true;
-              playerCap.value = value;
-            }
+        if (argument == "playercap") {
+          playerCap.consider = true;
+          playerCap.value = value;
+        }
 
-            if (argument == "playercap") {
-              playerCap.consider = true;
-              playerCap.value = value;
-            }
+        if (argument == "isFull") {
+          isFull.consider = true;
+          isFull.value = value;
+        }
 
-            if (argument == "isFull") {
-              isFull.consider = true;
-              isFull.value = value;
-            }
+        if (argument == "version") {
+          version.consider = true;
+          version.value = value;
+        }
 
-            if (argument == "version") {
-              version.consider = true;
-              version.value = value;
-            }
+        if (argument == "hasImage") {
+          hasImage.consider = true;
+          hasImage.value = value;
+        }
 
-            if (argument == "hasImage") {
-              hasImage.consider = true;
-              hasImage.value = value;
-            }
+        if (argument == "description") {
+          description.consider = true;
+          description.value = value;
+        }
 
-            if (argument == "description") {
-              description.consider = true;
-              description.value = value;
-            }
+        if (argument == "player") {
+          player.consider = true;
+          player.value = value;
+        }
 
-            if (argument == "player") {
-              player.consider = true;
-              player.value = value;
-            }
-          }
-        } else {
-          errors.push("invalid value \"" + value + "\" for argument \"" + argument + "\"");
+        if (argument == "seenafter") {
+          seenafter.consider = true;
+          seenafter.value = value;
         }
       }
     }
 
-    // Checks for any errors
-    if (errors.length > 0) {
-      var errorEmbed = new EmbedBuilder()
-        .setColor("#ff0000")
-        .addFields({ name: 'Error', value: errors[0] })
-      await interactReplyMessage.edit({ content: '', embeds: [errorEmbed] })
-    } else {
-      var argumentList = '**Searching with these arguments:**';
-      if (minOnline.consider) argumentList += `\n**minonline:** ${minOnline.value}`;
-      if (maxOnline.consider) argumentList += `\n**maxonline:** ${maxOnline.value}`;
-      if (playerCap.consider) argumentList += `\n**playercap:** ${playerCap.value}`;
-      if (isFull.consider) {
-        if (isFull.value == "true") {
-          argumentList += "\n**Is Full**";
-        } else {
-          argumentList += "\n**Not Full**"
-        }
-      }
-      if (version.consider) argumentList += `\n**version:** ${version.value}`;
-      if (hasImage.consider) {
-        if (hasImage.value == "true") {
-          argumentList += "\n**Has Image**";
-        } else {
-          argumentList += "\n**Doesn't Have Image**"
-        }
-      }
-      if (description.consider) argumentList += `\n**description:** ${description.value}`;
-      if (player.consider) argumentList += "\n**player: **" + player.value;
-
-      await interactReplyMessage.edit(argumentList);
-
-      if (lastFetch == null || timeSinceDate(lastFetch) > refreshDelay) {
-        const startDate = new Date();
-        
-        // filter servers
-        console.log("getting results");
-        var lastSearchResultsRaw = await fetch('https://api.cornbread2100.com/scannedServers');
-          
-        try {
-          lastSearchResults = await lastSearchResultsRaw.json();
-          lastFetch = new Date();
-        } catch (error) {
-          console.log(error.message);
-          lastSearchResultsRaw = await fetch('https://apiraw.cornbread2100.com/scannedServers');
-          try {
-            lastSearchResults = await lastSearchResultsRaw.json();
-            lastFetch = new Date();
-          } catch (error) {
-            console.log(error.message);
-          }
-        }
-
-        console.log(`got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
-      }
-
-      var filteredResults = [];
-
-      for (var i = 0; i < lastSearchResults.length; i++) {
-        // Check if the server meets the requirements set by the arguments
-        if (lastSearchResults[i].players == null) lastSearchResults[i].players = { online: 0, max: 0 };
-        var minOnlineRequirement = lastSearchResults[i].players.online >= minOnline.value || minOnline.consider == false;
-        var maxOnlineRequirement = lastSearchResults[i].players.online <= maxOnline.value || maxOnline.consider == false;
-        var playerCapRequirement = lastSearchResults[i].players.max == playerCap.value || playerCap.consider == false;
-        var isFullRequirement = (isFull.value == "false" && lastSearchResults[i].players.online != lastSearchResults[i].players.max) || (isFull.value == "true" && lastSearchResults[i].players.online == lastSearchResults[i].players.max) || isFull.consider == false;
-        var versionRequirement = new RegExp(version.value).test(getVersion(lastSearchResults[i].version)) || version.consider == false;
-        var hasImageRequirement = lastSearchResults[i].hasFavicon || hasImage.value == "false" || hasImage.consider == false;
-        var descriptionRequirement = new RegExp(description.value).test(getDescription(lastSearchResults[i].description)) || description.consider == false;
-        var playerRequirement;
-  
-        if (player.consider) {
-          playerRequirement = false;
-          
-          if (lastSearchResults[i].players.sample != null) {
-            for (const obj of lastSearchResults[i].players.sample) {
-              if (obj != null && obj.name == player.value) playerRequirement = true;
-            }
-          }
-        } else {
-          playerRequirement = true;
-        }
-
-        if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement) {
-          filteredResults.push(lastSearchResults[i]);
-        }
-      }
-
-      // If at least one server was found, send the message
-      if (filteredResults.length > 0) {
-        var buttons = createButtons(filteredResults);
-        var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
-          .setTitle('Search Results')
-          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[0].ip}&port=${filteredResults[0].port}`)
-          .addFields(
-            { name: 'Result ' + 1 + '/' + filteredResults.length, value: 'ㅤ' },
-            { name: 'IP', value: filteredResults[0].ip },
-            { name: 'Port', value: (filteredResults[0].port + '') },
-            { name: 'Version', value: getVersion(filteredResults[0].version) },
-            { name: 'Description', value: getDescription(filteredResults[0].description) }
-          )
-          .setTimestamp()
-
-        var playersString = `${filteredResults[0].players.online}/${filteredResults[0].players.max}`
-        if (filteredResults[0].players.sample != null) {
-          for (var i = 0; i < filteredResults[0].players.sample.length; i++) {
-            playersString += `\n${filteredResults[0].players.sample[i].name}\n${filteredResults[0].players.sample[i].id}`;
-            if (i + 1 < filteredResults[0].players.sample.length) playersString += '\n'
-          }
-        }
-
-        newEmbed.addFields(
-          { name: 'Players', value: playersString },
-          { name: 'Last Seen', value: `<t:${filteredResults[0].lastSeen}:f>` }
-        )
-        
-        filteredResults = [];
-        buttonTimeoutCheck();
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+    var argumentList = '**Searching with these arguments:**';
+    if (minOnline.consider) argumentList += `\n**minonline:** ${minOnline.value}`;
+    if (maxOnline.consider) argumentList += `\n**maxonline:** ${maxOnline.value}`;
+    if (playerCap.consider) argumentList += `\n**playercap:** ${playerCap.value}`;
+    if (isFull.consider) {
+      if (isFull.value == 'true') {
+        argumentList += '\n**Is Full**';
       } else {
-        await interactReplyMessage.edit("no matches could be found");
-      } 
-      lastButtonPress = new Date();
+        argumentList += '\n**Not Full**';
+      }
+    }
+    if (version.consider) argumentList += `\n**version:** ${version.value}`;
+    if (hasImage.consider) {
+      if (hasImage.value == 'true') {
+        argumentList += '\n**Has Image**';
+      } else {
+        argumentList += '\n**Doesn\'t Have Image**'
+      }
+    }
+    if (description.consider) argumentList += `\n**description:** ${description.value}`;
+    if (player.consider) argumentList += `\n**player:** ${player.value}`;
+    if (seenafter.consider) argumentList += "\n**seenafter: **" + `<t:${seenafter.value}:f>`
 
-      // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
-      async function buttonTimeoutCheck() {
-        if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('Last Page')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('Next Page')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true)
-            );
-          await interactReplyMessage.edit({ content: '', components: [buttons] });
+    await interactReplyMessage.edit(argumentList);
 
-          searchNextResultCollector.stop();
-          searchLastResultCollector.stop();
-        } else {
-          setTimeout(function() { buttonTimeoutCheck() }, 500);
+    var filteredResults = [];
+
+    for (var i = 0; i < lastSearchResults.length; i++) {
+      // Check if the server meets the requirements set by the arguments
+      if (lastSearchResults[i].players == null) lastSearchResults[i].players = { online: 0, max: 0 };
+      var minOnlineRequirement = lastSearchResults[i].players.online >= minOnline.value || !minOnline.consider;
+      var maxOnlineRequirement = lastSearchResults[i].players.online <= maxOnline.value || !maxOnline.consider;
+      var playerCapRequirement = lastSearchResults[i].players.max == playerCap.value || !playerCap.consider;
+      var isFullRequirement = (isFull.value == "false" && lastSearchResults[i].players.online != lastSearchResults[i].players.max) || (isFull.value == "true" && lastSearchResults[i].players.online == lastSearchResults[i].players.max) || !isFull.consider;
+      var versionRequirement = new RegExp(version.value).test(getVersion(lastSearchResults[i].version)) || !version.consider;
+      var hasImageRequirement = lastSearchResults[i].hasFavicon || hasImage.value == "false" || !hasImage.consider;
+      var descriptionRequirement = new RegExp(description.value).test(getDescription(lastSearchResults[i].description)) || !description.consider;
+      var playerRequirement;
+      if (player.consider) {
+        playerRequirement = false;
+        if (lastSearchResults[i].players.sample != null) {
+          for (const obj of lastSearchResults[i].players.sample) {
+            if (obj != null && obj.name == player.value) playerRequirement = true;
+          }
         }
+      } else {
+        playerRequirement = true;
+      }
+      var seenAfterRequirement = lastSearchResults[i].lastSeen >= seenafter.value || !seenafter.consider
+
+      if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement && seenAfterRequirement) {
+        filteredResults.push(lastSearchResults[i]);
+      }
+    }
+
+    // If at least one server was found, send the message
+    if (filteredResults.length > 0) {
+      var buttons = createButtons(filteredResults);
+      var newEmbed = new EmbedBuilder()
+        .setColor("#02a337")
+        .setTitle('Search Results')
+        .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+        .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[0].ip}&port=${filteredResults[0].port}`)
+        .addFields(
+          { name: 'Result ' + 1 + '/' + filteredResults.length, value: 'ㅤ' },
+          { name: 'IP', value: filteredResults[0].ip },
+          { name: 'Port', value: (filteredResults[0].port + '') },
+          { name: 'Version', value: getVersion(filteredResults[0].version) },
+          { name: 'Description', value: getDescription(filteredResults[0].description) }
+        )
+        .setTimestamp()
+
+      var playersString = `${filteredResults[0].players.online}/${filteredResults[0].players.max}`
+      if (filteredResults[0].players.sample != null) {
+        for (var i = 0; i < filteredResults[0].players.sample.length; i++) {
+          playersString += `\n${filteredResults[0].players.sample[i].name}\n${filteredResults[0].players.sample[i].id}`;
+          if (i + 1 < filteredResults[0].players.sample.length) playersString += '\n'
+        }
+      }
+
+      newEmbed.addFields(
+        { name: 'Players', value: playersString },
+        { name: 'Last Seen', value: `<t:${filteredResults[0].lastSeen}:f>` }
+      )
+      
+      filteredResults = [];
+      buttonTimeoutCheck();
+      await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+    } else {
+      await interactReplyMessage.edit("no matches could be found");
+    } 
+    lastButtonPress = new Date();
+
+    // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
+    async function buttonTimeoutCheck() {
+      if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
+        buttons = new ActionRowBuilder()
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId(lastResultID)
+              .setLabel('Last Page')
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true),
+            new ButtonBuilder()
+              .setCustomId(nextResultID)
+              .setLabel('Next Page')
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true)
+          );
+        await interactReplyMessage.edit({ content: '', components: [buttons] });
+
+        searchNextResultCollector.stop();
+        searchLastResultCollector.stop();
+      } else {
+        setTimeout(function() { buttonTimeoutCheck() }, 500);
       }
     }
   },
 };
+
+// update server list
+setTimeout(async function() {
+  const startDate = new Date();
+  console.log("getting results");
+  var lastSearchResultsRaw = await fetch('https://api.cornbread2100.com/scannedServers');
+  try {
+    lastSearchResults = await lastSearchResultsRaw.json();
+    console.log(`got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
+  } catch (error) {
+    console.log(`Error while fetching api: ${error.message}`);
+    lastSearchResultsRaw = await fetch('https://apiraw.cornbread2100.com/scannedServers');
+    try {
+      lastSearchResults = await lastSearchResultsRaw.json();
+      console.log(`got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
+    } catch (error) {
+      console.log(`Error while fetching apiraw: ${error.message}`);
+    }
+  }
+}, refreshDelay)
