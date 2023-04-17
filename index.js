@@ -82,4 +82,4 @@ async function update() {
 
 update();
 
-//setInterval(function() { update(); }, config.refreshDelay);
+setInterval(function() { update(); }, config.refreshDelay * 1000);
