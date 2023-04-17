@@ -146,7 +146,7 @@ module.exports = {
         { name: 'Port', value: String(scannedServers[index].port) },
         { name: 'Version', value: cleanVersion(scannedServers[index].version.name) },
         { name: 'Description', value: getDescription(scannedServers[index].description) },
-        { name: 'Players', value: scannedServers[index].minPlayers + '/' + scannedServers[index].maxPlayers }
+        { name: 'Players', value: scannedServers[index].players.online + '/' + scannedServers[index].players.max }
       )
       .setTimestamp()
 
