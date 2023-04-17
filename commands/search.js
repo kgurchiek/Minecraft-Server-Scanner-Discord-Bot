@@ -1,9 +1,6 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { refreshDelay } = require('../config.json');
-const fetch = require("node-fetch");
 const buttonTimeout = 60; // In seconds
-var lastSearchResults;
 
 // Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {
@@ -189,6 +186,7 @@ module.exports = {
         .setDescription("The oldest time a sever can be last seen (this doesn't mean it's offline, use /help for more info)")),
   async execute(interaction) {
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
+    const { scannedServers } = require('../index.js');
 
     // Create unique IDs for each button
     const lastResultID = 'searchLastResult' + interaction.id;
@@ -483,31 +481,31 @@ module.exports = {
 
     var filteredResults = [];
 
-    for (var i = 0; i < lastSearchResults.length; i++) {
+    for (var i = 0; i < scannedServers.length; i++) {
       // Check if the server meets the requirements set by the arguments
-      if (lastSearchResults[i].players == null) lastSearchResults[i].players = { online: 0, max: 0 };
-      var minOnlineRequirement = lastSearchResults[i].players.online >= minOnline.value || !minOnline.consider;
-      var maxOnlineRequirement = lastSearchResults[i].players.online <= maxOnline.value || !maxOnline.consider;
-      var playerCapRequirement = lastSearchResults[i].players.max == playerCap.value || !playerCap.consider;
-      var isFullRequirement = (isFull.value == "false" && lastSearchResults[i].players.online != lastSearchResults[i].players.max) || (isFull.value == "true" && lastSearchResults[i].players.online == lastSearchResults[i].players.max) || !isFull.consider;
-      var versionRequirement = new RegExp(version.value).test(getVersion(lastSearchResults[i].version)) || !version.consider;
-      var hasImageRequirement = lastSearchResults[i].hasFavicon || hasImage.value == "false" || !hasImage.consider;
-      var descriptionRequirement = new RegExp(description.value).test(getDescription(lastSearchResults[i].description)) || !description.consider;
+      if (scannedServers[i].players == null) scannedServers[i].players = { online: 0, max: 0 };
+      var minOnlineRequirement = scannedServers[i].players.online >= minOnline.value || !minOnline.consider;
+      var maxOnlineRequirement = scannedServers[i].players.online <= maxOnline.value || !maxOnline.consider;
+      var playerCapRequirement = scannedServers[i].players.max == playerCap.value || !playerCap.consider;
+      var isFullRequirement = (isFull.value == "false" && scannedServers[i].players.online != scannedServers[i].players.max) || (isFull.value == "true" && scannedServers[i].players.online == scannedServers[i].players.max) || !isFull.consider;
+      var versionRequirement = new RegExp(version.value).test(getVersion(scannedServers[i].version)) || !version.consider;
+      var hasImageRequirement = scannedServers[i].hasFavicon || hasImage.value == "false" || !hasImage.consider;
+      var descriptionRequirement = new RegExp(description.value).test(getDescription(scannedServers[i].description)) || !description.consider;
       var playerRequirement;
       if (player.consider) {
         playerRequirement = false;
-        if (lastSearchResults[i].players.sample != null) {
-          for (const obj of lastSearchResults[i].players.sample) {
+        if (scannedServers[i].players.sample != null) {
+          for (const obj of scannedServers[i].players.sample) {
             if (obj != null && obj.name == player.value) playerRequirement = true;
           }
         }
       } else {
         playerRequirement = true;
       }
-      var seenAfterRequirement = lastSearchResults[i].lastSeen >= seenafter.value || !seenafter.consider
+      var seenAfterRequirement = scannedServers[i].lastSeen >= seenafter.value || !seenafter.consider
 
       if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement && seenAfterRequirement) {
-        filteredResults.push(lastSearchResults[i]);
+        filteredResults.push(scannedServers[i]);
       }
     }
 
@@ -575,23 +573,3 @@ module.exports = {
     }
   },
 };
-
-// update server list
-setTimeout(async function() {
-  const startDate = new Date();
-  console.log("getting results");
-  var lastSearchResultsRaw = await fetch('https://api.cornbread2100.com/scannedServers');
-  try {
-    lastSearchResults = await lastSearchResultsRaw.json();
-    console.log(`got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
-  } catch (error) {
-    console.log(`Error while fetching api: ${error.message}`);
-    lastSearchResultsRaw = await fetch('https://apiraw.cornbread2100.com/scannedServers');
-    try {
-      lastSearchResults = await lastSearchResultsRaw.json();
-      console.log(`got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
-    } catch (error) {
-      console.log(`Error while fetching apiraw: ${error.message}`);
-    }
-  }
-}, refreshDelay)

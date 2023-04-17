@@ -1,8 +1,8 @@
 const config = require("./config.json");
 const fs = require('node:fs');
 const path = require('node:path');
-const http = require('http');
 const { Client, Partials, Collection, Events, GatewayIntentBits } = require('discord.js');
+const fetch = require("node-fetch");
 
 // Initialize Discord.js (Along with the commands)
 const client = new Client({ partials: [Partials.Channel], intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
@@ -55,6 +55,31 @@ client.on(Events.InteractionCreate, async interaction => {
 // Log the bot into the Discord API
 client.login(config.token);
 
-http.createServer(function(request, response) {
-  response.end();
-}).listen(80, "0.0.0.0");
+// update server list
+async function update() {
+  const startDate = new Date();
+  console.log("getting results");
+  var scannedServersRaw = await fetch('https://api.cornbread2100.com/scannedServers');
+  var scannedServers;
+  try {
+    scannedServers = await scannedServersRaw.json();
+    console.log(`got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
+  } catch (error) {
+    console.log(`Error while fetching api: ${error.message}`);
+    scannedServersRaw = await fetch('https://apiraw.cornbread2100.com/scannedServers');
+    try {
+      scannedServers = await scannedServersRaw.json();
+      console.log(`got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
+    } catch (error) {
+      console.log(`Error while fetching apiraw: ${error.message}`);
+    }
+  }
+
+  module.exports = {
+    scannedServers
+  }
+}
+
+update();
+
+//setInterval(function() { update(); }, config.refreshDelay);

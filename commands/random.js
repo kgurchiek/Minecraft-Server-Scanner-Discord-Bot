@@ -128,11 +128,9 @@ module.exports = {
     .setName('random')
 	  .setDescription('Gets a random Minecraft server'),
   async execute(interaction) {
+    const { scannedServers } = require('../index.js');
     // Status message
     await interaction.reply("Getting a server, please wait..."); 
-
-    const scannedServersRaw = await fetch('https://api.cornbread2100.com/scannedServers');
-    const scannedServers = await scannedServersRaw.json();
     
     // Generate a random number to select a server from the list of successful pings
     var index = Math.round((Math.random() * scannedServers.length));
