@@ -1,20 +1,5 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const fetch = require("node-fetch")
-var scannedServersRaw;
-var scannedServers;
-var lastFetch;
-
-function timeSinceDate(date1) {
-  if (date1 == null) {
-    date1 = new Date();
-  }
-  var date2 = new Date();
-  var date1Total = date1.getSeconds() + date1.getMinutes() * 60 + date1.getHours() * 3600 + date1.getDay() * 86400;
-  var date2Total = date2.getSeconds() + date2.getMinutes() * 60 + date2.getHours() * 3600 + date2.getDay() * 86400;
-
-  return date2Total - date1Total;
-}
 
 module.exports = {
 	// Sets up the command
@@ -22,12 +7,9 @@ module.exports = {
 		.setName('stats')
 		.setDescription('Sends helpful info about the bot'),
 	async execute(interaction) {
+    const { scannedServers } = require('../index.js');
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
-		if (lastFetch == null || timeSinceDate(lastFetch) > 600) {
-      lastFetch = new Date();
-      scannedServersRaw = await fetch('https://api.cornbread2100.com/scannedServers');
-      scannedServers = await scannedServersRaw.json();
-    }
+		
 		var totalSeconds = (interaction.client.uptime / 1000);
     const days = Math.floor(totalSeconds / 86400);
     totalSeconds %= 86400;
