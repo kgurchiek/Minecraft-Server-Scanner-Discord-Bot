@@ -21,7 +21,7 @@ function getDescription(response) {
     description = response.text;
   } else if (response.translate != null) {
     description = response.translate;
-  } else if (response[0] != null) {
+  } else if (Array.isArray(response)) {
     for (var i = 0; i < response.length; i++) {
       description += response[i].text;
     }
