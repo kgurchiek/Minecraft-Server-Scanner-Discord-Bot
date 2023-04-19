@@ -28,7 +28,8 @@ module.exports = {
           { name: 'hasimage (true/false)', value: 'Whether or not the server has a custom favicon', inline: true },
           { name: 'description (regex)', value: 'The description of the server', inline: true },
           { name: 'player (player name)', value: 'The name of a player to search for\n' + '​', inline: true },
-          { name: 'seenafter (unix timestamp)', value: `The oldest time a sever can be last see. This doesn't mean the server is offline, it could be that the ping was lost due to packet loss. Recommended: ${new Date().getTime() - 3600} (1 hour ago)\n` + '​', inline: true }
+          { name: 'seenafter (unix timestamp)', value: `The oldest time a sever can be last seen. This doesn't mean the server is offline, it could be that the ping was lost due to packet loss. Recommended: ${new Date().getTime() - 3600} (1 hour ago)\n` + '​', inline: true },
+					{ name: 'iprange (ip subnet)', value: 'The ip subnet a server\'s ip has to be within', inline: true }
 		)
     interaction.reply({ embeds: [exampleEmbed], ephemeral:true });
 	},

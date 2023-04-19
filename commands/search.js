@@ -1,5 +1,6 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const ip = require('ip-address');
 const buttonTimeout = 60; // In seconds
 
 // Times out the buttons; fetches how long it has been since last input date
@@ -183,7 +184,11 @@ module.exports = {
     .addIntegerOption(option =>
       option
         .setName("seenafter")
-        .setDescription("The oldest time a sever can be last seen (this doesn't mean it's offline, use /help for more info)")),
+        .setDescription("The oldest time a sever can be last seen (this doesn't mean it's offline, use /help for more info)"))
+    .addStringOption(option =>
+      option
+        .setName("iprange")
+        .setDescription("The ip subnet a server's ip has to be within")),
   async execute(interaction) {
     // Status message
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
@@ -225,23 +230,27 @@ module.exports = {
       consider: false
     };
     var version = {
-      value: "1.19.2",
+      value: '1.19.2',
       consider: false
     };
     var hasImage = {
-      value: "false",
+      value: 'false',
       consider: false
     };
     var description = {
-      value: "false",
+      value: 'false',
       consider: false
     };
     var player = {
-      value: "Steve",
+      value: 'Steve',
       consider: false
     };
-    var seenafter = {
+    var seenAfter = {
       value: 0,
+      consider: false
+    }
+    var ipRange = {
+      value: '0.0.0.0/0',
       consider: false
     }
 
@@ -377,41 +386,45 @@ module.exports = {
     }
     
     // Checks which values were provided
-    if (interaction.options.getInteger("minonline") != null) {
+    if (interaction.options.getInteger('minonline') != null) {
       minOnline.consider = true;
-      minOnline.value = interaction.options.getInteger("minonline");
+      minOnline.value = interaction.options.getInteger('minonline');
     }
-    if (interaction.options.getInteger("maxonline") != null) {
+    if (interaction.options.getInteger('maxonline') != null) {
       maxOnline.consider = true;
-      maxOnline.value = interaction.options.getInteger("maxonline");
+      maxOnline.value = interaction.options.getInteger('maxonline');
     }
-    if (interaction.options.getInteger("playercap") != null) {
+    if (interaction.options.getInteger('playercap') != null) {
       playerCap.consider = true;
-      playerCap.value = interaction.options.getInteger("playercap");
+      playerCap.value = interaction.options.getInteger('playercap');
     }
-    if (interaction.options.getBoolean("isfull") != null) {
+    if (interaction.options.getBoolean('isfull') != null) {
       isFull.consider = true;
-      isFull.value = interaction.options.getBoolean("isfull");
+      isFull.value = interaction.options.getBoolean('isfull');
     }
-    if (interaction.options.getString("version") != null) {
+    if (interaction.options.getString('version') != null) {
       version.consider = true;
-      version.value = interaction.options.getString("version");
+      version.value = interaction.options.getString('version');
     }
-    if (interaction.options.getBoolean("hasimage") != null) {
+    if (interaction.options.getBoolean('hasimage') != null) {
       hasImage.consider = true;
-      hasImage.value = interaction.options.getBoolean("hasimage");
+      hasImage.value = interaction.options.getBoolean('hasimage');
     }
-    if (interaction.options.getString("description") != null) {
+    if (interaction.options.getString('description') != null) {
       description.consider = true;
-      description.value = interaction.options.getString("description");
+      description.value = interaction.options.getString('description');
     }
-    if (interaction.options.getString("player") != null) {
+    if (interaction.options.getString('player') != null) {
       player.consider = true;
-      player.value = interaction.options.getString("player");
+      player.value = interaction.options.getString('player');
     }
-    if (interaction.options.getInteger("seenafter") != null) {
-      seenafter.consider = true;
-      seenafter.value = interaction.options.getInteger("seenafter");
+    if (interaction.options.getInteger('seenafter') != null) {
+      seenAfter.consider = true;
+      seenAfter.value = interaction.options.getInteger('seenafter');
+    }
+    if (interaction.options.getString('iprange') != null) {
+      ipRange.consider = true;
+      ipRange.value = interaction.options.getString('iprange');
     }
 
     var argumentList = '**Searching with these arguments:**';
@@ -435,7 +448,8 @@ module.exports = {
     }
     if (description.consider) argumentList += `\n**description:** ${description.value}`;
     if (player.consider) argumentList += `\n**player:** ${player.value}`;
-    if (seenafter.consider) argumentList += "\n**seenafter: **" + `<t:${seenafter.value}:f>`
+    if (seenAfter.consider) argumentList += `\n**seenafter: **<t:${seenAfter.value}:f>`;
+    if (ipRange.consider) argumentList += `\n**iprange: **${ipRange.value}`;
 
     await interactReplyMessage.edit(argumentList);
 
@@ -444,13 +458,13 @@ module.exports = {
     for (var i = 0; i < scannedServers.length; i++) {
       // Check if the server meets the requirements set by the arguments
       if (scannedServers[i].players == null) scannedServers[i].players = { online: 0, max: 0 };
-      var minOnlineRequirement = scannedServers[i].players.online >= minOnline.value || !minOnline.consider;
-      var maxOnlineRequirement = scannedServers[i].players.online <= maxOnline.value || !maxOnline.consider;
-      var playerCapRequirement = scannedServers[i].players.max == playerCap.value || !playerCap.consider;
-      var isFullRequirement = (isFull.value == "false" && scannedServers[i].players.online != scannedServers[i].players.max) || (isFull.value == "true" && scannedServers[i].players.online == scannedServers[i].players.max) || !isFull.consider;
-      var versionRequirement = new RegExp(version.value).test(getVersion(scannedServers[i].version)) || !version.consider;
-      var hasImageRequirement = scannedServers[i].hasFavicon || hasImage.value == "false" || !hasImage.consider;
-      var descriptionRequirement = new RegExp(description.value).test(getDescription(scannedServers[i].description)) || !description.consider;
+      const minOnlineRequirement = scannedServers[i].players.online >= minOnline.value || !minOnline.consider;
+      const maxOnlineRequirement = scannedServers[i].players.online <= maxOnline.value || !maxOnline.consider;
+      const playerCapRequirement = scannedServers[i].players.max == playerCap.value || !playerCap.consider;
+      const isFullRequirement = (isFull.value == "false" && scannedServers[i].players.online != scannedServers[i].players.max) || (isFull.value == "true" && scannedServers[i].players.online == scannedServers[i].players.max) || !isFull.consider;
+      const versionRequirement = new RegExp(version.value).test(getVersion(scannedServers[i].version)) || !version.consider;
+      const hasImageRequirement = scannedServers[i].hasFavicon || hasImage.value == "false" || !hasImage.consider;
+      const descriptionRequirement = new RegExp(description.value).test(getDescription(scannedServers[i].description)) || !description.consider;
       var playerRequirement;
       if (player.consider) {
         playerRequirement = false;
@@ -462,9 +476,10 @@ module.exports = {
       } else {
         playerRequirement = true;
       }
-      var seenAfterRequirement = scannedServers[i].lastSeen >= seenafter.value || !seenafter.consider
+      const seenAfterRequirement = scannedServers[i].lastSeen >= seenAfter.value || !seenAfter.consider;
+      const ipRangeRequirement = (new ip.Address4(scannedServers[i].ip)).isInSubnet(new ip.Address4(ipRange.value)) || !ipRange.consider;
 
-      if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement && seenAfterRequirement) {
+      if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement && seenAfterRequirement && ipRangeRequirement) {
         filteredResults.push(scannedServers[i]);
       }
     }

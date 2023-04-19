@@ -90,3 +90,9 @@ The description of the server
 
 ##### player (player name)
 Searches for the server a player is currently playing on. Note: this is very often inaccurate, as servers will send custom responses instead of a real player list, and not all servers send a player list. The player list also has a limited size, so players in big serverss won't be found.
+
+##### seenafter (unix timestamp)
+The oldest time a sever can be last seen. This doesn't mean the server is offline, it could be that the ping was lost due to packet loss.
+
+##### iprange (ip subent)
+The ip subnet a server's ip has to be within
