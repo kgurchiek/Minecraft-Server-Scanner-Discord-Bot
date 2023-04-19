@@ -1,7 +1,7 @@
 const config = require("./config.json");
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Partials, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fetch = require("node-fetch");
 
 // Initialize Discord.js (Along with the commands)
