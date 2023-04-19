@@ -185,8 +185,18 @@ module.exports = {
         .setName("seenafter")
         .setDescription("The oldest time a sever can be last seen (this doesn't mean it's offline, use /help for more info)")),
   async execute(interaction) {
+    // Status message
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
+    
+    // Import server data
     const { scannedServers } = require('../index.js');
+    if (scannedServers == null) {
+      var errorEmbed = new EmbedBuilder()
+        .setColor("#ff0000")
+        .addFields({ name: 'Error', value: 'Fetching api, try again in a few seconds.' })
+      await interaction.editReply({ embeds: [errorEmbed] })
+      return;
+    }
 
     // Create unique IDs for each button
     const lastResultID = 'searchLastResult' + interaction.id;
@@ -235,11 +245,8 @@ module.exports = {
       consider: false
     }
 
-    // Inits some more variables
-    var args = [];
-    var currentEmbed = 0;
-
     // Creates interactable buttons
+    var currentEmbed = 0;
     function createButtons(filteredResults) {
       var buttons;
     
@@ -371,87 +378,40 @@ module.exports = {
     
     // Checks which values were provided
     if (interaction.options.getInteger("minonline") != null) {
-      args.push("minOnline:" + interaction.options.getInteger("minonline"));
+      minOnline.consider = true;
+      minOnline.value = interaction.options.getInteger("minonline");
     }
     if (interaction.options.getInteger("maxonline") != null) {
-      args.push("maxOnline:" + interaction.options.getInteger("maxonline"));
+      maxOnline.consider = true;
+      maxOnline.value = interaction.options.getInteger("maxonline");
     }
     if (interaction.options.getInteger("playercap") != null) {
-      args.push("playerCap:" + interaction.options.getInteger("playercap"));
+      playerCap.consider = true;
+      playerCap.value = interaction.options.getInteger("playercap");
     }
     if (interaction.options.getBoolean("isfull") != null) {
-      args.push("isFull:" + interaction.options.getBoolean("isfull"));
+      isFull.consider = true;
+      isFull.value = interaction.options.getBoolean("isfull");
     }
     if (interaction.options.getString("version") != null) {
-      args.push("version:" + interaction.options.getString("version"));
+      version.consider = true;
+      version.value = interaction.options.getString("version");
     }
     if (interaction.options.getBoolean("hasimage") != null) {
-      args.push("hasImage:" + interaction.options.getBoolean("hasimage"));
+      hasImage.consider = true;
+      hasImage.value = interaction.options.getBoolean("hasimage");
     }
     if (interaction.options.getString("description") != null) {
-      args.push("description:" + interaction.options.getString("description"));
+      description.consider = true;
+      description.value = interaction.options.getString("description");
     }
     if (interaction.options.getString("player") != null) {
-      args.push("player:" + interaction.options.getString("player"));
+      player.consider = true;
+      player.value = interaction.options.getString("player");
     }
     if (interaction.options.getInteger("seenafter") != null) {
-      args.push("seenafter:" + interaction.options.getInteger("seenafter"));
-    }
-    
-    for (var i = 0; i < args.length; i++) {
-      if (args[0].includes(":")) {
-        var argument = args[i].split(":")[0];
-        var value = args[i].split(":")[1];
-        if (argument == "minOnline") {
-          minOnline.consider = true;
-          minOnline.value = value;
-        }
-
-        if (argument == "maxOnline") {
-          maxOnline.consider = true;
-          maxOnline.value = value;
-        }
-
-        if (argument == "playerCap") {
-          playerCap.consider = true;
-          playerCap.value = value;
-        }
-
-        if (argument == "playercap") {
-          playerCap.consider = true;
-          playerCap.value = value;
-        }
-
-        if (argument == "isFull") {
-          isFull.consider = true;
-          isFull.value = value;
-        }
-
-        if (argument == "version") {
-          version.consider = true;
-          version.value = value;
-        }
-
-        if (argument == "hasImage") {
-          hasImage.consider = true;
-          hasImage.value = value;
-        }
-
-        if (argument == "description") {
-          description.consider = true;
-          description.value = value;
-        }
-
-        if (argument == "player") {
-          player.consider = true;
-          player.value = value;
-        }
-
-        if (argument == "seenafter") {
-          seenafter.consider = true;
-          seenafter.value = value;
-        }
-      }
+      seenafter.consider = true;
+      seenafter.value = interaction.options.getInteger("seenafter");
     }
 
     var argumentList = '**Searching with these arguments:**';

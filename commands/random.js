@@ -128,9 +128,18 @@ module.exports = {
     .setName('random')
 	  .setDescription('Gets a random Minecraft server'),
   async execute(interaction) {
-    const { scannedServers } = require('../index.js');
     // Status message
-    await interaction.reply("Getting a server, please wait..."); 
+    await interaction.reply("Getting a server, please wait...");
+
+    // Import server data
+    const { scannedServers } = require('../index.js');
+    if (scannedServers == null) {
+      var errorEmbed = new EmbedBuilder()
+        .setColor("#ff0000")
+        .addFields({ name: 'Error', value: 'Fetching api, try again in a few seconds.' })
+      await interaction.editReply({ embeds: [errorEmbed] })
+      return;
+    }
     
     // Generate a random number to select a server from the list of successful pings
     var index = Math.round((Math.random() * scannedServers.length));

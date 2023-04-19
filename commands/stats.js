@@ -7,8 +7,18 @@ module.exports = {
 		.setName('stats')
 		.setDescription('Sends helpful info about the bot'),
 	async execute(interaction) {
-    const { scannedServers } = require('../index.js');
+    // Status message
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
+
+    // Import server data
+    const { scannedServers } = require('../index.js');
+    if (scannedServers == null) {
+      var errorEmbed = new EmbedBuilder()
+        .setColor("#ff0000")
+        .addFields({ name: 'Error', value: 'Fetching api, try again in a few seconds.' })
+      await interaction.editReply({ embeds: [errorEmbed] })
+      return;
+    }
 		
 		var totalSeconds = (interaction.client.uptime / 1000);
     const days = Math.floor(totalSeconds / 86400);
