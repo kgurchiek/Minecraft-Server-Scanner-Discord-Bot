@@ -250,7 +250,7 @@ module.exports = {
       consider: false
     }
     var ipRange = {
-      value: '0.0.0.0/0',
+      value: '',
       consider: false
     }
 
@@ -477,7 +477,8 @@ module.exports = {
         playerRequirement = true;
       }
       const seenAfterRequirement = scannedServers[i].lastSeen >= seenAfter.value || !seenAfter.consider;
-      const ipRangeRequirement = (new ip.Address4(scannedServers[i].ip)).isInSubnet(new ip.Address4(ipRange.value)) || !ipRange.consider;
+      var ipRangeRequirement = true;
+      if (ipRange.consider) ipRangeRequirement = (new ip.Address4(scannedServers[i].ip)).isInSubnet(new ip.Address4(ipRange.value));
 
       if (minOnlineRequirement && maxOnlineRequirement && playerCapRequirement && isFullRequirement && versionRequirement && hasImageRequirement && descriptionRequirement && playerRequirement && seenAfterRequirement && ipRangeRequirement) {
         filteredResults.push(scannedServers[i]);
