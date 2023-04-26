@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fetch = require("node-fetch");
+const zlib = require('zlib');
 
 // Initialize Discord.js (Along with the commands)
 const client = new Client({ partials: [Partials.Channel], intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
@@ -58,22 +59,17 @@ client.login(config.token);
 // update server list
 async function update() {
   const startDate = new Date();
-  console.log("getting results");
+  console.log('Getting results...');
   var scannedServersRaw = await fetch('https://api.cornbread2100.com/scannedServers');
   var scannedServers;
   try {
-    scannedServers = await scannedServersRaw.json();
-    console.log(`got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
+    const compressedData = await scannedServersRaw.buffer();
+    const decompressedData = zlib.gunzipSync(compressedData);
+    scannedServers = JSON.parse(decompressedData.toString());
+    console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
   } catch (error) {
     console.log(`Error while fetching api: ${error.message}`);
-    scannedServersRaw = await fetch('https://apiraw.cornbread2100.com/scannedServers');
-    try {
-      scannedServers = await scannedServersRaw.json();
-      console.log(`got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
-    } catch (error) {
-      console.log(`Error while fetching apiraw: ${error.message}`);
-      if (scannedServers == null) update();
-    }
+    if (scannedServers == null) update();
   }
 
   module.exports = {
