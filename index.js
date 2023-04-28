@@ -81,6 +81,7 @@ async function update() {
         const compressedData = require('./scannedServers.gz');
         const decompressedData = zlib.gunzipSync(compressedData);
         scannedServers = JSON.parse(decompressedData.toString());
+        console.log('Using backup file');
       } catch (error) {
         console.log(`Error with scannedServers.gz: ${error}`);
         if (scannedServers == null) update();
