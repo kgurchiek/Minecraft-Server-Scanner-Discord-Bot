@@ -60,13 +60,13 @@ client.login(config.token);
 async function update() {
   const startDate = new Date();
   console.log('Getting results...');
-  const timeoutPromise = new Promise((resolve, reject) => {
-    setTimeout(() => {
-      reject(new Error('scannedServers request timed out'));
-    }, 40000); // Timeout after 40 seconds
-  });
-  var fetchPromise = fetch('https://api.cornbread2100.com/scannedServers')
   try {
+    const timeoutPromise = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject(new Error('Request timed out'));
+      }, 40000); // Timeout after 40 seconds
+    });
+    var fetchPromise = fetch('https://api.cornbread2100.com/scannedServers');
     var scannedServersRaw = await Promise.race([fetchPromise, timeoutPromise]);
     var scannedServers;
     const compressedData = await scannedServersRaw.buffer();
