@@ -77,7 +77,14 @@ async function update() {
       console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
     } catch (error) {
       console.log(`Error while fetching apiraw: ${error.message}`);
-      if (scannedServers == null) update();
+      try {
+        const compressedData = require('./scannedServers.gz');
+        const decompressedData = zlib.gunzipSync(compressedData);
+        scannedServers = JSON.parse(decompressedData.toString());
+      } catch (error) {
+        console.log(`Error with scannedServers.gz: ${error}`);
+        if (scannedServers == null) update();
+      }
     }
   }
 
