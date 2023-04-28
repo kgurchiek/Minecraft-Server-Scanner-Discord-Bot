@@ -77,15 +77,15 @@ async function update() {
       console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
     } catch (error) {
       console.log(`Error while fetching apiraw: ${error.message}`);
-      try {
-        const compressedData = require('./scannedServers.gz');
-        const decompressedData = zlib.gunzipSync(compressedData);
-        scannedServers = JSON.parse(decompressedData.toString());
+      const fileContents = fs.readFileSync('./scannedServers.gz');
+      zlib.gunzip(fileContents, (error, uncompressedData) => {
+        if (error) {
+          console.log(`Error with scannedServers.gz: ${error}`);
+          if (scannedServers == null) update();
+        }
+        scannedServers = JSON.parse(uncompressedData.toString());
         console.log('Using backup file');
-      } catch (error) {
-        console.log(`Error with scannedServers.gz: ${error}`);
-        if (scannedServers == null) update();
-      }
+      });
     }
   }
 
