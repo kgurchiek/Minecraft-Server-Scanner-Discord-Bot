@@ -66,9 +66,9 @@ async function update() {
     }, 40000); // Timeout after 40 seconds
   });
   var fetchPromise = fetch('https://api.cornbread2100.com/scannedServers')
-  var scannedServersRaw = await Promise.race([fetchPromise, timeoutPromise]);
-  var scannedServers;
   try {
+    var scannedServersRaw = await Promise.race([fetchPromise, timeoutPromise]);
+    var scannedServers;
     const compressedData = await scannedServersRaw.buffer();
     const decompressedData = zlib.gunzipSync(compressedData);
     scannedServers = JSON.parse(decompressedData.toString());
