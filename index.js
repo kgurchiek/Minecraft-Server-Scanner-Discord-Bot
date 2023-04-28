@@ -69,7 +69,16 @@ async function update() {
     console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
   } catch (error) {
     console.log(`Error while fetching api: ${error.message}`);
-    if (scannedServers == null) update();
+    scannedServersRaw = await fetch('https://apiraw.cornbread2100.com/scannedServers');
+    try {
+      const compressedData = await scannedServersRaw.buffer();
+      const decompressedData = zlib.gunzipSync(compressedData);
+      scannedServers = JSON.parse(decompressedData.toString());
+      console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
+    } catch (error) {
+      console.log(`Error while fetching apiraw: ${error.message}`);
+      if (scannedServers == null) update();
+    }
   }
 
   module.exports = {
