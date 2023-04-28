@@ -60,8 +60,9 @@ client.login(config.token);
 async function update() {
   const startDate = new Date();
   console.log('Getting results...');
+  var timeoutPromise;
   try {
-    const timeoutPromise = new Promise((resolve, reject) => {
+    timeoutPromise = new Promise((resolve, reject) => {
       setTimeout(() => {
         reject(new Error('Request timed out'));
       }, 40000); // Timeout after 40 seconds
