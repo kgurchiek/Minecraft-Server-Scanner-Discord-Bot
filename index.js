@@ -85,14 +85,15 @@ async function update() {
     } catch (error) {
       console.log(`Error while fetching apiraw: ${error.message}`);
       const fileContents = fs.readFileSync('./scannedServers.gz');
-      zlib.gunzip(fileContents, (error, uncompressedData) => {
-        if (error) {
-          console.log(`Error with scannedServers.gz: ${error}`);
-          if (scannedServers == null) update();
-        }
-        scannedServers = JSON.parse(uncompressedData.toString());
-        console.log('Using backup file');
-      });
+      try {
+        zlib.gunzip(fileContents, (error, uncompressedData) => {
+          scannedServers = JSON.parse(uncompressedData.toString());
+          console.log('Using backup file');
+        });
+      } catch (error) {
+        console.log(`Error with scannedServers.gz: ${error}`);
+        if (scannedServers == null) update();
+      }
     }
   }
 
