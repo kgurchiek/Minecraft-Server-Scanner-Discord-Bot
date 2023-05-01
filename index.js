@@ -72,7 +72,6 @@ async function update() {
     const compressedData = await scannedServersRaw.buffer();
     const decompressedData = zlib.gunzipSync(compressedData);
     scannedServers = JSON.parse(decompressedData.toString());
-    console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
   } catch (error) {
     console.log(`Error while fetching api: ${error.message}`);
     try {
@@ -86,7 +85,6 @@ async function update() {
       const compressedData = await scannedServersRaw.buffer();
       const decompressedData = zlib.gunzipSync(compressedData);
       scannedServers = JSON.parse(decompressedData.toString());
-      console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
     } catch (error) {
       console.log(`Error while fetching apiraw: ${error.message}`);
       try {
@@ -101,6 +99,7 @@ async function update() {
       }
     }
   }
+  console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
 
   module.exports = {
     scannedServers
