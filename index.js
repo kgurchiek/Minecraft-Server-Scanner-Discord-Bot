@@ -102,7 +102,6 @@ async function update() {
       }
     }
   }
-  console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
 
   module.exports = {
     scannedServers
