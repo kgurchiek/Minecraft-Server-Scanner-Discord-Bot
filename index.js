@@ -60,6 +60,7 @@ client.login(config.token);
 async function update() {
   const startDate = new Date();
   console.log('Getting results...');
+  var scannedServers;
   try {
     const timeoutPromise = new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -68,7 +69,6 @@ async function update() {
     });
     const fetchPromise = fetch('https://api.cornbread2100.com/scannedServers');
     var scannedServersRaw = await Promise.race([fetchPromise, timeoutPromise]);
-    var scannedServers;
     const compressedData = await scannedServersRaw.buffer();
     const decompressedData = zlib.gunzipSync(compressedData);
     scannedServers = JSON.parse(decompressedData.toString());
