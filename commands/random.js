@@ -149,7 +149,7 @@ module.exports = {
         .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
         .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${scannedServers[index].ip}&port=${scannedServers[index].port}`)
         .addFields(
-          { name: 'Result ' + 1 + '/' + filteredResults.length, value: 'ㅤ' },
+          { name: 'Result ' + 1 + '/' + scannedServers.length, value: 'ㅤ' },
           { name: 'IP', value: scannedServers[index].ip },
           { name: 'Port', value: (scannedServers[index].port + '') },
           { name: 'Version', value: cleanVersion(scannedServers[index].version) },
