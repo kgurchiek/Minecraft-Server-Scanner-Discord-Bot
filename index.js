@@ -4,6 +4,9 @@ const path = require('node:path');
 const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fetch = require("node-fetch");
 const zlib = require('zlib');
+const { MongoClient } = require('mongodb');
+const mongoClient = new MongoClient("mongodb+srv://public:public@mcss.4nrik58.mongodb.net/?retryWrites=true&w=majority");
+const scannedServersDB = mongoClient.db("MCSS").collection("scannedServers");
 
 // Initialize Discord.js (Along with the commands)
 const client = new Client({ partials: [Partials.Channel], intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
@@ -67,35 +70,11 @@ async function update() {
   console.log('Getting results...');
   var scannedServers;
   try {
-    const timeoutPromise = new Promise((resolve, reject) => {
-      setTimeout(() => {
-        reject(new Error('Request timed out'));
-      }, 40000); // Timeout after 40 seconds
-    });
-    const fetchPromise = fetch('https://api.cornbread2100.com/scannedServers');
-    var scannedServersRaw = await Promise.race([fetchPromise, timeoutPromise]);
-    const compressedData = await scannedServersRaw.buffer();
-    const decompressedData = zlib.gunzipSync(compressedData);
-    scannedServers = JSON.parse(decompressedData.toString());
+    scannedServers = await scannedServersDB.find({}).toArray();
     console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
   } catch (error) {
-    console.log(`Error while fetching api: ${error.message}`);
-    try {
-      const timeoutPromise = new Promise((resolve, reject) => {
-        setTimeout(() => {
-          reject(new Error('Request timed out'));
-        }, 40000); // Timeout after 40 seconds
-      });
-      const fetchPromise = fetch('https://apiraw.cornbread2100.com/scannedServers');
-      scannedServersRaw = await Promise.race([fetchPromise, timeoutPromise]);
-      const compressedData = await scannedServersRaw.buffer();
-      const decompressedData = zlib.gunzipSync(compressedData);
-      scannedServers = JSON.parse(decompressedData.toString());
-      console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
-    } catch (error) {
-      console.log(`Error while fetching apiraw: ${error.message}`);
-      if (scannedServers == null) update();
-    }
+    console.log(`Error while fetching database: ${error.message}`);
+    if (scannedServers == null) update();
   }
 
   module.exports = {
