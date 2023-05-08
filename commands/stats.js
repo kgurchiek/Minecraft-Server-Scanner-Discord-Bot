@@ -33,8 +33,8 @@ module.exports = {
       .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
         // Adds more fields to the embed
       .addFields(
-        { name: 'Total Servers', value: String(scannedServers.length) },
-	      { name: 'Uptime:', value: `${hours}:${minutes}:${seconds}  ${days} Days`}
+        { name: 'Total Servers:', value: String(scannedServers.length) },
+	      { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. Uptime: ${days} days and ${hours}:${minutes}:${seconds}.`}
 	    )
       	// Send the embed to the user
         await interaction.editReply({ content: '', embeds: [exampleEmbed], ephemeral:true });
