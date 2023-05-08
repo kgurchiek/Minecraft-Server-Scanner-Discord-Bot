@@ -6,12 +6,12 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('stats')
 		.setDescription('Sends helpful info about the bot'),
-	async execute(interaction, client) {
+	async execute(interaction) {
     // Status message
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
 
     // Import server data
-    const { scannedServers } = require('../index.js');
+    const { client, scannedServers } = require('../index.js');
     if (scannedServers == null) {
       var errorEmbed = new EmbedBuilder()
         .setColor("#ff0000")

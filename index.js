@@ -38,7 +38,7 @@ client.on(Events.InteractionCreate, async interaction => {
   if (!command) return;
 
   try {
-    await command.execute(interaction, client);
+    await command.execute(interaction);
   } catch (error) {
     console.log('[Error]:');
     console.log(error);
@@ -55,6 +55,11 @@ client.on(Events.InteractionCreate, async interaction => {
 
 // Log the bot into the Discord API
 client.login(config.token);
+
+module.exports = {
+  client
+}
+
 
 // update server list
 async function update() {
@@ -94,6 +99,7 @@ async function update() {
   }
 
   module.exports = {
+    client,
     scannedServers
   }
 }
