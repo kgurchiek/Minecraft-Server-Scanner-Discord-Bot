@@ -60,7 +60,8 @@ client.on(Events.InteractionCreate, async interaction => {
 client.login(config.token);
 
 module.exports = {
-  client
+  client,
+  scannedServers: null
 }
 
 
