@@ -5,7 +5,6 @@ const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder } 
 const fetch = require("node-fetch");
 const zlib = require('zlib');
 const { MongoClient } = require('mongodb');
-const { scan } = require("shodan-client");
 const mongoClient = new MongoClient("mongodb+srv://public:public@mcss.4nrik58.mongodb.net/?retryWrites=true&w=majority");
 const scannedServersDB = mongoClient.db("MCSS").collection("scannedServers");
 
@@ -79,7 +78,7 @@ async function update() {
     if (scannedServers == null) update();
   }
 
-  module.exports.scannedServers = scannedServers
+  module.exports.scannedServers = scannedServers;
 }
 
 update();
