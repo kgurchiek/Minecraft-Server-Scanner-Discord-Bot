@@ -1,6 +1,8 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ip = require('ip-address');
+const { getDescription, getVersion } = require('./commonFunctions.js');
+const { cleanVersion } = require('../commonFunctions.js');
 const buttonTimeout = 60; // In seconds
 
 // Times out the buttons; fetches how long it has been since last input date
@@ -13,135 +15,6 @@ function timeSinceDate(date1) {
   var date2Total = date2.getSeconds() + date2.getMinutes() * 60 + date2.getHours() * 3600 + date2.getDay() * 86400;
 
   return date2Total - date1Total;
-}
-
-function getDescription(response) {
-  var description = "";
-  if (response == null) {
-    description = '​'; // zero width space
-  } else if (response.extra != null && response.extra.length > 0) {
-    if (response.extra[0].extra == null) {
-      for (var i = 0; i < response.extra.length; i++) {
-        description += response.extra[i].text;
-      }
-    } else {
-      for (var i = 0; i < response.extra[0].extra.length; i++) {
-        description += response.extra[0].extra[i].text;
-      }
-    }
-  } else if (response.text != null) {
-    description = response.text;
-  } else if (response.translate != null) {
-    description = response.translate;
-  } else if (Array.isArray(response)) {
-    for (var i = 0; i < response.length; i++) {
-      description += response[i].text;
-    }
-  } else if (response != null) {
-    description = response;
-  } else {
-    description = "Couldn't get description";
-  }
-
-  if (description.length > 150) {
-    description = description.substring(0, 150) + "...";
-  }
-
-  // Convert Minecraft color and formatting codes to ANSI format
-  description = minecraftToAnsi(description);
-
-  if (description == '') {
-    description = '​'; // zero width space
-  }
-
-  return String(description);
-}
-
-function getVersion(response) {
-  var version = "";
-  if (response == null) {
-    version = '​'; // zero width space
-  } else if (response.name != null) {
-    version = response.name;
-  } else {
-    version = response;
-  }
-
-  version += ''; // make sure version is a string
-
-  if (version.length > 150) {
-    version = version.substring(0, 150) + "...";
-  }
-
-  // Convert Minecraft color and formatting codes to ANSI format
-  version = minecraftToAnsi(version);
-
-  if (version == '') {
-    version = '​'; // zero width space
-  }
-
-  return String(version);
-}
-
-function minecraftToAnsi(text) {
-  colors = {
-    "0": 30,
-    "1": 34,
-    "2": 32,
-    "3": 36,
-    "4": 31,
-    "5": 35,
-    "6": 33,
-    "7": 37,
-    "8": 30,
-    "9": 34,
-    "a": 32,
-    "b": 36,
-    "c": 31,
-    "d": 35,
-    "e": 33,
-    "f": 37,
-  }
-  
-  formats = {
-    "l": 1,
-    "m": 0,
-    "n": 4,
-    "r": 0,
-  }
-  
-  result = '```ansi\n'
-  splitText = text.split('§');
-  if (splitText.length == 1) return text;
-  color = 30;
-  format = 0;
-  if (text.startsWith('§')) {
-    if (colors[text.charAt(1)] != null) {
-      color = colors[text.charAt(1)];
-    }
-
-    if (formats[text.charAt(1)] != null) {
-      format = formats[text.charAt(1)];
-    }
-
-    result += `\u001b[${format};${color}m` + String(splitText[0]).substring(1);
-  } else {
-    result += splitText[0];
-  }
-  for (var i = 1; i < splitText.length; i++) {
-    if (colors[splitText[i].charAt(0)] != null) {
-      color = colors[splitText[i].charAt(0)];
-    }
-
-    if (formats[splitText[i].charAt(0)] != null) {
-      format = formats[splitText[i].charAt(0)];
-    }
-
-    result += `\u001b[${format};${color}m` + splitText[i].substring(1);
-  }
-
-  result += '```';
-  return result;
 }
 
 // Exports an object with the parameters for the target server
@@ -313,7 +186,7 @@ module.exports = {
             { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: '​' },
             { name: 'IP', value: filteredResults[currentEmbed].ip },
             { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
-            { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
+            { name: 'Version', value: cleanVersion(filteredResults[currentEmbed].version) },
             { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) }
           )
           .setTimestamp();
@@ -361,7 +234,7 @@ module.exports = {
             { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: '​' },
             { name: 'IP', value: filteredResults[currentEmbed].ip },
             { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
-            { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
+            { name: 'Version', value: getVersion(filteredResults[currentEmbed].version.name) },
             { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) }
           )
           .setTimestamp();
@@ -462,7 +335,7 @@ module.exports = {
       const maxOnlineRequirement = scannedServers[i].players.online <= maxOnline.value || !maxOnline.consider;
       const playerCapRequirement = scannedServers[i].players.max == playerCap.value || !playerCap.consider;
       const isFullRequirement = (isFull.value == "false" && scannedServers[i].players.online != scannedServers[i].players.max) || (isFull.value == "true" && scannedServers[i].players.online == scannedServers[i].players.max) || !isFull.consider;
-      const versionRequirement = new RegExp(version.value).test(getVersion(scannedServers[i].version)) || !version.consider;
+      const versionRequirement = new RegExp(version.value).test(getVersion(scannedServers[i].version.name)) || !version.consider;
       const hasImageRequirement = scannedServers[i].hasFavicon == (hasImage.value == "true") || !hasImage.consider;
       const descriptionRequirement = new RegExp(description.value).test(getDescription(scannedServers[i].description)) || !description.consider;
       var playerRequirement;
@@ -497,7 +370,7 @@ module.exports = {
           { name: 'Result ' + 1 + '/' + filteredResults.length, value: 'ㅤ' },
           { name: 'IP', value: filteredResults[0].ip },
           { name: 'Port', value: (filteredResults[0].port + '') },
-          { name: 'Version', value: getVersion(filteredResults[0].version) },
+          { name: 'Version', value: getVersion(filteredResults[0].version.name) },
           { name: 'Description', value: getDescription(filteredResults[0].description) }
         )
         .setTimestamp()
