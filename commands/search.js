@@ -1,8 +1,7 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const ip = require('ip-address');
-const { getDescription, getVersion } = require('./commonFunctions.js');
-const { cleanVersion } = require('../commonFunctions.js');
+const { getDescription, getVersion } = require('../commonFunctions.js');
 const buttonTimeout = 60; // In seconds
 
 // Times out the buttons; fetches how long it has been since last input date
