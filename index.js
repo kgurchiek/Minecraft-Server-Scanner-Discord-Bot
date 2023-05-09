@@ -73,14 +73,13 @@ async function update() {
   try {
     scannedServers = await scannedServersDB.find({}).toArray();
     console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
+    module.exports.scannedServers = scannedServers;
   } catch (error) {
     console.log(`Error while fetching database: ${error.message}`);
     if (scannedServers == null) update();
   }
 
-  module.exports.scannedServers = scannedServers;
+  setTimeout(function() { update(); }, config.refreshDelay * 1000);
 }
 
 update();
-
-setInterval(function() { update(); }, config.refreshDelay * 1000);
