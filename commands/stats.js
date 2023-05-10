@@ -7,19 +7,12 @@ module.exports = {
 		.setName('stats')
 		.setDescription('Sends helpful info about the bot'),
 	async execute(interaction) {
+    const { client, scannedServersDB } = require('../index.js');
+
     // Status message
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
-
-    // Import server data
-    const { client, scannedServers } = require('../index.js');
-    if (scannedServers == null) {
-      var errorEmbed = new EmbedBuilder()
-        .setColor("#ff0000")
-        .addFields({ name: 'Error', value: 'Fetching api, try again in a few seconds.' })
-      await interaction.editReply({ embeds: [errorEmbed] })
-      return;
-    }
 		
+    const totalServers = await scannedServersDB.countDocuments();
 		var totalSeconds = (interaction.client.uptime / 1000);
     const days = Math.floor(totalSeconds / 86400);
     totalSeconds %= 86400;
@@ -33,7 +26,7 @@ module.exports = {
       .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
         // Adds more fields to the embed
       .addFields(
-        { name: 'Total Servers:', value: String(scannedServers.length) },
+        { name: 'Total Servers:', value: String(totalServers) },
 	      { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. Uptime: ${days} days and ${hours}:${minutes}:${seconds}.`}
 	    )
       	// Send the embed to the user

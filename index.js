@@ -61,6 +61,7 @@ client.login(config.token);
 
 module.exports = {
   client,
+  scannedServersDB,
   scannedServers: null
 }
 
