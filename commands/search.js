@@ -83,6 +83,7 @@ module.exports = {
     const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
     const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
     var lastButtonPress = null;
+    const mongoFilter = {};
 
     // Get arguments
     var minOnline = {
@@ -312,7 +313,7 @@ module.exports = {
     }
     if (version.consider) argumentList += `\n**version:** ${version.value}`;
     if (hasImage.consider) {
-      if (hasImage.value == 'true') {
+      if (hasImage.value) {
         argumentList += '\n**Has Image**';
       } else {
         argumentList += '\n**Doesn\'t Have Image**'
@@ -335,7 +336,7 @@ module.exports = {
       const playerCapRequirement = scannedServers[i].players.max == playerCap.value || !playerCap.consider;
       const isFullRequirement = (isFull.value == "false" && scannedServers[i].players.online != scannedServers[i].players.max) || (isFull.value == "true" && scannedServers[i].players.online == scannedServers[i].players.max) || !isFull.consider;
       const versionRequirement = new RegExp(version.value).test(getVersion(scannedServers[i].version)) || !version.consider;
-      const hasImageRequirement = scannedServers[i].hasFavicon == (hasImage.value == "true") || !hasImage.consider;
+      const hasImageRequirement = scannedServers[i].hasFavicon == hasImage.value || !hasImage.consider;
       const descriptionRequirement = new RegExp(description.value).test(getDescription(scannedServers[i].description)) || !description.consider;
       var playerRequirement;
       if (player.consider) {
