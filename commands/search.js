@@ -340,7 +340,7 @@ module.exports = {
       var playerRequirement;
       if (player.consider) {
         playerRequirement = false;
-        if (scannedServers[i].players.sample != null) {
+        if (Array.isArray(scannedServers[i].players.sample)) {
           for (const obj of scannedServers[i].players.sample) {
             if (obj != null && obj.name == player.value) playerRequirement = true;
           }
