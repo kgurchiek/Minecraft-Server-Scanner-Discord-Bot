@@ -1,28 +1,28 @@
 function minecraftToAnsi(text) {
   colors = {
-    "0": 30,
-    "1": 34,
-    "2": 32,
-    "3": 36,
-    "4": 31,
-    "5": 35,
-    "6": 33,
-    "7": 37,
-    "8": 30,
-    "9": 34,
-    "a": 32,
-    "b": 36,
-    "c": 31,
-    "d": 35,
-    "e": 33,
-    "f": 37,
+    '0': 30,
+    '1': 34,
+    '2': 32,
+    '3': 36,
+    '4': 31,
+    '5': 35,
+    '6': 33,
+    '7': 37,
+    '8': 30,
+    '9': 34,
+    'a': 32,
+    'b': 36,
+    'c': 31,
+    'd': 35,
+    'e': 33,
+    'f': 37,
   }
   
   formats = {
-    "l": 1,
-    "m": 0,
-    "n": 4,
-    "r": 0,
+    'l': 1,
+    'm': 0,
+    'n': 4,
+    'r': 0,
   }
   
   result = '```ansi\n'
@@ -60,7 +60,7 @@ function minecraftToAnsi(text) {
 }
 
 function getDescription(response) {
-  var description = "";
+  var description = '';
   if (response == null) {
     description = '​'; // zero width space
   } else if (response.extra != null && response.extra.length > 0) {
@@ -84,11 +84,11 @@ function getDescription(response) {
   } else if (response != null) {
     description = response;
   } else {
-    description = "Couldn't get description";
+    description = 'Couldn\'t get description.';
   }
 
   if (description.length > 150) {
-    description = description.substring(0, 150) + "...";
+    description = description.substring(0, 150) + '...';
   }
 
   // Convert Minecraft color and formatting codes to ANSI format
@@ -101,10 +101,21 @@ function getDescription(response) {
   return String(description);
 }
 
-function getVersion(version) {
-  version += "";
+function getVersion(rawVersion) {
+  version = '';
+
+  if (rawVersion == null) {
+    version = '​'; // zero width space
+  } else if (rawVersion.name == null) {
+    version = rawVersion;
+  } else {
+    version = rawVersion.name;
+  }
+
+  version = String(version);
+
   if (version.length > 150) {
-    version = version.substring(0, 150) + "...";
+    version = version.substring(0, 150) + '...';
   }
 
   // Convert Minecraft color and formatting codes to ANSI format
@@ -114,7 +125,7 @@ function getVersion(version) {
     version = '​'; //zero width space
   }
 
-  return String(version);
+  return version;
 }
 
 module.exports = {
