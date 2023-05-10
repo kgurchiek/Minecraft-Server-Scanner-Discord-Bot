@@ -334,7 +334,7 @@ module.exports = {
       const maxOnlineRequirement = scannedServers[i].players.online <= maxOnline.value || !maxOnline.consider;
       const playerCapRequirement = scannedServers[i].players.max == playerCap.value || !playerCap.consider;
       const isFullRequirement = (isFull.value == "false" && scannedServers[i].players.online != scannedServers[i].players.max) || (isFull.value == "true" && scannedServers[i].players.online == scannedServers[i].players.max) || !isFull.consider;
-      const versionRequirement = new RegExp(version.value).test(getVersion(scannedServers[i].version.name)) || !version.consider;
+      const versionRequirement = new RegExp(version.value).test(getVersion(scannedServers[i].version)) || !version.consider;
       const hasImageRequirement = scannedServers[i].hasFavicon == (hasImage.value == "true") || !hasImage.consider;
       const descriptionRequirement = new RegExp(description.value).test(getDescription(scannedServers[i].description)) || !description.consider;
       var playerRequirement;
@@ -369,7 +369,7 @@ module.exports = {
           { name: 'Result ' + 1 + '/' + filteredResults.length, value: 'ㅤ' },
           { name: 'IP', value: filteredResults[0].ip },
           { name: 'Port', value: (filteredResults[0].port + '') },
-          { name: 'Version', value: getVersion(filteredResults[0].version.name) },
+          { name: 'Version', value: getVersion(filteredResults[0].version) },
           { name: 'Description', value: getDescription(filteredResults[0].description) }
         )
         .setTimestamp()
