@@ -305,7 +305,7 @@ module.exports = {
     if (maxOnline.consider) argumentList += `\n**maxonline:** ${maxOnline.value}`;
     if (playerCap.consider) argumentList += `\n**playercap:** ${playerCap.value}`;
     if (isFull.consider) {
-      if (isFull.value == 'true') {
+      if (isFull.value) {
         argumentList += '\n**Is Full**';
       } else {
         argumentList += '\n**Not Full**';
@@ -334,7 +334,7 @@ module.exports = {
       const minOnlineRequirement = scannedServers[i].players.online >= minOnline.value || !minOnline.consider;
       const maxOnlineRequirement = scannedServers[i].players.online <= maxOnline.value || !maxOnline.consider;
       const playerCapRequirement = scannedServers[i].players.max == playerCap.value || !playerCap.consider;
-      const isFullRequirement = (isFull.value == "false" && scannedServers[i].players.online != scannedServers[i].players.max) || (isFull.value == "true" && scannedServers[i].players.online == scannedServers[i].players.max) || !isFull.consider;
+      const isFullRequirement = (!isFull.value && scannedServers[i].players.online != scannedServers[i].players.max) || (isFull.value && scannedServers[i].players.online == scannedServers[i].players.max) || !isFull.consider;
       const versionRequirement = new RegExp(version.value).test(getVersion(scannedServers[i].version)) || !version.consider;
       const hasImageRequirement = scannedServers[i].hasFavicon == hasImage.value || !hasImage.consider;
       const descriptionRequirement = new RegExp(description.value).test(getDescription(scannedServers[i].description)) || !description.consider;
