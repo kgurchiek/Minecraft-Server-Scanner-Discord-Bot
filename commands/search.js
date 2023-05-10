@@ -185,7 +185,7 @@ module.exports = {
             { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: '​' },
             { name: 'IP', value: filteredResults[currentEmbed].ip },
             { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
-            { name: 'Version', value: cleanVersion(filteredResults[currentEmbed].version) },
+            { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
             { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) }
           )
           .setTimestamp();
