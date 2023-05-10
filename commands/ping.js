@@ -39,7 +39,7 @@ module.exports = {
             .addFields(
               { name: 'IP', value: ip },
               { name: 'Port', value: port.toString() },
-              { name: 'Version', value: getVersion(response.version.name) },
+              { name: 'Version', value: getVersion(response.version) },
               { name: 'Description', value: getDescription(response.description) }
             )
             .setTimestamp()
