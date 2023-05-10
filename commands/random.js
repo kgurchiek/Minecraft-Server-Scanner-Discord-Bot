@@ -18,11 +18,11 @@ module.exports = {
     const server = (await (await scannedServersDB.find({}).skip(index).limit(1)).toArray())[0];
     var newEmbed = new EmbedBuilder()
         .setColor("#02a337")
-        .setTitle('Search Results')
+        .setTitle('Random Server')
         .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
         .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
         .addFields(
-          { name:  `Result ${index}/${totalServers}`, value: 'ㅤ' },
+          { name:  `Server ${index}/${totalServers}`, value: 'ㅤ' },
           { name: 'IP', value: server.ip },
           { name: 'Port', value: String(server.port) },
           { name: 'Version', value: getVersion(server.version) },
