@@ -34,7 +34,7 @@ module.exports = {
           { name: 'Result ' + 1 + '/' + scannedServers.length, value: 'ㅤ' },
           { name: 'IP', value: scannedServers[index].ip },
           { name: 'Port', value: (scannedServers[index].port + '') },
-          { name: 'Version', value: cleanVersion(scannedServers[index].version) },
+          { name: 'Version', value: getVersion(scannedServers[index].version) },
           { name: 'Description', value: getDescription(scannedServers[index].description) }
         )
         .setTimestamp()
