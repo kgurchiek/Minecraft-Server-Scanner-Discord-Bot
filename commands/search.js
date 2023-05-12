@@ -361,14 +361,11 @@ module.exports = {
             max = ipCount / 256;
           }
           octets[octets.length - i - 1] = `(${min}|[1-9]\\d{0,2}|[1-9]\\d{0,1}\\d|${max})`;
-          console.log(octets[octets.length - i - 1])
         }
       }
 
       mongoFilter['ip'] = { '$regex': `^${octets[0]}\.${octets[1]}\.${octets[2]}\.${octets[3]}\$`, '$options': 'i' }
     }
-
-    console.log(JSON.stringify(mongoFilter));
 
     const totalResults = await scannedServersDB.countDocuments(mongoFilter);
 
