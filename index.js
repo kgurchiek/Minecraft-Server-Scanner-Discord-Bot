@@ -2,8 +2,6 @@ const config = require("./config.json");
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
-const fetch = require("node-fetch");
-const zlib = require('zlib');
 const { MongoClient } = require('mongodb');
 const mongoClient = new MongoClient("mongodb+srv://public:public@mcss.4nrik58.mongodb.net/?retryWrites=true&w=majority");
 const scannedServersDB = mongoClient.db("MCSS").collection("scannedServers");
@@ -61,26 +59,5 @@ client.login(config.token);
 
 module.exports = {
   client,
-  scannedServersDB,
-  scannedServers: null
+  scannedServersDB
 }
-
-
-// update server list
-async function update() {
-  const startDate = new Date();
-  console.log('Getting results...');
-  var scannedServers;
-  try {
-    scannedServers = await scannedServersDB.find({}).toArray();
-    console.log(`Got results in ${Math.round((new Date().getTime() - startDate.getTime()) / 100) / 10} seconds.`);
-    module.exports.scannedServers = scannedServers;
-  } catch (error) {
-    console.log(`Error while fetching database: ${error.message}`);
-    if (scannedServers == null) update();
-  }
-
-  setTimeout(function() { update(); }, config.refreshDelay * 1000);
-}
-
-update();

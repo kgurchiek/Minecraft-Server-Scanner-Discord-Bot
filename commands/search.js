@@ -1,6 +1,5 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const ip = require('ip-address');
 const { getDescription, getVersion } = require('../commonFunctions.js');
 const buttonTimeout = 60; // In seconds
 
@@ -62,18 +61,11 @@ module.exports = {
         .setName("iprange")
         .setDescription("The ip subnet a server's ip has to be within")),
   async execute(interaction) {
+    // Import Mongo Client
+    const { scannedServersDB } = require('../index.js');
+
     // Status message
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
-    
-    // Import server data
-    const { scannedServers } = require('../index.js');
-    if (scannedServers == null) {
-      var errorEmbed = new EmbedBuilder()
-        .setColor("#ff0000")
-        .addFields({ name: 'Error', value: 'Fetching api, try again in a few seconds.' })
-      await interaction.editReply({ embeds: [errorEmbed] })
-      return;
-    }
 
     // Create unique IDs for each button
     const lastResultID = 'searchLastResult' + interaction.id;
@@ -129,10 +121,10 @@ module.exports = {
 
     // Creates interactable buttons
     var currentEmbed = 0;
-    function createButtons(filteredResults) {
+    function createButtons(totalResults) {
       var buttons;
     
-      if (filteredResults.length > 1) {
+      if (totalResults > 1) {
         buttons = new ActionRowBuilder()
           .addComponents(
             new ButtonBuilder()
@@ -174,34 +166,36 @@ module.exports = {
         lastButtonPress = new Date();
 
         currentEmbed++;
-        if (currentEmbed == filteredResults.length) currentEmbed = 0;
+        if (currentEmbed == totalResults) currentEmbed = 0;
+
+        const server = (await (await scannedServersDB.find(mongoFilter).skip(currentEmbed).limit(1)).toArray())[0];
 
         // Updates UI when 'Next Page' pressed
         newEmbed = new EmbedBuilder()
           .setColor("#02a337")
           .setTitle('Search Results')
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[currentEmbed].ip}&port=${filteredResults[currentEmbed].port}`)
+          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
           .addFields(
-            { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: '​' },
-            { name: 'IP', value: filteredResults[currentEmbed].ip },
-            { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
-            { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
-            { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) }
+            { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
+            { name: 'IP', value: server.ip },
+            { name: 'Port', value: (server.port + '') },
+            { name: 'Version', value: getVersion(server.version) },
+            { name: 'Description', value: getDescription(server.description) }
           )
           .setTimestamp();
 
-        var playersString = `${filteredResults[currentEmbed].players.online}/${filteredResults[currentEmbed].players.max}`
-        if (filteredResults[currentEmbed].players.sample != null) {
-          for (var i = 0; i < filteredResults[currentEmbed].players.sample.length; i++) {
-            playersString += `\n${filteredResults[currentEmbed].players.sample[i].name}\n${filteredResults[currentEmbed].players.sample[i].id}`;
-            if (i + 1 < filteredResults[currentEmbed].players.sample.length) playersString += '\n'
+        var playersString = `${server.players.online}/${server.players.max}`
+        if (server.players.sample != null) {
+          for (var i = 0; i < server.players.sample.length; i++) {
+            playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+            if (i + 1 < server.players.sample.length) playersString += '\n'
           }
         }
 
         newEmbed.addFields(
           { name: 'Players', value: playersString },
-          { name: 'Last Seen', value: `<t:${filteredResults[currentEmbed].lastSeen}:f>` }
+          { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
         )
 
         await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
@@ -222,34 +216,36 @@ module.exports = {
         lastButtonPress = new Date();
 
         currentEmbed--;
-        if (currentEmbed == -1) currentEmbed = filteredResults.length - 1;
+        if (currentEmbed == -1) currentEmbed = totalResults - 1;
+
+        const server = (await (await scannedServersDB.find(mongoFilter).skip(currentEmbed).limit(1)).toArray())[0];
     
         // Updates UI when 'Last Page' pressed
         var newEmbed = new EmbedBuilder()
           .setColor("#02a337")
           .setTitle('Search Results')
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[currentEmbed].ip}&port=${filteredResults[currentEmbed].port}`)
+          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
           .addFields(
-            { name: 'Result ' + (currentEmbed + 1) + '/' + filteredResults.length, value: '​' },
-            { name: 'IP', value: filteredResults[currentEmbed].ip },
-            { name: 'Port', value: (filteredResults[currentEmbed].port + '') },
-            { name: 'Version', value: getVersion(filteredResults[currentEmbed].version) },
-            { name: 'Description', value: getDescription(filteredResults[currentEmbed].description) }
+            { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
+            { name: 'IP', value: server.ip },
+            { name: 'Port', value: (server.port + '') },
+            { name: 'Version', value: getVersion(server.version) },
+            { name: 'Description', value: getDescription(server.description) }
           )
           .setTimestamp();
 
-        var playersString = `${filteredResults[currentEmbed].players.online}/${filteredResults[currentEmbed].players.max}`;
-        if (filteredResults[currentEmbed].players.sample != null) { 
-          for (var i = 0; i < filteredResults[currentEmbed].players.sample.length; i++) {
-            playersString += `\n${filteredResults[currentEmbed].players.sample[i].name} ${filteredResults[currentEmbed].players.sample[i].id}`;
-            if (i + 1 < filteredResults[currentEmbed].players.sample.length) playersString += '\n'
+        var playersString = `${server.players.online}/${server.players.max}`;
+        if (server.players.sample != null) { 
+          for (var i = 0; i < server.players.sample.length; i++) {
+            playersString += `\n${server.players.sample[i].name} ${server.players.sample[i].id}`;
+            if (i + 1 < server.players.sample.length) playersString += '\n'
           }
         }
 
         newEmbed.addFields(
           { name: 'Players', value: playersString },
-          { name: 'Last Seen', value: `<t:${filteredResults[currentEmbed].lastSeen}:f>` }
+          { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
         )
   
         await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
@@ -326,29 +322,61 @@ module.exports = {
 
     await interactReplyMessage.edit(argumentList);
 
-    var filteredResults = [];
+    if (minOnline.consider) {
+      if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
+      mongoFilter['players.online']['$gte'] = minOnline.value;
+    }
+    if (maxOnline.consider) {
+      if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
+      mongoFilter['players.online']['$lte'] = maxOnline.value;
+    }
+    if (playerCap.consider) mongoFilter['players.max'] = playerCap.value;
+    if (isFull.consider) {
+      if (isFull.value) {
+        mongoFilter['$expr'] = { '$eq': ['$players.online', '$players.max'] };
+      } else { 
+        mongoFilter['$expr'] = { '$ne': ['$players.online', '$players.max'] };
+      }
+      mongoFilter['players'] = { '$ne': null };
+    }
+    if (version.consider) mongoFilter['version.name'] = { '$regex': version.value };
+    if (hasImage.consider) mongoFilter['hasFavicon'] = hasImage.value;
+    if (description.consider) mongoFilter['$or'] = [ {'description.text': {'$regex': description.value, '$options': 'i'}}, { 'description.extra.text': { '$regex': description.value, '$options': 'i', } }, ];
+    if (player.consider) {
+      mongoFilter['players'] = { '$ne': null };
+      mongoFilter['players.sample'] = { '$exists': true, "$elemMatch": { "name": player.value }};
+    }
+    if (seenAfter.consider) mongoFilter['lastSeen'] = { '$gte': seenAfter.value };
+    if (ipRange.consider) {
+      const [ip, range] = ipRange.value.split('/');
+      const ipCount = 2**(32 - range)
+      const octets = ip.split('.');
+      for (var i = 0; i < octets.length; i++) {
+        if (256**i < ipCount) {
+          var min = octets[octets.length - i - 1];
+          var max = 255;
+          if (256**(i + 1) < ipCount) {
+            min = 0;
+          } else {
+            max = ipCount / 256;
+          }
+          octets[octets.length - i - 1] = `(${min}|[1-9]\\d{0,2}|[1-9]\\d{0,1}\\d|${max})`;
+          console.log(octets[octets.length - i - 1])
+        }
+      }
 
+      mongoFilter['ip'] = { '$regex': `^${octets[0]}\.${octets[1]}\.${octets[2]}\.${octets[3]}\$`, '$options': 'i' }
+    }
+
+    console.log(JSON.stringify(mongoFilter));
+
+    const totalResults = await scannedServersDB.countDocuments(mongoFilter);
+
+    /*
     for (var i = 0; i < scannedServers.length; i++) {
       // Check if the server meets the requirements set by the arguments
       if (scannedServers[i].players == null) scannedServers[i].players = { online: 0, max: 0 };
-      const minOnlineRequirement = scannedServers[i].players.online >= minOnline.value || !minOnline.consider;
-      const maxOnlineRequirement = scannedServers[i].players.online <= maxOnline.value || !maxOnline.consider;
-      const playerCapRequirement = scannedServers[i].players.max == playerCap.value || !playerCap.consider;
-      const isFullRequirement = (!isFull.value && scannedServers[i].players.online != scannedServers[i].players.max) || (isFull.value && scannedServers[i].players.online == scannedServers[i].players.max) || !isFull.consider;
-      const versionRequirement = new RegExp(version.value).test(getVersion(scannedServers[i].version)) || !version.consider;
-      const hasImageRequirement = scannedServers[i].hasFavicon == hasImage.value || !hasImage.consider;
-      const descriptionRequirement = new RegExp(description.value).test(getDescription(scannedServers[i].description)) || !description.consider;
-      var playerRequirement;
-      if (player.consider) {
-        playerRequirement = false;
-        if (Array.isArray(scannedServers[i].players.sample)) {
-          for (const obj of scannedServers[i].players.sample) {
-            if (obj != null && obj.name == player.value) playerRequirement = true;
-          }
-        }
-      } else {
-        playerRequirement = true;
-      }
+      
       const seenAfterRequirement = scannedServers[i].lastSeen >= seenAfter.value || !seenAfter.consider;
       var ipRangeRequirement = true;
       if (ipRange.consider) ipRangeRequirement = (new ip.Address4(scannedServers[i].ip)).isInSubnet(new ip.Address4(ipRange.value));
@@ -357,38 +385,40 @@ module.exports = {
         filteredResults.push(scannedServers[i]);
       }
     }
+    */
 
     // If at least one server was found, send the message
-    if (filteredResults.length > 0) {
-      var buttons = createButtons(filteredResults);
+    if (totalResults > 0) {
+      var buttons = createButtons(totalResults);
+
+      const server = (await (await scannedServersDB.find(mongoFilter).limit(1)).toArray())[0];
       var newEmbed = new EmbedBuilder()
         .setColor("#02a337")
         .setTitle('Search Results')
         .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-        .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${filteredResults[0].ip}&port=${filteredResults[0].port}`)
+        .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
         .addFields(
-          { name: 'Result ' + 1 + '/' + filteredResults.length, value: 'ㅤ' },
-          { name: 'IP', value: filteredResults[0].ip },
-          { name: 'Port', value: (filteredResults[0].port + '') },
-          { name: 'Version', value: getVersion(filteredResults[0].version) },
-          { name: 'Description', value: getDescription(filteredResults[0].description) }
+          { name: 'Result ' + 1 + '/' + totalResults, value: '​' },
+          { name: 'IP', value: server.ip },
+          { name: 'Port', value: (server.port + '') },
+          { name: 'Version', value: getVersion(server.version) },
+          { name: 'Description', value: getDescription(server.description) }
         )
         .setTimestamp()
 
-      var playersString = `${filteredResults[0].players.online}/${filteredResults[0].players.max}`
-      if (filteredResults[0].players.sample != null) {
-        for (var i = 0; i < filteredResults[0].players.sample.length; i++) {
-          playersString += `\n${filteredResults[0].players.sample[i].name}\n${filteredResults[0].players.sample[i].id}`;
-          if (i + 1 < filteredResults[0].players.sample.length) playersString += '\n'
+      var playersString = `${server.players.online}/${server.players.max}`
+      if (server.players.sample != null) {
+        for (var i = 0; i < server.players.sample.length; i++) {
+          playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+          if (i + 1 < server.players.sample.length) playersString += '\n'
         }
       }
 
       newEmbed.addFields(
         { name: 'Players', value: playersString },
-        { name: 'Last Seen', value: `<t:${filteredResults[0].lastSeen}:f>` }
+        { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
       )
-      
-      filteredResults = [];
+
       buttonTimeoutCheck();
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
     } else {
