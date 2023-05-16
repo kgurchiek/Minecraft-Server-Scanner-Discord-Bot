@@ -120,6 +120,22 @@ module.exports = {
         )
 
         await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+        const streamLinks = [];
+        var thumbnail;
+        for (const player of server.players.sample) {
+          if (streamers.includes(player.name)) {
+            streamLinks.push(`https://twitch.tv/${streams[streamers.indexOf(player.name)].user_login}`);
+            if (!thumbnail) thumbnail = streams[streamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+          }
+        }
+        for (var i = 0; i < streamLinks.length; i++) {
+          newEmbed.addFields(
+            { name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] }
+          )
+        }
+        newEmbed.setImage(thumbnail);
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       // Event listener for 'Last Page' button
@@ -170,6 +186,22 @@ module.exports = {
         )
   
         await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+        const streamLinks = [];
+        var thumbnail;
+        for (const player of server.players.sample) {
+          if (streamers.includes(player.name)) {
+            streamLinks.push(`https://twitch.tv/${streams[streamers.indexOf(player.name)].user_login}`);
+            if (!thumbnail) thumbnail = streams[streamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+          }
+        }
+        for (var i = 0; i < streamLinks.length; i++) {
+          newEmbed.addFields(
+            { name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] }
+          )
+        }
+        newEmbed.setImage(thumbnail);
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       return buttons;
