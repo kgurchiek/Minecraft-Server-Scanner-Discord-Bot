@@ -248,7 +248,6 @@ module.exports = {
           { name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] }
         )
       }
-      console.log(thumbnail)
       newEmbed.setImage(thumbnail);
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
     } else {
