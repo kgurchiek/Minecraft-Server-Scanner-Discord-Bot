@@ -1,5 +1,6 @@
 {
 	"clientId": "YOUR CLIENT ID",
 	"token": "YOUR BOT TOKEN",
-	"refreshDelay":600
+	"twitchClientId": "TWITCH CLIENT ID",
+	"twitchAccessToken": "TWITCH ACCESS TOKEN"
 }
