@@ -234,6 +234,23 @@ module.exports = {
 
       buttonTimeoutCheck();
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+      const streamLinks = [];
+      var thumbnail;
+      for (const player of server.players.sample) {
+        if (streamers.includes(player.name)) {
+          streamLinks.push(`https://twitch.tv/${streams[streamers.indexOf(player.name)].user_login}`);
+          if (!thumbnail) thumbnail = streams[streamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+        }
+      }
+      for (var i = 0; i < streamLinks.length; i++) {
+        newEmbed.addFields(
+          { name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] }
+        )
+      }
+      console.log(thumbnail)
+      newEmbed.setImage(thumbnail);
+      await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
     } else {
       await interactReplyMessage.edit("no matches could be found");
     } 
