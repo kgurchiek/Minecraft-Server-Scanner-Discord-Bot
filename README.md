@@ -96,3 +96,6 @@ The oldest time a sever can be last seen. This doesn't mean the server is offlin
 
 ##### iprange (ip subent)
 The ip subnet a server's ip has to be within
+
+### /streamsnipe
+Returns servers that live Twitch streamers are playing on
