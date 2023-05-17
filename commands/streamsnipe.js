@@ -2,6 +2,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getDescription, getVersion } = require('../commonFunctions.js');
 const config = require('../config.json');
+const languages = require('../languages.json');
 const buttonTimeout = 60; // In seconds
 
 // Times out the buttons; fetches how long it has been since last input date
@@ -20,8 +21,21 @@ function timeSinceDate(date1) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("streamsnipe")
-    .setDescription("Searches for twitch streamer's servers"),
+    .setDescription("Searches for twitch streamer's servers")
+    .addStringOption(option =>
+      option
+        .setName("language")
+        .setDescription("The language of the stream")
+        .setAutocomplete(true)),
+  async autocomplete(interaction) {
+    const focusedValue = interaction.options.getFocused();
+    const filtered = languages.filter(choice => choice.name.startsWith(focusedValue));
+    await interaction.respond(
+      filtered.map(choice => ({ name: choice.name, value: choice.value })),
+    );
+  },
   async execute(interaction) {
+    console.log(interaction.options.getString('language'));
     // Import Mongo Client
     const { scannedServersDB } = require('../index.js');
 
@@ -247,6 +261,7 @@ module.exports = {
       response = await (await fetch(`https://api.twitch.tv/helix/streams?game_id=27471&first=100&after=${response.pagination.cursor}`, options)).json();
       streams = streams.concat(response.data);
     } while (response.pagination.cursor)
+    if (interaction.options.getString('language')) streams = streams.filter(item => item.language == interaction.options.getString('language'));
 
     await interactReplyMessage.edit('Searching servers...');
 

@@ -32,25 +32,31 @@ client.once(Events.ClientReady, () => {
 
 // When a chat input command is received, attempt to execute it
 client.on(Events.InteractionCreate, async interaction => {
-  if (!interaction.isChatInputCommand()) return;
+  if (interaction.isChatInputCommand()) {
+    const command = client.commands.get(interaction.commandName);
+    if (!command) return;
 
-  const command = client.commands.get(interaction.commandName);
-
-  if (!command) return;
-
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.log('[Error]:');
-    console.log(error);
-    var errorEmbed = new EmbedBuilder()
-      .setColor("#ff0000")
-      .addFields({ name: 'Error', value: error.toString() })
     try {
-      await interaction.reply({ embeds: [errorEmbed] })
-    } catch (err) {
-      await interaction.editReply({ content: '', embeds: [errorEmbed] })
+      await command.execute(interaction);
+    } catch (error) {
+      console.log('[Error]:');
+      console.log(error);
+      var errorEmbed = new EmbedBuilder()
+        .setColor("#ff0000")
+        .addFields({ name: 'Error', value: error.toString() })
+      try {
+        await interaction.reply({ embeds: [errorEmbed] })
+      } catch (err) {
+        await interaction.editReply({ content: '', embeds: [errorEmbed] })
+      }
     }
+  } else if (interaction.isAutocomplete()) {
+    const command = client.commands.get(interaction.commandName);
+    if (!command) return;
+
+    try {
+      await command.autocomplete(interaction);
+    } catch (error) {}
   }
 });
 
