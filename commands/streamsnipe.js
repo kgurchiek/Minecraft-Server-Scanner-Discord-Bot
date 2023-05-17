@@ -35,7 +35,6 @@ module.exports = {
     );
   },
   async execute(interaction) {
-    console.log(interaction.options.getString('language'));
     // Import Mongo Client
     const { scannedServersDB } = require('../index.js');
 
