@@ -136,6 +136,19 @@ module.exports = {
         }
         newEmbed.setImage(thumbnail);
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
+        if (auth == 'true') {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Cracked' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        } else if (auth == 'false') {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Premium' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        }
       });
     
       // Event listener for 'Last Page' button
@@ -202,6 +215,19 @@ module.exports = {
         }
         newEmbed.setImage(thumbnail);
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
+        if (auth == 'true') {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Cracked' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        } else if (auth == 'false') {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Premium' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        }
       });
     
       return buttons;
@@ -282,6 +308,19 @@ module.exports = {
       }
       newEmbed.setImage(thumbnail);
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+      const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
+      if (auth == 'true') {
+        newEmbed.addFields(
+          { name: 'Auth', value: 'Cracked' }
+        )
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+      } else if (auth == 'false') {
+        newEmbed.addFields(
+          { name: 'Auth', value: 'Premium' }
+        )
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+      }
     } else {
       await interactReplyMessage.edit("no matches could be found");
     } 
