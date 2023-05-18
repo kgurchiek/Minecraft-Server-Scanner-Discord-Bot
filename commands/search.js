@@ -200,6 +200,21 @@ module.exports = {
 
         await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
+        const location = await (await fetch(`http://ip-api.com/json/${server.ip}`)).json();
+        if (location.status == 'success') {
+          newEmbed.addFields(
+            { name: 'Country: ', value: `:flag_${location.countryCode.toLowerCase()}: ${location.country}` },
+            { name: 'Isp: ', value: location.isp }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        } else {
+          newEmbed.addFields(
+            { name: 'Country: ', value: 'Unknown' },
+            { name: 'Isp: ', value: 'Unknown' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        }
+
         const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
         if (auth == 'true') {
           newEmbed.addFields(
@@ -209,6 +224,11 @@ module.exports = {
         } else if (auth == 'false') {
           newEmbed.addFields(
             { name: 'Auth', value: 'Premium' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        } else {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Unknown' }
           )
           await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
         }
@@ -263,6 +283,21 @@ module.exports = {
   
         await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
+        const location = await (await fetch(`http://ip-api.com/json/${server.ip}`)).json();
+        if (location.status == 'success') {
+          newEmbed.addFields(
+            { name: 'Country: ', value: `:flag_${location.countryCode.toLowerCase()}: ${location.country}` },
+            { name: 'Isp: ', value: location.isp }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        } else {
+          newEmbed.addFields(
+            { name: 'Country: ', value: 'Unknown' },
+            { name: 'Isp: ', value: 'Unknown' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        }
+
         const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
         if (auth == 'true') {
           newEmbed.addFields(
@@ -272,6 +307,11 @@ module.exports = {
         } else if (auth == 'false') {
           newEmbed.addFields(
             { name: 'Auth', value: 'Premium' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        } else {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Unknown' }
           )
           await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
         }
@@ -430,6 +470,21 @@ module.exports = {
       buttonTimeoutCheck();
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
+      const location = await (await fetch(`http://ip-api.com/json/${server.ip}`)).json();
+      if (location.status == 'success') {
+        newEmbed.addFields(
+          { name: 'Country: ', value: `:flag_${location.countryCode.toLowerCase()}: ${location.country}` },
+          { name: 'Isp: ', value: location.isp }
+        )
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+      } else {
+        newEmbed.addFields(
+          { name: 'Country: ', value: 'Unknown' },
+          { name: 'Isp: ', value: 'Unknown' }
+        )
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+      }
+
       const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
       if (auth == 'true') {
         newEmbed.addFields(
@@ -439,6 +494,11 @@ module.exports = {
       } else if (auth == 'false') {
         newEmbed.addFields(
           { name: 'Auth', value: 'Premium' }
+        )
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+      } else {
+        newEmbed.addFields(
+          { name: 'Auth', value: 'Unknown' }
         )
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       }
