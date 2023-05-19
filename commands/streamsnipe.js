@@ -309,7 +309,7 @@ module.exports = {
       streamers.push(stream.user_name);
     }
     mongoFilter['players.sample'] = { '$elemMatch': { 'name': { '$in': streamers } } }
-    mongoFilter['ip'] = { '$not': '109.123.240.84' }
+    mongoFilter['ip'] = { '$ne': '109.123.240.84' }
 
     const totalResults = await scannedServersDB.countDocuments(mongoFilter);
 
