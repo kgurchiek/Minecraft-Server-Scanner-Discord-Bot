@@ -29,7 +29,7 @@ module.exports = {
         .setAutocomplete(true)),
   async autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused();
-    const filtered = languages.filter(choice => choice.name.startsWith(focusedValue)).splice(0, 25);
+    const filtered = languages.filter(choice => choice.name.toLowerCase().includes(focusedValue.toLowerCase())).splice(0, 25);
     await interaction.respond(
       filtered.map(choice => ({ name: choice.name, value: choice.value })),
     );
@@ -49,7 +49,7 @@ module.exports = {
     const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
     const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
     var lastButtonPress = null;
-    const mongoFilter = {};
+    const mongoFilter = { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 10800 }};
 
     // Get arguments
 
