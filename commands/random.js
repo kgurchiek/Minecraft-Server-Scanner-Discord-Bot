@@ -6,16 +6,16 @@ module.exports = {
   // Define 'random' command
   data: new SlashCommandBuilder()
     .setName('random')
-	  .setDescription('Gets a random Minecraft server'),
+	  .setDescription('Gets a random online Minecraft server'),
   async execute(interaction) {
     const { scannedServersDB } = require('../index.js');
     // Status message
     await interaction.reply("Getting a server, please wait...");
     
     // Get a random server from the database
-    const totalServers = await scannedServersDB.countDocuments();
+    const totalServers = await scannedServersDB.countDocuments({ 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }});
     var index = Math.floor((Math.random() * totalServers));
-    const server = (await (await scannedServersDB.find({}).skip(index).limit(1)).toArray())[0];
+    const server = (await (await scannedServersDB.find({ 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}).skip(index).limit(1)).toArray())[0];
     var newEmbed = new EmbedBuilder()
         .setColor("#02a337")
         .setTitle('Random Server')

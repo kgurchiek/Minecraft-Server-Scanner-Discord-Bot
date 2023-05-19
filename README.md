@@ -14,7 +14,7 @@ This is the full code for a Node.js Minecraft server scanner Discord bot I made.
 
 If you find any bugs, please report them in the [official discord](https://discord.gg/TSWcF2m67m).
 
-You can contact me via discord: Cornbread 2100#0001
+You can contact me via discord: Cornbread 2100#8774
 
 ## Hosting the bot yourself
 **If you just want to use the bot, you don't have to host it, you can try it out in its [official Discord server](https://discord.gg/TSWcF2m67m)** 
@@ -34,7 +34,7 @@ Sends the bot's list of commands
 Sends some stats about the bot
 
 ### /random
-Fetches a random Minecraft server
+Fetches a random online Minecraft server
 
 ### /ping \<ip\> \[port\]
 Fetches info from a given Minecraft server
@@ -45,7 +45,7 @@ The ip address of the server
     
 ##### port
 The port of the server. Defaults to 25565.
-
+ㅤ
 ### /search \[minonline\] \[maxonline\] \[playercap\] \[isfull\] \[version\] \[hasimage\] \[description\] \[strictdescription\] \[player\]
 Searches the database for a server with specific properties
 
@@ -83,11 +83,3 @@ The oldest time a sever can be last seen. This doesn't mean the server is offlin
 
 ##### iprange (ip subent)
 The ip subnet a server's ip has to be within
-
-### /streamsnipe \[language\]
-Returns servers that live Twitch streamers are playing on
-
-#### arguments:
-
-##### language
-The language of the stream (won't work if you don't use the autocorrect/suggested responses)
