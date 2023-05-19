@@ -44,5 +44,23 @@ module.exports = {
       )
 
     interaction.editReply({ content:'', embeds: [newEmbed] });
+
+    const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
+    if (auth == 'true') {
+      newEmbed.addFields(
+        { name: 'Auth', value: 'Cracked' }
+      )
+      await interaction.editReply({ content:'', embeds: [newEmbed] });
+    } else if (auth == 'false') {
+      newEmbed.addFields(
+        { name: 'Auth', value: 'Premium' }
+      )
+      await interaction.editReply({ content:'', embeds: [newEmbed] });
+    } else {
+      newEmbed.addFields(
+        { name: 'Auth', value: 'Unknown' }
+      )
+      await interaction.editReply({ content:'', embeds: [newEmbed] });
+    }
   },
 }
