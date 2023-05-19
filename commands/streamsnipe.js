@@ -29,7 +29,7 @@ module.exports = {
         .setAutocomplete(true)),
   async autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused();
-    const filtered = languages.filter(choice => choice.name.startsWith(focusedValue));
+    const filtered = languages.filter(choice => choice.name.startsWith(focusedValue)).splice(0, 25);
     await interaction.respond(
       filtered.map(choice => ({ name: choice.name, value: choice.value })),
     );
@@ -165,7 +165,7 @@ module.exports = {
           await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
         }
 
-        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
+        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
         if (auth == 'true') {
           newEmbed.addFields(
             { name: 'Auth', value: 'Cracked' }
@@ -264,7 +264,7 @@ module.exports = {
           await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
         }
 
-        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
+        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
         if (auth == 'true') {
           newEmbed.addFields(
             { name: 'Auth', value: 'Cracked' }
@@ -309,6 +309,7 @@ module.exports = {
       streamers.push(stream.user_name);
     }
     mongoFilter['players.sample'] = { '$elemMatch': { 'name': { '$in': streamers } } }
+    mongoFilter['ip'] = { '$not': '109.123.240.84' }
 
     const totalResults = await scannedServersDB.countDocuments(mongoFilter);
 
@@ -378,7 +379,7 @@ module.exports = {
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       }
 
-      const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
+      const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
       if (auth == 'true') {
         newEmbed.addFields(
           { name: 'Auth', value: 'Cracked' }

@@ -46,19 +46,6 @@ The ip address of the server
 ##### port
 The port of the server. Defaults to 25565.
 
-### /auth \<ip\> \<version\> \[port\]
-Checks if a server requires account authentication
-
-#### arguments:
-##### ip
-The ip address of the server.
-
-##### version
-The Minecraft version to attempt a join from
-    
-##### port
-The port of the server. Defaults to 25565
-ㅤ
 ### /search \[minonline\] \[maxonline\] \[playercap\] \[isfull\] \[version\] \[hasimage\] \[description\] \[strictdescription\] \[player\]
 Searches the database for a server with specific properties
 
@@ -100,5 +87,7 @@ The ip subnet a server's ip has to be within
 ### /streamsnipe \[language\]
 Returns servers that live Twitch streamers are playing on
 
-#### language
+#### arguments:
+
+##### language
 The language of the stream (won't work if you don't use the autocorrect/suggested responses)

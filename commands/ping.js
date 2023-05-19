@@ -14,15 +14,14 @@ module.exports = {
       option.setName("port")
 	    .setDescription("The port of the server to ping")),
     async execute(interaction) {
-    // Ping status
-    await interaction.reply("Pinging, please wait...");
-	  // Fetch IP and Port from the command
-    const ip = interaction.options.getString("ip");
-    const port = interaction.options.getInteger("port") || 25565;
+      // Ping status
+      await interaction.reply("Pinging, please wait...");
+      // Fetch IP and Port from the command
+      const ip = interaction.options.getString("ip");
+      const port = interaction.options.getInteger("port") || 25565;
 
-    fetch(`https://ping.cornbread2100.com/ping/?ip=${ip}&port=${port}`)
-      .then(rawtext => rawtext.text())
-      .then(text => {
+      try {
+        const text = await (await fetch(`https://ping.cornbread2100.com/ping/?ip=${ip}&port=${port}`)).text();
         if (text == 'timeout') {
           var errorEmbed = new EmbedBuilder()
             .setColor("#ff0000")
@@ -52,15 +51,33 @@ module.exports = {
           }
           newEmbed.addFields({ name: 'Players', value: playersString })
 
-          interaction.editReply({ content:'', embeds: [newEmbed] });
+          await interaction.editReply({ content:'', embeds: [newEmbed] });
+
+          console.log(response.version.protocol)
+          const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${ip}&port=${port}`)).text();
+          if (auth == 'true') {
+            newEmbed.addFields(
+              { name: 'Auth', value: 'Cracked' }
+            )
+            await interaction.editReply({ content:'', embeds: [newEmbed] });
+          } else if (auth == 'false') {
+            newEmbed.addFields(
+              { name: 'Auth', value: 'Premium' }
+            )
+            await interaction.editReply({ content:'', embeds: [newEmbed] });
+          } else {
+            newEmbed.addFields(
+              { name: 'Auth', value: 'Unknown' }
+            )
+            await interaction.editReply({ content:'', embeds: [newEmbed] });
+          }
         }
-      })
-      .catch(error => {
+      } catch (error) {
         console.log(error);
         var errorEmbed = new EmbedBuilder()
           .setColor("#ff0000")
           .addFields({ name: 'Error', value: error.toString() })
         interaction.editReply({ content: '', embeds: [errorEmbed] })
-      });
-  }
+      }
+    }
 }
