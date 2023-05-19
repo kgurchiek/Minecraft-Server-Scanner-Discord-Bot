@@ -52,8 +52,7 @@ module.exports = {
           newEmbed.addFields({ name: 'Players', value: playersString })
 
           await interaction.editReply({ content:'', embeds: [newEmbed] });
-
-          console.log(response.version.protocol)
+          
           const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${ip}&port=${port}`)).text();
           if (auth == 'true') {
             newEmbed.addFields(
