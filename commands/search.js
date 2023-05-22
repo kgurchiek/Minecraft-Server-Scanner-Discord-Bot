@@ -407,7 +407,7 @@ module.exports = {
     }
     if (version.consider) mongoFilter['version.name'] = { '$regex': version.value };
     if (hasImage.consider) mongoFilter['hasFavicon'] = hasImage.value;
-    if (description.consider) mongoFilter['$or'] = [ {'description.text': {'$regex': description.value, '$options': 'i'}}, { 'description.extra.text': { '$regex': description.value, '$options': 'i', } }, ];
+    if (description.consider) mongoFilter['$or'] = [ {'description': {'$regex': description.value, '$options': 'i'}}, {'description.text': {'$regex': description.value, '$options': 'i'}}, { 'description.extra.text': { '$regex': description.value, '$options': 'i', } }, ];
     if (player.consider) {
       mongoFilter['players'] = { '$ne': null };
       mongoFilter['players.sample'] = { '$exists': true, "$elemMatch": { "name": player.value }};
