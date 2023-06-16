@@ -1,6 +1,7 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getDescription, getVersion } = require('../commonFunctions.js');
+const countryCodes = require('../countryCodes.json');
 const buttonTimeout = 60; // In seconds
 
 // Times out the buttons; fetches how long it has been since last input date
@@ -59,7 +60,19 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName("iprange")
-        .setDescription("The ip subnet a server's ip has to be within")),
+        .setDescription("The ip subnet a server's ip has to be within"))
+    .addStringOption(option =>
+      option
+        .setName("country")
+        .setDescription("The country the server is hosted in")
+        .setAutocomplete(true)),
+  async autocomplete(interaction) {
+    const focusedValue = interaction.options.getFocused();
+    const filtered = countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.toLowerCase())).splice(0, 25);
+    await interaction.respond(
+      filtered.map(choice => ({ name: choice.name, value: choice.code })),
+    );
+  },
   async execute(interaction) {
     // Import Mongo Client
     const { scannedServersDB } = require('../index.js');
