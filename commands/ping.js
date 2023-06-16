@@ -1,5 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getDescription, getVersion } = require('../commonFunctions.js');
+const maxmind = require('maxmind');
+var cityLookup;
+var asnLookup;
+(async () => {
+  cityLookup = await maxmind.open('./GeoLite2-City.mmdb');
+  asnLookup = await maxmind.open('./GeoLite2-ASN.mmdb');
+})();
+
 
 module.exports = {
   // Command options
@@ -52,6 +60,25 @@ module.exports = {
           newEmbed.addFields({ name: 'Players', value: playersString })
 
           await interaction.editReply({ content:'', embeds: [newEmbed] });
+
+          var location = await cityLookup.get(ip);
+          if (location == null) {
+            newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
+          } else {
+            if (location.country != null) {
+              newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
+            } else {
+              newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
+            }
+          }
+          var org = await asnLookup.get(ip);
+          if (org == null) {
+            newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
+          } else {
+            newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
+          }
+
+          await interaction.editReply({ content: '', embeds: [newEmbed] });
           
           const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${ip}&port=${port}`)).text();
           if (auth == 'true') {

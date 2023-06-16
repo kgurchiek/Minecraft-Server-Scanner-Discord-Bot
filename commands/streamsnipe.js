@@ -4,6 +4,13 @@ const { getDescription, getVersion } = require('../commonFunctions.js');
 const config = require('../config.json');
 const languages = require('../languages.json');
 const buttonTimeout = 60; // In seconds
+const maxmind = require('maxmind');
+var cityLookup;
+var asnLookup;
+(async () => {
+  cityLookup = await maxmind.open('./GeoLite2-City.mmdb');
+  asnLookup = await maxmind.open('./GeoLite2-ASN.mmdb');
+})();
 
 // Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {
@@ -150,20 +157,24 @@ module.exports = {
         newEmbed.setImage(thumbnail);
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
-        const location = await (await fetch(`http://ip-api.com/json/${server.ip}`)).json();
-        if (location.status == 'success') {
-          newEmbed.addFields(
-            { name: 'Country: ', value: `:flag_${location.countryCode.toLowerCase()}: ${location.country}` },
-            { name: 'Isp: ', value: location.isp }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        var location = await cityLookup.get(server.ip);
+        if (location == null) {
+          newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
         } else {
-          newEmbed.addFields(
-            { name: 'Country: ', value: 'Unknown' },
-            { name: 'Isp: ', value: 'Unknown' }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+          if (location.country != null) {
+            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
+          } else {
+            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
+          }
         }
+        var org = await asnLookup.get(server.ip);
+        if (org == null) {
+          newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
+        } else {
+          newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
+        }
+
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
         const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
         if (auth == 'true') {
@@ -249,20 +260,24 @@ module.exports = {
         newEmbed.setImage(thumbnail);
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
-        const location = await (await fetch(`http://ip-api.com/json/${server.ip}`)).json();
-        if (location.status == 'success') {
-          newEmbed.addFields(
-            { name: 'Country: ', value: `:flag_${location.countryCode.toLowerCase()}: ${location.country}` },
-            { name: 'Isp: ', value: location.isp }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        var location = await cityLookup.get(server.ip);
+        if (location == null) {
+          newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
         } else {
-          newEmbed.addFields(
-            { name: 'Country: ', value: 'Unknown' },
-            { name: 'Isp: ', value: 'Unknown' }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+          if (location.country != null) {
+            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
+          } else {
+            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
+          }
         }
+        var org = await asnLookup.get(server.ip);
+        if (org == null) {
+          newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
+        } else {
+          newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
+        }
+
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
         const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
         if (auth == 'true') {
@@ -364,20 +379,24 @@ module.exports = {
       newEmbed.setImage(thumbnail);
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
-      const location = await (await fetch(`http://ip-api.com/json/${server.ip}`)).json();
-      if (location.status == 'success') {
-        newEmbed.addFields(
-          { name: 'Country: ', value: `:flag_${location.countryCode.toLowerCase()}: ${location.country}` },
-          { name: 'Isp: ', value: location.isp }
-        )
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+      var location = await cityLookup.get(server.ip);
+      if (location == null) {
+        newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
       } else {
-        newEmbed.addFields(
-          { name: 'Country: ', value: 'Unknown' },
-          { name: 'Isp: ', value: 'Unknown' }
-        )
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        if (location.country != null) {
+          newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
+        } else {
+          newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
+        }
       }
+      var org = await asnLookup.get(server.ip);
+      if (org == null) {
+        newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
+      } else {
+        newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
+      }
+
+      await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
       const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
       if (auth == 'true') {
