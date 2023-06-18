@@ -211,9 +211,15 @@ module.exports = {
 
         var playersString = `${server.players.online}/${server.players.max}`
         if (server.players.sample != null) {
+          var oldString;
           for (var i = 0; i < server.players.sample.length; i++) {
+            oldString = playersString;
             playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-            if (i + 1 < server.players.sample.length) playersString += '\n'
+            if (i + 1 < server.players.sample.length) playersString += '\n';
+            if (playersString.length > 1024) {
+              playersString = oldString;
+              break;
+            }
           }
         }
 
@@ -297,10 +303,16 @@ module.exports = {
           .setTimestamp();
 
         var playersString = `${server.players.online}/${server.players.max}`;
-        if (server.players.sample != null) { 
+        if (server.players.sample != null) {
+          var oldString;
           for (var i = 0; i < server.players.sample.length; i++) {
-            playersString += `\n${server.players.sample[i].name} ${server.players.sample[i].id}`;
-            if (i + 1 < server.players.sample.length) playersString += '\n'
+            oldString = playersString;
+            playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+            if (i + 1 < server.players.sample.length) playersString += '\n';
+            if (playersString.length > 1024) {
+              playersString = oldString;
+              break;
+            }
           }
         }
 
@@ -494,9 +506,15 @@ module.exports = {
 
       var playersString = `${server.players.online}/${server.players.max}`
       if (server.players.sample != null) {
+        var oldString;
         for (var i = 0; i < server.players.sample.length; i++) {
+          oldString = playersString;
           playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-          if (i + 1 < server.players.sample.length) playersString += '\n'
+          if (i + 1 < server.players.sample.length) playersString += '\n';
+          if (playersString.length > 1024) {
+            playersString = oldString;
+            break;
+          }
         }
       }
 

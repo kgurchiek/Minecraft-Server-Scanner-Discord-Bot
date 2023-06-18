@@ -51,10 +51,16 @@ module.exports = {
             .setTimestamp()
 
           var playersString = `${response.players.online}/${response.players.max}`;
-          if (response.players.sample != null) { 
-            for (var i = 0; i < response.players.sample.length; i++) {
-              playersString += `\n${response.players.sample[i].name} ${response.players.sample[i].id}`;
-              if (i + 1 < response.players.sample.length) playersString += '\n';
+          if (server.players.sample != null) {
+            var oldString;
+            for (var i = 0; i < server.players.sample.length; i++) {
+              oldString = playersString;
+              playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+              if (i + 1 < server.players.sample.length) playersString += '\n';
+              if (playersString.length > 1024) {
+                playersString = oldString;
+                break;
+              }
             }
           }
           newEmbed.addFields({ name: 'Players', value: playersString })
