@@ -14,7 +14,7 @@ This is the full code for a Node.js Minecraft server scanner Discord bot I made.
 
 If you find any bugs, please report them in the [official discord](https://discord.gg/TSWcF2m67m).
 
-You can contact me via discord: Cornbread 2100#8774
+You can contact me via discord: cornbread2100
 
 ## Hosting the bot yourself
 **If you just want to use the bot, you don't have to host it, you can try it out in its [official Discord server](https://discord.gg/TSWcF2m67m)** 
