@@ -1,7 +1,7 @@
 const config = require("./config.json");
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder, ActivityType } = require('discord.js');
 const { MongoClient } = require('mongodb');
 const mongoClient = new MongoClient("mongodb+srv://public:public@mcss.4nrik58.mongodb.net/?retryWrites=true&w=majority");
 const scannedServersDB = mongoClient.db("MCSS").collection("scannedServers");
@@ -27,7 +27,10 @@ client.once(Events.ClientReady, () => {
   // Logs how many servers the bot is logged in to
   console.log(`[Bot]: ${client.user.tag}`)
   console.log("[Servers]: " + client.guilds.cache.size);
-
+  (async () => { client.user.setPresence({ activities: [{ name: `${await scannedServersDB.countDocuments()} Minecraft servers`, type: ActivityType.Watching }]}); })();
+  setInterval(async () => {
+    client.user.setPresence({ activities: [{ name: `${await scannedServersDB.countDocuments()} Minecraft servers`, type: ActivityType.Watching }]});
+  }, 60000)
 });
 
 // When a chat input command is received, attempt to execute it
