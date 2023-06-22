@@ -34,6 +34,6 @@ module.exports = {
         { name: 'Total Servers:', value: String(totalServers) },
         { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. ${users} users. Uptime: ${days}:${hours}:${minutes}:${seconds}.`}
       )
-    await interaction.editReply({ content: '', embeds: [exampleEmbed], ephemeral:true });
+    await interaction.editReply({ content: '', embeds: [newEmbed], ephemeral:true });
   },
 };
