@@ -213,7 +213,7 @@ module.exports = {
         if (server.players.sample != null) {
           var oldString;
           for (var i = 0; i < server.players.sample.length; i++) {
-            if (players.sample[i].lastSeen == server.lastSeen) {
+            if (server.players.sample[i].lastSeen == server.lastSeen) {
               oldString = playersString;
               playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
               if (i + 1 < server.players.sample.length) playersString += '\n';
@@ -308,7 +308,7 @@ module.exports = {
         if (server.players.sample != null) {
           var oldString;
           for (var i = 0; i < server.players.sample.length; i++) {
-            if (players.sample[i].lastSeen == server.lastSeen) {
+            if (server.players.sample[i].lastSeen == server.lastSeen) {
               oldString = playersString;
               playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
               if (i + 1 < server.players.sample.length) playersString += '\n';
