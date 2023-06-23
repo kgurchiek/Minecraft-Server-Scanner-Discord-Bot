@@ -93,7 +93,7 @@ module.exports = {
     const oldPlayersID = 'oldPlayers' + interaction.id;
     const searchNextResultFilter = interaction => interaction.customId == nextResultID;
     const searchLastResultFilter = interaction => interaction.customId == lastResultID;
-    const oldPlayersFilter = interaction => interaction.customId == oldPlayersFilter;
+    const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
     const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
     const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
     const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
