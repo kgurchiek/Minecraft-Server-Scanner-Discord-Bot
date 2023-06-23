@@ -88,12 +88,15 @@ module.exports = {
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
 
     // Create unique IDs for each button
-    const lastResultID = 'searchLastResult' + interaction.id;
-    const nextResultID = 'searchNextResult' + interaction.id;
+    const lastResultID = 'lastResult' + interaction.id;
+    const nextResultID = 'nextResult' + interaction.id;
+    const oldPlayersID = 'oldPlayers' + interaction.id;
     const searchNextResultFilter = interaction => interaction.customId == nextResultID;
     const searchLastResultFilter = interaction => interaction.customId == lastResultID;
+    const oldPlayersFilter = interaction => interaction.customId == oldPlayersFilter;
     const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
     const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
+    const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
     var lastButtonPress = null;
     const mongoFilter = {};
 
@@ -158,6 +161,10 @@ module.exports = {
             new ButtonBuilder()
               .setCustomId(nextResultID)
               .setLabel('Next Page')
+              .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+              .setCustomId(oldPlayersID)
+              .setLabel('Show Old Players')
               .setStyle(ButtonStyle.Primary)
           );
       } else {
@@ -172,7 +179,11 @@ module.exports = {
               .setCustomId(nextResultID)
               .setLabel('Next Page')
               .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true)
+              .setDisabled(true),
+            new ButtonBuilder()
+              .setCustomId(oldPlayersID)
+              .setLabel('Show Old Players')
+              .setStyle(ButtonStyle.Primary)
           );
       }
     
@@ -316,6 +327,93 @@ module.exports = {
                 playersString = oldString;
                 break;
               }
+            }
+          }
+        }
+
+        newEmbed.addFields(
+          { name: 'Players', value: playersString },
+          { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
+        )
+  
+        await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+        var location = await cityLookup.get(server.ip);
+        if (location == null) {
+          newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
+        } else {
+          if (location.country != null) {
+            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
+          } else {
+            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
+          }
+        }
+        var org = await asnLookup.get(server.ip);
+        if (org == null) {
+          newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
+        } else {
+          newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
+        }
+
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
+        if (auth == 'true') {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Cracked' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        } else if (auth == 'false') {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Premium' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        } else {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Unknown' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        }
+      });
+
+      oldPlayersCollector.on('collect', async interaction => {
+        var newEmbed = new EmbedBuilder()
+          .setColor("#02a337")
+          .setTitle('Search Results')
+          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+          .addFields(
+            { name: 'Updating page...', value: '​' },
+          )
+          .setTimestamp();
+        const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [] });
+        lastButtonPress = new Date();
+
+        const server = (await (await scannedServersDB.find(mongoFilter).skip(currentEmbed).limit(1)).toArray())[0];
+        // Updates UI when 'Last Page' pressed
+        var newEmbed = new EmbedBuilder()
+          .setColor("#02a337")
+          .setTitle('Search Results')
+          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
+          .addFields(
+            { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
+            { name: 'IP', value: server.ip },
+            { name: 'Port', value: (server.port + '') },
+            { name: 'Version', value: getVersion(server.version) },
+            { name: 'Description', value: getDescription(server.description) }
+          )
+          .setTimestamp();
+
+        var playersString = `${server.players.online}/${server.players.max}`;
+        if (server.players.sample != null) {
+          var oldString;
+          for (var i = 0; i < server.players.sample.length; i++) {
+            oldString = playersString;
+            playersString += `\n${server.players.sample[i].name} ${server.players.sample[i].lastSeen == server.lastSeen ? '`online`' : '<t:' + server.players.sample[i].lastSeen + ':R>'}`;
+            if (i + 1 < server.players.sample.length) playersString += '\n';
+            if (playersString.length > 1020 && i + 1 < server.players.sample.length || playersString.length > 1024) {
+              playersString = oldString + '\n...';
+              break;
             }
           }
         }
@@ -587,12 +685,17 @@ module.exports = {
               .setCustomId(nextResultID)
               .setLabel('Next Page')
               .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true)
+              .setDisabled(true),
+            new ButtonBuilder()
+              .setCustomId(oldPlayersID)
+              .setLabel('Show Old Players')
+              .setStyle(ButtonStyle.Secondary)
           );
         await interactReplyMessage.edit({ content: '', components: [buttons] });
 
         searchNextResultCollector.stop();
         searchLastResultCollector.stop();
+        oldPlayersCollector.stop();
       } else {
         setTimeout(function() { buttonTimeoutCheck() }, 500);
       }
