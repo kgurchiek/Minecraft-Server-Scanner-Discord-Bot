@@ -60,6 +60,10 @@ module.exports = {
       option
         .setName("player")
         .setDescription("The name of a player to search for"))
+    .addBooleanOption(option =>
+      option
+        .setName("hasplayerlist")
+        .setDescription("Whether or not the server has player list enabled"))
     .addIntegerOption(option =>
       option
         .setName("seenafter")
@@ -130,6 +134,10 @@ module.exports = {
       consider: false
     };
     var player = {
+      value: 'Steve',
+      consider: false
+    };
+    var hasPlayerList = {
       value: 'Steve',
       consider: false
     };
@@ -499,6 +507,10 @@ module.exports = {
       player.consider = true;
       player.value = interaction.options.getString('player');
     }
+    if (interaction.options.getBoolean('hasplayerlist') != null) {
+      hasPlayerList.consider = true;
+      hasPlayerList.value = interaction.options.getBoolean('hasplayerlist');
+    }
     if (interaction.options.getInteger('seenafter') != null) {
       seenAfter.consider = true;
       seenAfter.value = interaction.options.getInteger('seenafter');
@@ -533,6 +545,13 @@ module.exports = {
     }
     if (description.consider) argumentList += `\n**description:** ${description.value}`;
     if (player.consider) argumentList += `\n**player:** ${player.value}`;
+    if (hasImage.consider) {
+      if (hasPlayerList.value) {
+        argumentList += '\n**Player List Enabled**';
+      } else {
+        argumentList += '\n**Player List Disabled**'
+      }
+    }
     if (seenAfter.consider) argumentList += `\n**seenafter: **<t:${seenAfter.value}:f>`;
     if (ipRange.consider) argumentList += `\n**iprange: **${ipRange.value}`;
     if (country.consider) argumentList += `\n**country: **:flag_${country.value.toLowerCase()}: ${country.value}`;
@@ -562,6 +581,10 @@ module.exports = {
     if (player.consider) {
       mongoFilter['players'] = { '$ne': null };
       mongoFilter['players.sample'] = { '$exists': true, "$elemMatch": { "name": player.value }};
+    }
+    if (hasPlayerList.consider) {
+      if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = { '$exists': true };
+      mongoFilter['players.sample']['$not'] = { '$size': 0 };
     }
     if (seenAfter.consider) mongoFilter['lastSeen'] = { '$gte': seenAfter.value };
     if (ipRange.consider) {
