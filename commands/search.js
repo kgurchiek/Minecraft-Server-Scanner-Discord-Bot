@@ -690,6 +690,7 @@ module.exports = {
               .setCustomId(oldPlayersID)
               .setLabel('Show Old Players')
               .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true)
           );
         await interactReplyMessage.edit({ content: '', components: [buttons] });
 
