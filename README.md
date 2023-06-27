@@ -23,7 +23,7 @@ You can contact me via discord: cornbread2100
 Enter the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers/) in config.json. In order to make subsequent searches considerably faster, search results are temporarily saved. If it has been a while, the results will be fetched again. In the config, refreshDelay controlls how many seconds to wait before fetching the database again. About 600 (10 minutes) is recommended.
 
 ### Usage
-You'll need Node.js version 16.9.0 or later to operate the bot. Run "node deploy-commands.js" in your terminal before launching the bot. The slash instructions will then be registered; otherwise, they won't show up in Discord. Run "node index.js" to start the bot once you're ready. You'll also need to install discord.js v14 and node-fetch version 2.6.6.
+You'll need Node.js version v18 or later to operate the bot. Run "node deploy-commands.js" in your terminal before launching the bot. The slash instructions will then be registered; otherwise, they won't show up in Discord. Run "node index.js" to start the bot once you're ready. You'll also need to install discord.js v14 and node-fetch version 2.6.6.
 
 ## Commands
 
