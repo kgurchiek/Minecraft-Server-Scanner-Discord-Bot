@@ -1,5 +1,5 @@
 // Imports
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder } = require('discord.js');
 const { getDescription, getVersion } = require('../commonFunctions.js')
 const maxmind = require('maxmind');
 var cityLookup;
