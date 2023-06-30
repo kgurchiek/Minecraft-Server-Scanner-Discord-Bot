@@ -30,7 +30,7 @@ module.exports = {
       .setTitle('Statistics')
       .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
       .addFields(
-        { name: 'Author:', value: userTag.tag },
+        { name: 'Author:', value: userTag.username },
         { name: 'Total Servers:', value: String(totalServers) },
         { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. ${users} users. Uptime: ${days}:${hours}:${minutes}:${seconds}.`}
       )
