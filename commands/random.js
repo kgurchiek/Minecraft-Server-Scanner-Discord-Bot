@@ -90,7 +90,7 @@ module.exports = {
 
       newEmbed.addFields({ name: 'Players', value: playersString })
 
-      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
+      await interaction.reply({ content:'', embeds: [newEmbed], components: [buttons] });
 
       var location = await cityLookup.get(server.ip);
       if (location == null) {
