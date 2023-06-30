@@ -223,7 +223,7 @@ module.exports = {
             { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
             { name: 'IP', value: server.ip },
             { name: 'Port', value: (server.port + '') },
-            { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
+            { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
             { name: 'Description', value: getDescription(server.description) }
           )
           .setTimestamp();
@@ -318,7 +318,7 @@ module.exports = {
             { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
             { name: 'IP', value: server.ip },
             { name: 'Port', value: (server.port + '') },
-            { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
+            { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
             { name: 'Description', value: getDescription(server.description) }
           )
           .setTimestamp();
@@ -407,7 +407,7 @@ module.exports = {
             { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
             { name: 'IP', value: server.ip },
             { name: 'Port', value: (server.port + '') },
-            { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
+            { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
             { name: 'Description', value: getDescription(server.description) }
           )
           .setTimestamp();
@@ -624,7 +624,7 @@ module.exports = {
           { name: 'Result ' + 1 + '/' + totalResults, value: '​' },
           { name: 'IP', value: server.ip },
           { name: 'Port', value: (server.port + '') },
-          { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
+          { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
           { name: 'Description', value: getDescription(server.description) }
         )
         .setTimestamp()

@@ -36,7 +36,7 @@ module.exports = {
         { name:  `Server ${index}/${totalServers}`, value: ' ' },
         { name: 'IP', value: server.ip },
         { name: 'Port', value: String(server.port) },
-        { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
+        { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
         { name: 'Description', value: getDescription(server.description) }
       )
       .setTimestamp()
@@ -60,7 +60,7 @@ module.exports = {
           { name:  `Server ${index}/${totalServers}`, value: ' ' },
           { name: 'IP', value: server.ip },
           { name: 'Port', value: String(server.port) },
-          { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
+          { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
           { name: 'Description', value: getDescription(server.description) }
         )
         .setTimestamp()
