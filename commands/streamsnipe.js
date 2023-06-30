@@ -49,8 +49,8 @@ module.exports = {
     const interactReplyMessage = await interaction.reply({ content: 'Fetching streams...', fetchReply: true });
 
     // Create unique IDs for each button
-    const lastResultID = 'searchLastResult' + interaction.id;
-    const nextResultID = 'searchNextResult' + interaction.id;
+    const lastResultID = 'lastResult' + interaction.id;
+    const nextResultID = 'nextResult' + interaction.id;
     const searchNextResultFilter = interaction => interaction.customId == nextResultID;
     const searchLastResultFilter = interaction => interaction.customId == lastResultID;
     const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
@@ -121,21 +121,23 @@ module.exports = {
             { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
             { name: 'IP', value: server.ip },
             { name: 'Port', value: (server.port + '') },
-            { name: 'Version', value: getVersion(server.version) },
+            { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
             { name: 'Description', value: getDescription(server.description) }
           )
           .setTimestamp();
 
-        var playersString = `${server.players.online}/${server.players.max}`
+        var playersString = `${server.players.online}/${server.players.max}`;
         if (server.players.sample != null) {
           var oldString;
           for (var i = 0; i < server.players.sample.length; i++) {
-            oldString = playersString;
-            playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-            if (i + 1 < server.players.sample.length) playersString += '\n';
-            if (playersString.length > 1024) {
-              playersString = oldString;
-              break;
+            if (server.players.sample[i].lastSeen == server.lastSeen) {
+              oldString = playersString;
+              playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+              if (i + 1 < server.players.sample.length) playersString += '\n';
+              if (playersString.length > 1024) {
+                playersString = oldString;
+                break;
+              }
             }
           }
         }
@@ -230,7 +232,7 @@ module.exports = {
             { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
             { name: 'IP', value: server.ip },
             { name: 'Port', value: (server.port + '') },
-            { name: 'Version', value: getVersion(server.version) },
+            { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
             { name: 'Description', value: getDescription(server.description) }
           )
           .setTimestamp();
@@ -239,12 +241,14 @@ module.exports = {
         if (server.players.sample != null) {
           var oldString;
           for (var i = 0; i < server.players.sample.length; i++) {
-            oldString = playersString;
-            playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-            if (i + 1 < server.players.sample.length) playersString += '\n';
-            if (playersString.length > 1024) {
-              playersString = oldString;
-              break;
+            if (server.players.sample[i].lastSeen == server.lastSeen) {
+              oldString = playersString;
+              playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+              if (i + 1 < server.players.sample.length) playersString += '\n';
+              if (playersString.length > 1024) {
+                playersString = oldString;
+                break;
+              }
             }
           }
         }
@@ -354,21 +358,23 @@ module.exports = {
           { name: 'Result ' + 1 + '/' + totalResults, value: '​' },
           { name: 'IP', value: server.ip },
           { name: 'Port', value: (server.port + '') },
-          { name: 'Version', value: getVersion(server.version) },
+          { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
           { name: 'Description', value: getDescription(server.description) }
         )
         .setTimestamp()
 
-      var playersString = `${server.players.online}/${server.players.max}`
+      var playersString = `${server.players.online}/${server.players.max}`;
       if (server.players.sample != null) {
         var oldString;
         for (var i = 0; i < server.players.sample.length; i++) {
-          oldString = playersString;
-          playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-          if (i + 1 < server.players.sample.length) playersString += '\n';
-          if (playersString.length > 1024) {
-            playersString = oldString;
-            break;
+          if (server.players.sample[i].lastSeen == server.lastSeen) {
+            oldString = playersString;
+            playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+            if (i + 1 < server.players.sample.length) playersString += '\n';
+            if (playersString.length > 1024) {
+              playersString = oldString;
+              break;
+            }
           }
         }
       }

@@ -17,6 +17,7 @@ module.exports = {
 	  .setDescription('Gets a random online Minecraft server'),
   async execute(interaction) {
     const { scannedServersDB } = require('../index.js');
+    const oldPlayersID = `oldPlayers${interaction.user.id}`;
     // Status message
     await interaction.reply("Getting a server, please wait...");
     
@@ -33,21 +34,112 @@ module.exports = {
         { name:  `Server ${index}/${totalServers}`, value: ' ' },
         { name: 'IP', value: server.ip },
         { name: 'Port', value: String(server.port) },
-        { name: 'Version', value: getVersion(server.version) },
+        { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
         { name: 'Description', value: getDescription(server.description) }
       )
       .setTimestamp()
+    
 
-    var playersString = `${server.players.online}/${server.players.max}`
+    var buttons = new ActionRowBuilder()
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId(oldPlayersID)
+          .setLabel('Show Old Players')
+          .setStyle(ButtonStyle.Primary)
+      );
+
+    oldPlayersCollector.on('collect', async interaction => {
+      var newEmbed = new EmbedBuilder()
+        .setColor("#02a337")
+        .setTitle('Random Server')
+        .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+        .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
+        .addFields(
+          { name:  `Server ${index}/${totalServers}`, value: ' ' },
+          { name: 'IP', value: server.ip },
+          { name: 'Port', value: String(server.port) },
+          { name: 'Version', value: getVersion(server.version) + ` (${server.protocol})` },
+          { name: 'Description', value: getDescription(server.description) }
+        )
+        .setTimestamp()
+
+      var buttons = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId(oldPlayersID)
+            .setLabel('Show Old Players')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(true)
+        );
+
+      var playersString = `${server.players.online}/${server.players.max}`;
+      if (server.players.sample != null) {
+        var oldString;
+        for (var i = 0; i < server.players.sample.length; i++) {
+          oldString = playersString;
+          playersString += `\n${server.players.sample[i].name} ${server.players.sample[i].lastSeen == server.lastSeen ? '`online`' : '<t:' + server.players.sample[i].lastSeen + ':R>'}`;
+          if (i + 1 < server.players.sample.length) playersString += '\n';
+          if (playersString.length > 1020 && i + 1 < server.players.sample.length || playersString.length > 1024) {
+            playersString = oldString + '\n...';
+            break;
+          }
+        }
+      }
+
+      newEmbed.addFields({ name: 'Players', value: playersString })
+
+      interaction.editReply({ content:'', embeds: [newEmbed] });
+
+      var location = await cityLookup.get(server.ip);
+      if (location == null) {
+        newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
+      } else {
+        if (location.country != null) {
+          newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
+        } else {
+          newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
+        }
+      }
+      var org = await asnLookup.get(server.ip);
+      if (org == null) {
+        newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
+      } else {
+        newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
+      }
+
+      await interaction.editReply({ content: '', embeds: [newEmbed] });
+
+      const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
+      if (auth == 'true') {
+        newEmbed.addFields(
+          { name: 'Auth', value: 'Cracked' }
+        )
+        await interaction.editReply({ content:'', embeds: [newEmbed] });
+      } else if (auth == 'false') {
+        newEmbed.addFields(
+          { name: 'Auth', value: 'Premium' }
+        )
+        await interaction.editReply({ content:'', embeds: [newEmbed] });
+      } else {
+        newEmbed.addFields(
+          { name: 'Auth', value: 'Unknown' }
+        )
+        await interaction.editReply({ content:'', embeds: [newEmbed] });
+      }
+    });
+
+    var playersString = `${server.players.online}/${server.players.max}`;
     if (server.players.sample != null) {
       var oldString;
       for (var i = 0; i < server.players.sample.length; i++) {
-        oldString = playersString;
-        playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-        if (i + 1 < server.players.sample.length) playersString += '\n';
-        if (playersString.length > 1024) {
-          playersString = oldString;
-          break;
+        if (server.players.sample[i].lastSeen == server.lastSeen) {
+          oldString = playersString;
+          playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+          if (i + 1 < server.players.sample.length) playersString += '\n';
+          if (playersString.length > 1024) {
+            playersString = oldString;
+            break;
+          }
         }
       }
     }
