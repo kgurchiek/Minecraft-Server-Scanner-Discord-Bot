@@ -90,7 +90,7 @@ module.exports = {
 
       newEmbed.addFields({ name: 'Players', value: playersString })
 
-      await interaction.editReply({ content:'', embeds: [newEmbed], buttons: [buttons] });
+      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
 
       var location = await cityLookup.get(server.ip);
       if (location == null) {
@@ -109,24 +109,24 @@ module.exports = {
         newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
       }
 
-      await interaction.editReply({ content: '', embeds: [newEmbed], buttons: [buttons] });
+      await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
 
       const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
       if (auth == 'true') {
         newEmbed.addFields(
           { name: 'Auth', value: 'Cracked' }
         )
-        await interaction.editReply({ content:'', embeds: [newEmbed], buttons: [buttons] });
+        await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
       } else if (auth == 'false') {
         newEmbed.addFields(
           { name: 'Auth', value: 'Premium' }
         )
-        await interaction.editReply({ content:'', embeds: [newEmbed], buttons: [buttons] });
+        await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
       } else {
         newEmbed.addFields(
           { name: 'Auth', value: 'Unknown' }
         )
-        await interaction.editReply({ content:'', embeds: [newEmbed], buttons: [buttons] });
+        await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
       }
     });
 
@@ -148,7 +148,7 @@ module.exports = {
 
     newEmbed.addFields({ name: 'Players', value: playersString })
 
-    await interaction.editReply({ content:'', embeds: [newEmbed], buttons: [buttons] });
+    await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
 
     var location = await cityLookup.get(server.ip);
     if (location == null) {
@@ -167,24 +167,24 @@ module.exports = {
       newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
     }
 
-    await interaction.editReply({ content: '', embeds: [newEmbed], buttons: [buttons] });
+    await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
 
     const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
     if (auth == 'true') {
       newEmbed.addFields(
         { name: 'Auth', value: 'Cracked' }
       )
-      await interaction.editReply({ content:'', embeds: [newEmbed], buttons: [buttons] });
+      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
     } else if (auth == 'false') {
       newEmbed.addFields(
         { name: 'Auth', value: 'Premium' }
       )
-      await interaction.editReply({ content:'', embeds: [newEmbed], buttons: [buttons] });
+      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
     } else {
       newEmbed.addFields(
         { name: 'Auth', value: 'Unknown' }
       )
-      await interaction.editReply({ content:'', embeds: [newEmbed], buttons: [buttons] });
+      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
     }
   },
 }
