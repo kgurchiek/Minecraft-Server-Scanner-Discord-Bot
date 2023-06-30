@@ -18,6 +18,8 @@ module.exports = {
   async execute(interaction) {
     const { scannedServersDB } = require('../index.js');
     const oldPlayersID = `oldPlayers${interaction.user.id}`;
+    const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
+    const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
     // Status message
     await interaction.reply("Getting a server, please wait...");
     
