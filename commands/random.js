@@ -50,6 +50,63 @@ module.exports = {
           .setStyle(ButtonStyle.Primary)
       );
 
+    var playersString = `${server.players.online}/${server.players.max}`;
+    if (server.players.sample != null) {
+      var oldString;
+      for (var i = 0; i < server.players.sample.length; i++) {
+        if (server.players.sample[i].lastSeen == server.lastSeen) {
+          oldString = playersString;
+          playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+          if (i + 1 < server.players.sample.length) playersString += '\n';
+          if (playersString.length > 1024) {
+            playersString = oldString;
+            break;
+          }
+        }
+      }
+    }
+
+    newEmbed.addFields({ name: 'Players', value: playersString })
+
+    await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
+
+    var location = await cityLookup.get(server.ip);
+    if (location == null) {
+      newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
+    } else {
+      if (location.country != null) {
+        newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
+      } else {
+        newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
+      }
+    }
+    var org = await asnLookup.get(server.ip);
+    if (org == null) {
+      newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
+    } else {
+      newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
+    }
+
+    await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
+
+    const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
+    if (auth == 'true') {
+      newEmbed.addFields(
+        { name: 'Auth', value: 'Cracked' }
+      )
+      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
+    } else if (auth == 'false') {
+      newEmbed.addFields(
+        { name: 'Auth', value: 'Premium' }
+      )
+      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
+    } else {
+      newEmbed.addFields(
+        { name: 'Auth', value: 'Unknown' }
+      )
+      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
+    }
+
     oldPlayersCollector.on('collect', async interaction => {
       var newEmbed = new EmbedBuilder()
         .setColor("#02a337")
@@ -118,62 +175,5 @@ module.exports = {
       }
       await interactionUpdate.edit({ content:'', embeds: [newEmbed], components: [buttons] });
     });
-
-    var playersString = `${server.players.online}/${server.players.max}`;
-    if (server.players.sample != null) {
-      var oldString;
-      for (var i = 0; i < server.players.sample.length; i++) {
-        if (server.players.sample[i].lastSeen == server.lastSeen) {
-          oldString = playersString;
-          playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-          if (i + 1 < server.players.sample.length) playersString += '\n';
-          if (playersString.length > 1024) {
-            playersString = oldString;
-            break;
-          }
-        }
-      }
-    }
-
-    newEmbed.addFields({ name: 'Players', value: playersString })
-
-    await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
-
-    var location = await cityLookup.get(server.ip);
-    if (location == null) {
-      newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
-    } else {
-      if (location.country != null) {
-        newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
-      } else {
-        newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
-      }
-    }
-    var org = await asnLookup.get(server.ip);
-    if (org == null) {
-      newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
-    } else {
-      newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
-    }
-
-    await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
-
-    const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
-    if (auth == 'true') {
-      newEmbed.addFields(
-        { name: 'Auth', value: 'Cracked' }
-      )
-      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
-    } else if (auth == 'false') {
-      newEmbed.addFields(
-        { name: 'Auth', value: 'Premium' }
-      )
-      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
-    } else {
-      newEmbed.addFields(
-        { name: 'Auth', value: 'Unknown' }
-      )
-      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
-    }
   },
 }

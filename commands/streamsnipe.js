@@ -44,6 +44,9 @@ module.exports = {
   async execute(interaction) {
     // Import Mongo Client
     const { scannedServersDB } = require('../index.js');
+    const oldPlayersID = `oldPlayers${interaction.user.id}`;
+    const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
+    const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
 
     // Status message
     const interactReplyMessage = await interaction.reply({ content: 'Fetching streams...', fetchReply: true });
@@ -57,8 +60,6 @@ module.exports = {
     const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
     var lastButtonPress = null;
     const mongoFilter = { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 10800 }};
-
-    // Get arguments
 
     // Creates interactable buttons
     var currentEmbed = 0;
@@ -75,6 +76,10 @@ module.exports = {
             new ButtonBuilder()
               .setCustomId(nextResultID)
               .setLabel('Next Page')
+              .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+              .setCustomId(oldPlayersID)
+              .setLabel('Show Old Players')
               .setStyle(ButtonStyle.Primary)
           );
       } else {
@@ -89,7 +94,11 @@ module.exports = {
               .setCustomId(nextResultID)
               .setLabel('Next Page')
               .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true)
+              .setDisabled(true),
+            new ButtonBuilder()
+              .setCustomId(oldPlayersID)
+              .setLabel('Show Old Players')
+              .setStyle(ButtonStyle.Primary)
           );
       }
     
@@ -252,6 +261,141 @@ module.exports = {
             }
           }
         }
+
+        newEmbed.addFields(
+          { name: 'Players', value: playersString },
+          { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
+        )
+  
+        await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+        const streamLinks = [];
+        var thumbnail;
+        for (const player of server.players.sample) {
+          if (streamers.includes(player.name)) {
+            streamLinks.push(`https://twitch.tv/${streams[streamers.indexOf(player.name)].user_login}`);
+            if (!thumbnail) thumbnail = streams[streamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+          }
+        }
+        for (var i = 0; i < streamLinks.length; i++) {
+          newEmbed.addFields(
+            { name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] }
+          )
+        }
+        newEmbed.setImage(thumbnail);
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+        var location = await cityLookup.get(server.ip);
+        if (location == null) {
+          newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
+        } else {
+          if (location.country != null) {
+            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
+          } else {
+            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
+          }
+        }
+        var org = await asnLookup.get(server.ip);
+        if (org == null) {
+          newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
+        } else {
+          newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
+        }
+
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+
+        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
+        if (auth == 'true') {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Cracked' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        } else if (auth == 'false') {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Premium' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        } else {
+          newEmbed.addFields(
+            { name: 'Auth', value: 'Unknown' }
+          )
+          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        }
+      });
+
+      // Event listener for 'Show Old Players' button
+      oldPlayersCollector.on('collect', async interaction => {
+        lastButtonPress = new Date();
+
+        if (totalResults > 1) {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('Last Page')
+                .setStyle(ButtonStyle.Primary),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('Next Page')
+                .setStyle(ButtonStyle.Primary),
+              new ButtonBuilder()
+                .setCustomId(oldPlayersID)
+                .setLabel('Show Old Players')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+        } else {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('Last Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('Next Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(oldPlayersID)
+                .setLabel('Show Old Players')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+        }
+
+        const server = (await scannedServersDB.find(mongoFilter).skip(currentEmbed).limit(1).toArray())[0];
+
+        var newEmbed = new EmbedBuilder()
+          .setColor("#02a337")
+          .setTitle('Search Results')
+          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
+          .addFields(
+            { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
+            { name: 'IP', value: server.ip },
+            { name: 'Port', value: (server.port + '') },
+            { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
+            { name: 'Description', value: getDescription(server.description) }
+          )
+          .setTimestamp();
+
+        var playersString = `${server.players.online}/${server.players.max}`;
+        if (server.players.sample != null) {
+          var oldString;
+          for (var i = 0; i < server.players.sample.length; i++) {
+            oldString = playersString;
+            playersString += `\n${server.players.sample[i].name} ${server.players.sample[i].lastSeen == server.lastSeen ? '`online`' : '<t:' + server.players.sample[i].lastSeen + ':R>'}`;
+            if (i + 1 < server.players.sample.length) playersString += '\n';
+            if (playersString.length > 1020 && i + 1 < server.players.sample.length || playersString.length > 1024) {
+              playersString = oldString + '\n...';
+              break;
+            }
+          }
+        }
+        newEmbed.addFields({ name: 'Players', value: playersString })
+        const interactionUpdate = await interaction.update({ content:'', embeds: [newEmbed], components: [buttons] });
 
         newEmbed.addFields(
           { name: 'Players', value: playersString },
