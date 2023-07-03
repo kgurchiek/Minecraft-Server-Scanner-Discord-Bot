@@ -270,7 +270,7 @@ module.exports = {
 
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
-        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
+        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
         if (auth == 'true') {
           newEmbed.addFields(
             { name: 'Auth', value: 'Cracked' }
@@ -365,7 +365,7 @@ module.exports = {
 
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
-        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
+        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
         if (auth == 'true') {
           newEmbed.addFields(
             { name: 'Auth', value: 'Cracked' }
@@ -490,7 +490,7 @@ module.exports = {
 
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
-        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
+        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
         if (auth == 'true') {
           newEmbed.addFields(
             { name: 'Auth', value: 'Cracked' }
@@ -710,7 +710,7 @@ module.exports = {
 
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
-      const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}`)).text();
+      const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
       if (auth == 'true') {
         newEmbed.addFields(
           { name: 'Auth', value: 'Cracked' }

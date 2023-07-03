@@ -86,7 +86,7 @@ module.exports = {
 
           await interaction.editReply({ content: '', embeds: [newEmbed] });
           
-          const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${ip}&port=${port}`)).text();
+          const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${ip}&port=${port}&protocol=${response.version.protocol}`)).text();
           if (auth == 'true') {
             newEmbed.addFields(
               { name: 'Auth', value: 'Cracked' }
