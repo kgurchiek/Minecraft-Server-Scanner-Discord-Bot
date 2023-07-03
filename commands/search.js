@@ -385,6 +385,44 @@ module.exports = {
       });
 
       oldPlayersCollector.on('collect', async interaction => {
+        if (totalResults > 1) {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('Last Page')
+                .setStyle(ButtonStyle.Primary),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('Next Page')
+                .setStyle(ButtonStyle.Primary),
+              new ButtonBuilder()
+                .setCustomId(oldPlayersID)
+                .setLabel('Show Old Players')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+        } else {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('Last Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('Next Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(oldPlayersID)
+                .setLabel('Show Old Players')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+        }
+        
         var newEmbed = new EmbedBuilder()
           .setColor("#02a337")
           .setTitle('Search Results')
