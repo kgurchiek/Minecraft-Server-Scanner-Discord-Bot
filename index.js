@@ -2,9 +2,7 @@ const config = require("./config.json");
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder, ActivityType } = require('discord.js');
-const { MongoClient } = require('mongodb');
-const mongoClient = new MongoClient("mongodb+srv://public:public@mcss.4nrik58.mongodb.net/?retryWrites=true&w=majority");
-const scannedServersDB = mongoClient.db("MCSS").collection("scannedServers");
+const { POST } = require('./commonFunctions.js');
 
 // Initialize Discord.js (Along with the commands)
 const client = new Client({ partials: [Partials.Channel], intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
@@ -23,13 +21,17 @@ for (const file of commandFiles) {
 }
 
 // When the client is ready, log a message to the console (NOT in the Discord server)
-client.once(Events.ClientReady, () => {
+client.once(Events.ClientReady, async () => {
   // Logs how many servers the bot is logged in to
   console.log(`[Bot]: ${client.user.tag}`)
   console.log("[Servers]: " + client.guilds.cache.size);
-  (async () => { client.user.setPresence({ activities: [{ name: `${await scannedServersDB.countDocuments()} Minecraft servers`, type: ActivityType.Watching }]}); })();
+  var totalServers = parseInt(await POST('https://api.cornbread2100.com/countServers', {}));
+  module.exports.totalServers = totalServers;
+  client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
   setInterval(async () => {
-    client.user.setPresence({ activities: [{ name: `${await scannedServersDB.countDocuments()} Minecraft servers`, type: ActivityType.Watching }]});
+    var totalServers = parseInt(await POST('https://api.cornbread2100.com/countServers', {}));
+    module.exports.totalServers = totalServers;
+    client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
   }, 60000)
 });
 
@@ -66,7 +68,4 @@ client.on(Events.InteractionCreate, async interaction => {
 // Log the bot into the Discord API
 client.login(config.token);
 
-module.exports = {
-  client,
-  scannedServersDB
-}
+module.exports.client = client;

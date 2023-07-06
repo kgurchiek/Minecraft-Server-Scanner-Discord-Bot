@@ -1,6 +1,6 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion } = require('../commonFunctions.js');
+const { getDescription, getVersion, POST } = require('../commonFunctions.js');
 const countryCodes = require('../countryCodes.json');
 const buttonTimeout = 60; // In seconds
 const maxmind = require('maxmind');
@@ -85,9 +85,6 @@ module.exports = {
     );
   },
   async execute(interaction) {
-    // Import Mongo Client
-    const { scannedServersDB } = require('../index.js');
-
     // Status message
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
 
@@ -211,7 +208,7 @@ module.exports = {
         currentEmbed++;
         if (currentEmbed == totalResults) currentEmbed = 0;
 
-        const server = (await (await scannedServersDB.find(mongoFilter).skip(currentEmbed).limit(1)).toArray())[0];
+        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
 
         // Updates UI when 'Next Page' pressed
         newEmbed = new EmbedBuilder()
@@ -306,7 +303,7 @@ module.exports = {
         currentEmbed--;
         if (currentEmbed == -1) currentEmbed = totalResults - 1;
 
-        const server = (await (await scannedServersDB.find(mongoFilter).skip(currentEmbed).limit(1)).toArray())[0];
+        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
     
         // Updates UI when 'Last Page' pressed
         var newEmbed = new EmbedBuilder()
@@ -434,7 +431,7 @@ module.exports = {
         const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [] });
         lastButtonPress = new Date();
 
-        const server = (await (await scannedServersDB.find(mongoFilter).skip(currentEmbed).limit(1)).toArray())[0];
+        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
         // Updates UI when 'Last Page' pressed
         var newEmbed = new EmbedBuilder()
           .setColor("#02a337")
@@ -646,13 +643,13 @@ module.exports = {
     }
     if (country.consider) mongoFilter['geo.country'] = country.value;
 
-    const totalResults = await scannedServersDB.countDocuments(mongoFilter);
+    const totalResults = parseInt(await POST('https://api.cornbread2100.com/countServers', mongoFilter));
 
     // If at least one server was found, send the message
     if (totalResults > 0) {
       var buttons = createButtons(totalResults);
 
-      const server = (await (await scannedServersDB.find(mongoFilter).limit(1)).toArray())[0];
+      const server = (await POST('https://api.cornbread2100.com/servers?limit=1', mongoFilter))[0];
       var newEmbed = new EmbedBuilder()
         .setColor("#02a337")
         .setTitle('Search Results')

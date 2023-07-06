@@ -1,6 +1,6 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion } = require('../commonFunctions.js')
+const { getDescription, getVersion, POST } = require('../commonFunctions.js')
 const maxmind = require('maxmind');
 var cityLookup;
 var asnLookup;
@@ -16,7 +16,6 @@ module.exports = {
     .setName('random')
 	  .setDescription('Gets a random online Minecraft server'),
   async execute(interaction) {
-    const { scannedServersDB } = require('../index.js');
     const oldPlayersID = `oldPlayers${interaction.user.id}`;
     const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
     const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
@@ -24,9 +23,9 @@ module.exports = {
     await interaction.reply("Getting a server, please wait...");
     
     // Get a random server from the database
-    const totalServers = await scannedServersDB.countDocuments({ 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }});
+    const totalServers = parseInt(await POST('https://api.cornbread2100.com/countServers', { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}));
     var index = Math.floor((Math.random() * totalServers));
-    const server = (await (await scannedServersDB.find({ 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}).skip(index).limit(1)).toArray())[0];
+    const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${index}`, { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}))[0];
     var newEmbed = new EmbedBuilder()
       .setColor("#02a337")
       .setTitle('Random Server')

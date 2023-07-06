@@ -1,5 +1,6 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { POST } = require('../commonFunctions.js');
 
 module.exports = {
   // Sets up the command
@@ -7,13 +8,12 @@ module.exports = {
     .setName('stats')
     .setDescription('Sends helpful info about the bot'),
   async execute(interaction) {
-    const { client, scannedServersDB } = require('../index.js');
+    const { client, totalServers } = require('../index.js');
 
     // Status message
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
 
     const userTag = await client.users.fetch("720658048611516559");
-    const totalServers = await scannedServersDB.countDocuments();
     var totalSeconds = (interaction.client.uptime / 1000);
     const days = Math.floor(totalSeconds / 86400);
     totalSeconds %= 86400;
