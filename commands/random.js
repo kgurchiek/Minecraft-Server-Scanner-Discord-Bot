@@ -1,6 +1,7 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getDescription, getVersion, POST } = require('../commonFunctions.js')
+const buttonTimeout = 60;
 const maxmind = require('maxmind');
 var cityLookup;
 var asnLookup;
@@ -9,6 +10,16 @@ var asnLookup;
   asnLookup = await maxmind.open('./GeoLite2-ASN.mmdb');
 })();
 
+function timeSinceDate(date1) {
+  if (date1 == null) {
+    date1 = new Date();
+  }
+  var date2 = new Date();
+  var date1Total = date1.getSeconds() + date1.getMinutes() * 60 + date1.getHours() * 3600 + date1.getDay() * 86400;
+  var date2Total = date2.getSeconds() + date2.getMinutes() * 60 + date2.getHours() * 3600 + date2.getDay() * 86400;
+
+  return date2Total - date1Total;
+}
 
 module.exports = {
   // Define 'random' command
@@ -16,11 +27,12 @@ module.exports = {
     .setName('random')
 	  .setDescription('Gets a random online Minecraft server'),
   async execute(interaction) {
+    var lastButtonPress = new Date();
     const oldPlayersID = `oldPlayers${interaction.user.id}`;
     const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
     const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
     // Status message
-    await interaction.reply("Getting a server, please wait...");
+    const interactionReplyMessage = await interaction.reply("Getting a server, please wait...");
     
     // Get a random server from the database
     const totalServers = parseInt(await POST('https://api.cornbread2100.com/countServers', { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}));
@@ -32,7 +44,7 @@ module.exports = {
       .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
       .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
       .addFields(
-        { name:  `Server ${index + 1}/${totalServers}`, value: ' ' },
+        { name:  `Server ${index}/${totalServers}`, value: ' ' },
         { name: 'IP', value: server.ip },
         { name: 'Port', value: String(server.port) },
         { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
@@ -67,7 +79,7 @@ module.exports = {
 
     newEmbed.addFields({ name: 'Players', value: playersString })
 
-    await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
+    await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
 
     var location = await cityLookup.get(server.ip);
     if (location == null) {
@@ -86,27 +98,28 @@ module.exports = {
       newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
     }
 
-    await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
+    await interactionReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
     const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
     if (auth == 'true') {
       newEmbed.addFields(
         { name: 'Auth', value: 'Cracked' }
       )
-      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
+      await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
     } else if (auth == 'false') {
       newEmbed.addFields(
         { name: 'Auth', value: 'Premium' }
       )
-      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
+      await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
     } else {
       newEmbed.addFields(
         { name: 'Auth', value: 'Unknown' }
       )
-      await interaction.editReply({ content:'', embeds: [newEmbed], components: [buttons] });
+      await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
     }
 
     oldPlayersCollector.on('collect', async interaction => {
+      lastButtonPress = new Date();
       var newEmbed = new EmbedBuilder()
         .setColor("#02a337")
         .setTitle('Random Server')
@@ -144,7 +157,7 @@ module.exports = {
         }
       }
       newEmbed.addFields({ name: 'Players', value: playersString })
-      const interactionUpdate = await interaction.update({ content:'', embeds: [newEmbed], components: [buttons] });
+      await interaction.update({ content:'', embeds: [newEmbed], components: [buttons] });
 
       var location = await cityLookup.get(server.ip);
       if (location == null) {
@@ -162,7 +175,7 @@ module.exports = {
       } else {
         newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
       }
-      await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+      await interactionReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
       const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
       if (auth == 'true') {
@@ -172,7 +185,28 @@ module.exports = {
       } else {
         newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
       }
-      await interactionUpdate.edit({ content:'', embeds: [newEmbed], components: [buttons] });
+      await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
     });
+    
+    
+    // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
+    async function buttonTimeoutCheck() {
+      if (timeSinceDate(lastButtonPress) >= buttonTimeout) {
+        var buttons = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId(oldPlayersID)
+            .setLabel('Show Old Players')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(true)
+          );
+        await interactionReplyMessage.edit({ components: [buttons] });
+        
+        oldPlayersCollector.stop();
+      } else {
+        setTimeout(function() { buttonTimeoutCheck() }, 500);
+      }
+    }
+    buttonTimeoutCheck();
   },
 }
