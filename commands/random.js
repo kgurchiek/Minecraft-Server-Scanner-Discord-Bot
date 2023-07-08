@@ -78,45 +78,16 @@ module.exports = {
     }
 
     newEmbed.addFields({ name: 'Players', value: playersString })
-
     await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
 
     var location = await cityLookup.get(server.ip);
-    if (location == null) {
-      newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
-    } else {
-      if (location.country != null) {
-        newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
-      } else {
-        newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
-      }
-    }
+    newEmbed.addFields({ name: 'Country: ', value: location == null ? 'Unknown' : location.country == null ? `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` : `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
     var org = await asnLookup.get(server.ip);
-    if (org == null) {
-      newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
-    } else {
-      newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
-    }
-
-    await interactionReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+    newEmbed.addFields({ name: 'Organization: ', value: org == null ? 'Unknown' : org.autonomous_system_organization });
 
     const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-    if (auth == 'true') {
-      newEmbed.addFields(
-        { name: 'Auth', value: 'Cracked' }
-      )
-      await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
-    } else if (auth == 'false') {
-      newEmbed.addFields(
-        { name: 'Auth', value: 'Premium' }
-      )
-      await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
-    } else {
-      newEmbed.addFields(
-        { name: 'Auth', value: 'Unknown' }
-      )
-      await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
-    }
+    newEmbed.addFields({ name: 'Auth', value: auth == 'true' ? 'Cracked' : auth == 'false' ? 'Premium' : 'Unknown' })
+    await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
 
     oldPlayersCollector.on('collect', async interaction => {
       lastButtonPress = new Date();
@@ -157,35 +128,15 @@ module.exports = {
         }
       }
       newEmbed.addFields({ name: 'Players', value: playersString })
-      await interaction.update({ content:'', embeds: [newEmbed], components: [buttons] });
 
       var location = await cityLookup.get(server.ip);
-      if (location == null) {
-        newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
-      } else {
-        if (location.country != null) {
-          newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
-        } else {
-          newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
-        }
-      }
+      newEmbed.addFields({ name: 'Country: ', value: location == null ? 'Unknown' : location.country == null ? `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` : `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
       var org = await asnLookup.get(server.ip);
-      if (org == null) {
-        newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
-      } else {
-        newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
-      }
-      await interactionReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+      newEmbed.addFields({ name: 'Organization: ', value: org == null ? 'Unknown' : org.autonomous_system_organization });
 
       const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-      if (auth == 'true') {
-        newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
-      } else if (auth == 'false') {
-        newEmbed.addFields({ name: 'Auth', value: 'Premium' })
-      } else {
-        newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
-      }
-      await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
+      newEmbed.addFields({ name: 'Auth', value: auth == 'true' ? 'Cracked' : auth == 'false' ? 'Premium' : 'Unknown' })
+      await interaction.update({ content:'', embeds: [newEmbed], components: [buttons] });
     });
     
     
