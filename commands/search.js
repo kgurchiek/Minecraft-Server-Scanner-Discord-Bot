@@ -123,11 +123,11 @@ module.exports = {
       consider: false
     };
     var hasImage = {
-      value: 'false',
+      value: false,
       consider: false
     };
     var description = {
-      value: 'false',
+      value: '',
       consider: false
     };
     var player = {
@@ -135,7 +135,7 @@ module.exports = {
       consider: false
     };
     var hasPlayerList = {
-      value: 'Steve',
+      value: false,
       consider: false
     };
     var seenAfter = {
@@ -618,8 +618,13 @@ module.exports = {
       mongoFilter['players.sample'] = { '$exists': true, "$elemMatch": { "name": player.value }};
     }
     if (hasPlayerList.consider) {
-      if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = { '$exists': true };
-      mongoFilter['players.sample']['$not'] = { '$size': 0 };
+      if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = {};
+      mongoFilter['players.sample']['$exists'] = hasPlayerList.value;
+      if (hasPlayerList.value) {
+        mongoFilter['players.sample']['$not'] = { '$size': 0 };
+      } else {
+        mongoFilter['players.sample']['$size'] = 0;
+      }
     }
     if (seenAfter.consider) mongoFilter['lastSeen'] = { '$gte': seenAfter.value };
     if (ipRange.consider) {
