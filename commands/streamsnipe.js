@@ -118,6 +118,50 @@ module.exports = {
 
         const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
 
+        if (server.players.sample != null && Array.isArray(server.players.sample)) {
+          for (const player of server.players.sample) {
+            if (player.lastSeen != server.lastSeen) {
+              hasOldPlayers = true;
+              break;
+            }
+          }
+        }
+
+        if (totalResults > 1) {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('Last Page')
+                .setStyle(ButtonStyle.Primary),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('Next Page')
+                .setStyle(ButtonStyle.Primary)
+            );
+        } else {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('Last Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('Next Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+        }
+        if (hasOldPlayers) {
+          buttons.addComponents(
+            new ButtonBuilder()
+            .setCustomId(oldPlayersID)
+            .setLabel('Show Old Players')
+            .setStyle(ButtonStyle.Primary))
+        }
+
         newEmbed = new EmbedBuilder()
           .setColor("#02a337")
           .setTitle('Search Results')
@@ -169,7 +213,6 @@ module.exports = {
           )
         }
         newEmbed.setImage(thumbnail);
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
         var location = await cityLookup.get(server.ip);
         if (location == null) {
@@ -188,25 +231,15 @@ module.exports = {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
 
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-
         const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
         if (auth == 'true') {
-          newEmbed.addFields(
-            { name: 'Auth', value: 'Cracked' }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+          newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
         } else if (auth == 'false') {
-          newEmbed.addFields(
-            { name: 'Auth', value: 'Premium' }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+          newEmbed.addFields({ name: 'Auth', value: 'Premium' })
         } else {
-          newEmbed.addFields(
-            { name: 'Auth', value: 'Unknown' }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+          newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
         }
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       // Event listener for 'Last Page' button
@@ -228,6 +261,50 @@ module.exports = {
 
         const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
     
+        if (server.players.sample != null && Array.isArray(server.players.sample)) {
+          for (const player of server.players.sample) {
+            if (player.lastSeen != server.lastSeen) {
+              hasOldPlayers = true;
+              break;
+            }
+          }
+        }
+
+        if (totalResults > 1) {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('Last Page')
+                .setStyle(ButtonStyle.Primary),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('Next Page')
+                .setStyle(ButtonStyle.Primary)
+            );
+        } else {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('Last Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('Next Page')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+        }
+        if (hasOldPlayers) {
+          buttons.addComponents(
+            new ButtonBuilder()
+            .setCustomId(oldPlayersID)
+            .setLabel('Show Old Players')
+            .setStyle(ButtonStyle.Primary))
+        }
+
         // Updates UI when 'Last Page' pressed
         var newEmbed = new EmbedBuilder()
           .setColor("#02a337")
@@ -280,7 +357,6 @@ module.exports = {
           )
         }
         newEmbed.setImage(thumbnail);
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
         var location = await cityLookup.get(server.ip);
         if (location == null) {
@@ -299,30 +375,31 @@ module.exports = {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
 
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-
         const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
         if (auth == 'true') {
-          newEmbed.addFields(
-            { name: 'Auth', value: 'Cracked' }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+          newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
         } else if (auth == 'false') {
-          newEmbed.addFields(
-            { name: 'Auth', value: 'Premium' }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+          newEmbed.addFields({ name: 'Auth', value: 'Premium' })
         } else {
-          newEmbed.addFields(
-            { name: 'Auth', value: 'Unknown' }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+          newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
         }
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
 
       // Event listener for 'Show Old Players' button
       oldPlayersCollector.on('collect', async interaction => {
         lastButtonPress = new Date();
+
+        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
+
+        if (server.players.sample != null && Array.isArray(server.players.sample)) {
+          for (const player of server.players.sample) {
+            if (player.lastSeen != server.lastSeen) {
+              hasOldPlayers = true;
+              break;
+            }
+          }
+        }
 
         if (totalResults > 1) {
           buttons = new ActionRowBuilder()
@@ -360,8 +437,6 @@ module.exports = {
             .setDisabled(true))
         }
 
-        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
-
         var newEmbed = new EmbedBuilder()
           .setColor("#02a337")
           .setTitle('Search Results')
@@ -379,25 +454,22 @@ module.exports = {
         var playersString = `${server.players.online}/${server.players.max}`;
         if (server.players.sample != null) {
           var oldString;
-          for (var i = 0; i < server.players.sample.length; i++) {
+          const sortedPlayers = [...server.players.sample]
+          sortedPlayers.sort((a, b) => b.lastSeen - a.lastSeen);
+          for (var i = 0; i < sortedPlayers.length; i++) {
             oldString = playersString;
-            playersString += `\n${server.players.sample[i].name} ${server.players.sample[i].lastSeen == server.lastSeen ? '`online`' : '<t:' + server.players.sample[i].lastSeen + ':R>'}`;
-            if (i + 1 < server.players.sample.length) playersString += '\n';
-            if (playersString.length > 1020 && i + 1 < server.players.sample.length || playersString.length > 1024) {
+            playersString += `\n${sortedPlayers[i].name} ${sortedPlayers[i].lastSeen == server.lastSeen ? '`online`' : '<t:' + sortedPlayers[i].lastSeen + ':R>'}`;
+            if (playersString.length > 1020 && i + 1 < sortedPlayers.length || playersString.length > 1024) {
               playersString = oldString + '\n...';
               break;
             }
           }
         }
-        newEmbed.addFields({ name: 'Players', value: playersString })
-        const interactionUpdate = await interaction.update({ content:'', embeds: [newEmbed], components: [buttons] });
-
         newEmbed.addFields(
           { name: 'Players', value: playersString },
           { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
         )
-  
-        await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
 
         const streamLinks = [];
         var thumbnail;
@@ -413,7 +485,6 @@ module.exports = {
           )
         }
         newEmbed.setImage(thumbnail);
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
         var location = await cityLookup.get(server.ip);
         if (location == null) {
@@ -432,25 +503,17 @@ module.exports = {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
 
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-
         const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
         if (auth == 'true') {
-          newEmbed.addFields(
-            { name: 'Auth', value: 'Cracked' }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+          newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
         } else if (auth == 'false') {
-          newEmbed.addFields(
-            { name: 'Auth', value: 'Premium' }
-          )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+          newEmbed.addFields({ name: 'Auth', value: 'Premium' })
         } else {
           newEmbed.addFields(
             { name: 'Auth', value: 'Unknown' }
           )
-          await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
         }
+        await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       return buttons;
@@ -495,7 +558,6 @@ module.exports = {
           }
         }
       }
-
       
       var buttons = createButtons(totalResults);
 
@@ -551,7 +613,6 @@ module.exports = {
         )
       }
       newEmbed.setImage(thumbnail);
-      await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
       var location = await cityLookup.get(server.ip);
       if (location == null) {
@@ -570,25 +631,15 @@ module.exports = {
         newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
       }
 
-      await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-
       const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
       if (auth == 'true') {
-        newEmbed.addFields(
-          { name: 'Auth', value: 'Cracked' }
-        )
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
       } else if (auth == 'false') {
-        newEmbed.addFields(
-          { name: 'Auth', value: 'Premium' }
-        )
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        newEmbed.addFields({ name: 'Auth', value: 'Premium' })
       } else {
-        newEmbed.addFields(
-          { name: 'Auth', value: 'Unknown' }
-        )
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
       }
+      await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
     } else {
       await interactReplyMessage.edit("no matches could be found");
     } 
