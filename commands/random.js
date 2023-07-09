@@ -38,6 +38,25 @@ module.exports = {
     const totalServers = parseInt(await POST('https://api.cornbread2100.com/countServers', { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}));
     var index = Math.floor((Math.random() * totalServers));
     const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${index}`, { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}))[0];
+    
+    var hasOldPlayers = false;
+    if (server.players.sample != null && Array.isArray(server.players.sample)) {
+      for (const player of server.players.sample) {
+        if (player.lastSeen != server.lastSeen) {
+          hasOldPlayers = true;
+          break;
+        }
+      }
+    }
+
+    var buttons = new ActionRowBuilder()
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId(oldPlayersID)
+          .setLabel('Show Old Players')
+          .setStyle(ButtonStyle.Primary)
+      );
+    
     var newEmbed = new EmbedBuilder()
       .setColor("#02a337")
       .setTitle('Random Server')
@@ -51,15 +70,6 @@ module.exports = {
         { name: 'Description', value: getDescription(server.description) }
       )
       .setTimestamp()
-    
-
-    var buttons = new ActionRowBuilder()
-      .addComponents(
-        new ButtonBuilder()
-          .setCustomId(oldPlayersID)
-          .setLabel('Show Old Players')
-          .setStyle(ButtonStyle.Primary)
-      );
 
     var playersString = `${server.players.online}/${server.players.max}`;
     if (server.players.sample != null) {
@@ -78,7 +88,7 @@ module.exports = {
     }
 
     newEmbed.addFields({ name: 'Players', value: playersString })
-    await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
+    await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: hasOldPlayers ? [buttons] : [] });
 
     var location = await cityLookup.get(server.ip);
     newEmbed.addFields({ name: 'Country: ', value: location == null ? 'Unknown' : location.country == null ? `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` : `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
@@ -87,7 +97,7 @@ module.exports = {
 
     const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
     newEmbed.addFields({ name: 'Auth', value: auth == 'true' ? 'Cracked' : auth == 'false' ? 'Premium' : 'Unknown' })
-    await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: [buttons] });
+    await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: hasOldPlayers ? [buttons] : [] });
 
     oldPlayersCollector.on('collect', async interaction => {
       lastButtonPress = new Date();
@@ -136,7 +146,7 @@ module.exports = {
 
       const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
       newEmbed.addFields({ name: 'Auth', value: auth == 'true' ? 'Cracked' : auth == 'false' ? 'Premium' : 'Unknown' })
-      await interaction.update({ content:'', embeds: [newEmbed], components: [buttons] });
+      await interaction.update({ content:'', embeds: [newEmbed], components: hasOldPlayers ? [buttons] : [] });
     });
     
     
@@ -158,6 +168,6 @@ module.exports = {
         setTimeout(function() { buttonTimeoutCheck() }, 500);
       }
     }
-    buttonTimeoutCheck();
+    if (hasOldPlayers) buttonTimeoutCheck();
   },
 }
