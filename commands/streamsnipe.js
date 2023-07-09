@@ -198,6 +198,7 @@ module.exports = {
         )
 
         await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        const oldPage = currentEmbed;
 
         const streamLinks = [];
         var thumbnail;
@@ -239,7 +240,7 @@ module.exports = {
         } else {
           newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
         }
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        if (currentEmbed == oldPage) await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       // Event listener for 'Last Page' button
@@ -342,6 +343,7 @@ module.exports = {
         )
   
         await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        const oldPage = currentEmbed;
 
         const streamLinks = [];
         var thumbnail;
@@ -383,7 +385,7 @@ module.exports = {
         } else {
           newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
         }
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        if (currentEmbed == oldPage) await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
 
       // Event listener for 'Show Old Players' button
@@ -470,6 +472,7 @@ module.exports = {
           { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
         )
         const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
+        const oldPage = currentEmbed;
 
         const streamLinks = [];
         var thumbnail;
@@ -513,7 +516,7 @@ module.exports = {
             { name: 'Auth', value: 'Unknown' }
           )
         }
-        await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        if (currentEmbed == oldPage) await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       return buttons;
