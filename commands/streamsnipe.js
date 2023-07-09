@@ -61,6 +61,7 @@ module.exports = {
 
     // Creates interactable buttons
     var currentEmbed = 0;
+    var hasOldPlayers = false;
     function createButtons(totalResults) {
       var buttons;
     
@@ -74,10 +75,6 @@ module.exports = {
             new ButtonBuilder()
               .setCustomId(nextResultID)
               .setLabel('Next Page')
-              .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-              .setCustomId(oldPlayersID)
-              .setLabel('Show Old Players')
               .setStyle(ButtonStyle.Primary)
           );
       } else {
@@ -92,12 +89,15 @@ module.exports = {
               .setCustomId(nextResultID)
               .setLabel('Next Page')
               .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true),
-            new ButtonBuilder()
-              .setCustomId(oldPlayersID)
-              .setLabel('Show Old Players')
-              .setStyle(ButtonStyle.Primary)
+              .setDisabled(true)
           );
+      }
+      if (hasOldPlayers) {
+        buttons.addComponents(
+          new ButtonBuilder()
+          .setCustomId(oldPlayersID)
+          .setLabel('Show Old Players')
+          .setStyle(ButtonStyle.Primary))
       }
     
       // Event listener for 'Next Page' button
@@ -334,12 +334,7 @@ module.exports = {
               new ButtonBuilder()
                 .setCustomId(nextResultID)
                 .setLabel('Next Page')
-                .setStyle(ButtonStyle.Primary),
-              new ButtonBuilder()
-                .setCustomId(oldPlayersID)
-                .setLabel('Show Old Players')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true)
+                .setStyle(ButtonStyle.Primary)
             );
         } else {
           buttons = new ActionRowBuilder()
@@ -353,13 +348,16 @@ module.exports = {
                 .setCustomId(nextResultID)
                 .setLabel('Next Page')
                 .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setCustomId(oldPlayersID)
-                .setLabel('Show Old Players')
-                .setStyle(ButtonStyle.Secondary)
                 .setDisabled(true)
             );
+        }
+        if (hasOldPlayers) {
+          buttons.addComponents(
+            new ButtonBuilder()
+            .setCustomId(oldPlayersID)
+            .setLabel('Show Old Players')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(true))
         }
 
         const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
@@ -487,9 +485,20 @@ module.exports = {
 
     // If at least one server was found, send the message
     if (totalResults > 0) {
+      const server = (await POST('https://api.cornbread2100.com/servers?limit=1', mongoFilter))[0];
+
+      if (server.players.sample != null && Array.isArray(server.players.sample)) {
+        for (const player of server.players.sample) {
+          if (player.lastSeen != server.lastSeen) {
+            hasOldPlayers = true;
+            break;
+          }
+        }
+      }
+
+      
       var buttons = createButtons(totalResults);
 
-      const server = (await POST('https://api.cornbread2100.com/servers?limit=1', mongoFilter))[0];
       var newEmbed = new EmbedBuilder()
         .setColor("#02a337")
         .setTitle('Search Results')
@@ -601,6 +610,14 @@ module.exports = {
               .setStyle(ButtonStyle.Secondary)
               .setDisabled(true)
           );
+        if (hasOldPlayers) {
+          buttons.addComponents(
+            new ButtonBuilder()
+            .setCustomId(oldPlayersID)
+            .setLabel('Show Old Players')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(true))
+        }
         await interactReplyMessage.edit({ content: '', components: [buttons] });
 
         searchNextResultCollector.stop();
