@@ -620,11 +620,7 @@ module.exports = {
     if (hasPlayerList.consider) {
       if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = {};
       mongoFilter['players.sample']['$exists'] = hasPlayerList.value;
-      if (hasPlayerList.value) {
-        mongoFilter['players.sample']['$not'] = { '$size': 0 };
-      } else {
-        mongoFilter['players.sample']['$size'] = 0;
-      }
+      if (hasPlayerList.value) mongoFilter['players.sample']['$not'] = { '$size': 0 };
     }
     if (seenAfter.consider) mongoFilter['lastSeen'] = { '$gte': seenAfter.value };
     if (ipRange.consider) {
