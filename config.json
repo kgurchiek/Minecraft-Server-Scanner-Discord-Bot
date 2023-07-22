@@ -2,5 +2,5 @@
 	"clientId": "YOUR CLIENT ID",
 	"token": "YOUR BOT TOKEN",
 	"twitchClientId": "TWITCH CLIENT ID",
-	"twitchAccessToken": "TWITCH ACCESS TOKEN"
+	"twitchClientSecret": "TWITCH CLIENT SECRET"
 }

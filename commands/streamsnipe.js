@@ -5,9 +5,26 @@ const config = require('../config.json');
 const languages = require('../languages.json');
 const buttonTimeout = 60; // In seconds
 const maxmind = require('maxmind');
+var twitchAccessToken;
+var accessTokenTimeout = 0;
 var cityLookup;
 var asnLookup;
+
+async function getAccessToken() {
+  if (Math.floor((new Date()).getTime() / 1000) >= accessTokenTimeout - 21600) {
+    const twitchResponse = (await POST('https://id.twitch.tv/oauth2/token', {
+      client_id: config.twitchClientId,
+      client_secret: config.twitchClientSecret,
+      grant_type: 'client_credentials'
+    }));
+    twitchAccessToken = twitchResponse.access_token;
+    accessTokenTimeout = twitchResponse.expires_in;
+  }
+  setTimeout(getAccessToken, 7200);
+}
+
 (async () => {
+  getAccessToken();
   cityLookup = await maxmind.open('./GeoLite2-City.mmdb');
   asnLookup = await maxmind.open('./GeoLite2-ASN.mmdb');
 })();
@@ -527,7 +544,7 @@ module.exports = {
       headers: {
         'Content-Type': 'application/json',
         'Client-ID': config.twitchClientId,
-        'Authorization': `Bearer ${config.twitchAccessToken}`
+        'Authorization': `Bearer ${twitchAccessToken}`
       }
     };
     var response = await (await fetch('https://api.twitch.tv/helix/streams?game_id=27471&first=100', options)).json();
