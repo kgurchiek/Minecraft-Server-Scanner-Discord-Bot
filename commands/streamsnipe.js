@@ -12,13 +12,14 @@ var asnLookup;
 
 async function getAccessToken() {
   if (Math.floor((new Date()).getTime() / 1000) >= accessTokenTimeout - 21600) {
+    console.log('Refreshing access token');
     const twitchResponse = (await POST('https://id.twitch.tv/oauth2/token', {
       client_id: config.twitchClientId,
       client_secret: config.twitchClientSecret,
       grant_type: 'client_credentials'
     }));
     twitchAccessToken = twitchResponse.access_token;
-    accessTokenTimeout = twitchResponse.expires_in;
+    accessTokenTimeout = (new Date()).getTime() / 1000 + twitchResponse.expires_in;
   }
   setTimeout(getAccessToken, 7200);
 }
