@@ -2,6 +2,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getDescription, getVersion, POST } = require('../commonFunctions.js');
 const countryCodes = require('../countryCodes.json');
+const orgs = require('../orgs.json');
 const buttonTimeout = 60; // In seconds
 const maxmind = require('maxmind');
 var cityLookup;
@@ -76,12 +77,20 @@ module.exports = {
       option
         .setName("country")
         .setDescription("The country the server is hosted in")
+        .setAutocomplete(true))
+    .addStringOption(option =>
+      option
+        .setName("org")
+        .setDescription("The organization hosting the server")
         .setAutocomplete(true)),
   async autocomplete(interaction) {
-    const focusedValue = interaction.options.getFocused();
-    const filtered = countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.toLowerCase())).splice(0, 25);
+    const focusedValue = interaction.options.getFocused(true);
+    console.log(focusedValue.name);
+    var filtered;
+    if (focusedValue.name == 'country') filtered = countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25);
+    if (focusedValue.name == 'org') filtered = orgs.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25);
     await interaction.respond(
-      filtered.map(choice => ({ name: choice.name, value: choice.code })),
+      filtered.map(choice => ({ name: choice, value: choice })),
     );
   },
   async execute(interaction) {
@@ -147,6 +156,10 @@ module.exports = {
       consider: false
     }
     var country = {
+      value: '',
+      consider: false
+    }
+    var org = {
       value: '',
       consider: false
     }
@@ -629,6 +642,10 @@ module.exports = {
       country.consider = true;
       country.value = interaction.options.getString('country');
     }
+    if (interaction.options.getString('org') != null) {
+      org.consider = true;
+      org.value = interaction.options.getString('org');
+    }
 
     var argumentList = '**Searching with these arguments:**';
     if (minOnline.consider) argumentList += `\n**minonline:** ${minOnline.value}`;
@@ -662,6 +679,7 @@ module.exports = {
     if (seenAfter.consider) argumentList += `\n**seenafter: **<t:${seenAfter.value}:f>`;
     if (ipRange.consider) argumentList += `\n**iprange: **${ipRange.value}`;
     if (country.consider) argumentList += `\n**country: **:flag_${country.value.toLowerCase()}: ${country.value}`;
+    if (org.consider) argumentList += `\n**org: **${org.value}`;
 
     await interactReplyMessage.edit(argumentList);
 
@@ -715,6 +733,7 @@ module.exports = {
       mongoFilter['ip'] = { '$regex': `^${octets[0]}\.${octets[1]}\.${octets[2]}\.${octets[3]}\$`, '$options': 'i' }
     }
     if (country.consider) mongoFilter['geo.country'] = country.value;
+    if (org.consider) mongoFilter['org'] = org.value;
 
     const totalResults = parseInt(await POST('https://api.cornbread2100.com/countServers', mongoFilter));
 
