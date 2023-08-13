@@ -87,11 +87,8 @@ module.exports = {
     const focusedValue = interaction.options.getFocused(true);
     console.log(focusedValue.name);
     var filtered;
-    if (focusedValue.name == 'country') filtered = countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25);
-    if (focusedValue.name == 'org') filtered = orgs.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25);
-    await interaction.respond(
-      filtered.map(choice => ({ name: choice, value: choice })),
-    );
+    if (focusedValue.name == 'country') await interaction.respond(countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice.name, value: choice.code })));
+    if (focusedValue.name == 'org') await interaction.respond(orgs.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice, value: choice })));
   },
   async execute(interaction) {
     // Status message
