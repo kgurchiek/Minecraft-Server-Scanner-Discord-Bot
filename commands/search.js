@@ -85,8 +85,6 @@ module.exports = {
         .setAutocomplete(true)),
   async autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused(true);
-    console.log(focusedValue.name);
-    var filtered;
     if (focusedValue.name == 'country') await interaction.respond(countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice.name, value: choice.code })));
     if (focusedValue.name == 'org') await interaction.respond(orgs.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice, value: choice })));
   },
