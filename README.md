@@ -87,8 +87,14 @@ The oldest time a sever can be last seen. This doesn't mean the server is offlin
 ##### iprange (ip subent)
 The ip subnet a server's ip has to be within
 
+##### port (integer)
+The port the server is hosted on
+
 ##### country (country name)
 The country the server is hosted in
+
+##### org (organization name, uses regex)
+The organization the ip belongs to
 
 ### /streamsnipe \[language\]
 Searches the database for live Twitch streamers

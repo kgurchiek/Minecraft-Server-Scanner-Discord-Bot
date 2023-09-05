@@ -73,6 +73,10 @@ module.exports = {
       option
         .setName("iprange")
         .setDescription("The ip subnet a server's ip has to be within"))
+    .addIntegerOption(option =>
+      option
+        .setName("port")
+        .setDescription("The port the server is hosted on"))
     .addStringOption(option =>
       option
         .setName("country")
@@ -86,7 +90,7 @@ module.exports = {
   async autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused(true);
     if (focusedValue.name == 'country') await interaction.respond(countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice.name, value: choice.code })));
-    if (focusedValue.name == 'org') await interaction.respond(orgs.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice, value: choice })));
+    if (focusedValue.name == 'org') await interaction.respond(orgs.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice, value: `^${choice}$` })));
   },
   async execute(interaction) {
     // Status message
@@ -148,6 +152,10 @@ module.exports = {
     }
     var ipRange = {
       value: '',
+      consider: false
+    }
+    var port = {
+      value: 0,
       consider: false
     }
     var country = {
@@ -633,6 +641,10 @@ module.exports = {
       ipRange.consider = true;
       ipRange.value = interaction.options.getString('iprange');
     }
+    if (interaction.options.getInteger('port') != null) {
+      port.consider = true;
+      port.value = interaction.options.getInteger('port');
+    }
     if (interaction.options.getString('country') != null) {
       country.consider = true;
       country.value = interaction.options.getString('country');
@@ -673,6 +685,7 @@ module.exports = {
     }
     if (seenAfter.consider) argumentList += `\n**seenafter: **<t:${seenAfter.value}:f>`;
     if (ipRange.consider) argumentList += `\n**iprange: **${ipRange.value}`;
+    if (port.consider) argumentList += `\n**port: **${port.value}`;
     if (country.consider) argumentList += `\n**country: **:flag_${country.value.toLowerCase()}: ${country.value}`;
     if (org.consider) argumentList += `\n**org: **${org.value}`;
 
@@ -695,7 +708,7 @@ module.exports = {
       }
       mongoFilter['players'] = { '$ne': null };
     }
-    if (version.consider) mongoFilter['version.name'] = { '$regex': version.value };
+    if (version.consider) mongoFilter['version.name'] = { '$regex': version.value, '$options': 'i' };
     if (hasImage.consider) mongoFilter['hasFavicon'] = hasImage.value;
     if (description.consider) mongoFilter['$or'] = [ {'description': {'$regex': description.value, '$options': 'i'}}, {'description.text': {'$regex': description.value, '$options': 'i'}}, { 'description.extra.text': { '$regex': description.value, '$options': 'i', } }, ];
     if (player.consider) {
@@ -727,8 +740,9 @@ module.exports = {
 
       mongoFilter['ip'] = { '$regex': `^${octets[0]}\.${octets[1]}\.${octets[2]}\.${octets[3]}\$`, '$options': 'i' }
     }
+    if (port.consider) mongoFilter['port'] = port.value;
     if (country.consider) mongoFilter['geo.country'] = country.value;
-    if (org.consider) mongoFilter['org'] = org.value;
+    if (org.consider) mongoFilter['org'] = { '$regex': org.value, '$options': 'i' };
 
     const totalResults = parseInt(await POST('https://api.cornbread2100.com/countServers', mongoFilter));
 
