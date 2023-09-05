@@ -8,6 +8,9 @@
     <img src="https://raw.githubusercontent.com/kgurchiek/Minecraft-Server-Scanner-Discord-Bot/main/Icon.PNG" alt="Minecraft Server Scanner Icon" width="20%"/>
 </div>
 
+
+> This product includes GeoLite2 data created by MaxMind, available from http://www.maxmind.com.
+
 ## About
 
 This is the full code for a Node.js Minecraft server scanner Discord bot I made. This bot itself doesn't do the scanning, it just displays the scanned servers from my database, which is actively expanded by a seperate scanning program. You can access this yourself at https://api.cornbread2100.com/scannedServers.
