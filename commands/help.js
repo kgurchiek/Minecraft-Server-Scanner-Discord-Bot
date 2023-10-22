@@ -28,8 +28,8 @@ module.exports = {
           		{ name: 'seenafter (unix timestamp)', value: `The oldest time a sever can be last seen. This doesn't mean the server is offline, it could be that the ping was lost due to packet loss. Recommended: ${Math.round(new Date().getTime() / 1000) - 3600} (1 hour ago)\n` + '​', inline: true },
 				{ name: 'iprange (ip subnet)', value: 'The ip subnet a server\'s ip has to be within', inline: true },
 				{ name: 'port (integer)', value: 'The port the server is hosted on', inline: true },
-				{ name: 'country (country name)', value: 'The country the server is hosted in\n' + '​', inline: true },
-				{ name: 'org (organization name, uses regex)', value: 'The organization the ip belongs to', inline: true },
+				{ name: 'country (country name)', value: 'The country the server is hosted in', inline: true },
+				{ name: 'org (organization name, uses regex)', value: 'The organization the ip belongs to\n' + '​', inline: true },
 			{ name: '/streamsnipe', value: 'Gets servers that live Twitch streamers are playing on'},
 				{ name: 'language (language name)', value: 'The language of the Twitch stream (you must use the autocomplete for it to work)\n' + '​', inline: true },
 				 
