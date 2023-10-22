@@ -58,7 +58,6 @@ The IP address of the server
 
 The port of the server. Defaults to 25565.
 ㅤ
-
 ### /search \[minonline\] \[maxonline\] \[playercap\] \[isfull\] \[version\] \[hasimage\] \[description\] \[strictdescription\] \[player\]
 
 Searches the database for a server with certain properties
@@ -125,11 +124,11 @@ The country where the server is hosted
 
 The organisation to which the IP belongs
 
-### /streamsnipe \[language\]
+##### /streamsnipe \[language\]
 
 Searches the database for live Twitch streamers
 
-#### language (language name)
+##### language (language name)
 
 The language of the stream
 
