@@ -12,10 +12,10 @@ module.exports = {
     	.addFields(
 			{ name: '/stats', value: 'Sends stats about the bot\n' + '​' },
 			{ name: '/random', value: 'Gets a random online Minecraft server\n' + '​' },
-    		{ name: '/ping <ip> [port]', value: 'Fetches info from a given Minecraft server'},
+    		{ name: '/ping', value: 'Fetches info from a given Minecraft server'},
 				{ name: 'ip', value: 'The ip address of the server', inline: true },
 			    { name: 'port', value: 'The port of the server (defaults to 25565)\n' + '​', inline: true },
-		    { name: '/search [minonline] [maxonline] [playerCap] [isfull] [version] [hasImage] [description] [strictDescription]', value: 'searches for a server with specific properties'},
+		    { name: '/search', value: 'searches for a server with specific properties'},
 			    { name: 'minonline (integer)', value: 'The minimum number of players online', inline: true },
 			    { name: 'maxonline (integer)', value: 'The maximum number of players online (not to be confused with the server\'s maximum player capacity (playerCap))', inline: true },
 			    { name: 'playercap (integer)', value: 'The maximum player capacity of the server', inline: true },
