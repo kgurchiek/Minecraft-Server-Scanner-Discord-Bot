@@ -30,105 +30,12 @@ Put the bot's token and client id from the [Discord Developer Portal](https://di
 
 You'll need Node.js version v18 or later to run the bot. Run `node deploy-commands.js` in your terminal before launching the bot. This will register the slash commands, otherwise they won't show up in Discord. Run `node index.js` to launch the bot when you're ready. You'll need to install the 'maxmind' and discord.js v14 packages to run the bot. If you don't know how to do this, just run this command: `npm install maxmind discord.js`.
 
-## Commands
-
-### /help
-
-Send the bot's command list
-
-### /stats
-
-Send some statistics about the bot
-
-### /random
-
-Get a random Minecraft online server
-
-### /ping \<ip\> \[port\]
-
-Gets info from a specific Minecraft server
-
-#### Arguments:
-
-##### ip
-
-The IP address of the server
-
-##### port
-
-The port of the server. Defaults to 25565.
-ㅤ
-### /search \[minonline\] \[maxonline\] \[playercap\] \[isfull\] \[version\] \[hasimage\] \[description\] \[strictdescription\] \[player\]
-
-Searches the database for a server with certain properties
-
-#### arguments:
-
-##### playerCap (integer)
-
-The maximum number of players on the server
-
-##### minonline (integer)
-
-The minimum number of online players
-
-##### maxonline (integer)
-
-The maximum number of players online (not to be confused with the maximum player capacity of the server (playerCap))
-
-##### isfull (true/false)
-
-Whether the server is full or not
-
-##### version (regex)
-
-The version of the server
-
-##### hasimage (true/false)
-
-Whether the server has a custom favicon or not
-
-##### description (regex)
-
-The description of the server
-
-##### strictdescription (true/false)
-
-(Used with the description argument) If true, the server's description must match the description argument exactly. If false, the server's description must only match the description argument.
-
-##### player (player name)
-
-Searches for the server on which a player is currently playing. Note: this is very often inaccurate, as servers send custom responses instead of a real player list, and not all servers send a player list. The player list is also limited in size, so players on large servers won't be found.
-
-##### hasplayerlist
-
-Whether or not the server has player lists enabled. This is the default, but some servers turn it off, especially if they're popular (the player list is limited to 12 players, so servers that are typically more active than 12 players will turn it off).
-
-##### seenafter (Unix timestamp)
-
-The oldest time a sever can be last seen. This doesn't mean the server is offline, it could be that the ping was lost due to packet loss.
-
-##### iprange (ip subnet)
-
-The ip subnet a server's ip must be within.
-
-##### port (integer)
-
-The port on which the server is hosted
-
-##### country (country name)
-
-The country where the server is hosted
-
-##### org (organisation name, using regex)
-
-The organisation to which the IP belongs
-
-##### /streamsnipe \[language\]
-
-Searches the database for live Twitch streamers
-
-##### language (language name)
-
-The language of the stream
+| Command | Description | Arguments |
+| --- | --- | --- |
+| /help | Shows the bot's list of commands | None |
+| /stats | Sends some stats about the bot | None |
+| /random | Fetches a random online Minecraft server | None |
+| /ping | Fetches info from a given Minecraft server | ip (required), port (optional, defaults to 25565) |
+| /search | Searches the database for a server with specific properties | playerCap (integer), minonline (integer), maxonline (integer), isfull (true/false), version (regex), hasimage (true/false), description (regex), strictdescription (true/false), player (player name), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (country name), org (organization name, uses regex) |
+| /streamsnipe | Searches the database for live Twitch streamers | language (language name) |
 
