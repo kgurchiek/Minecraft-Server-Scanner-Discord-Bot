@@ -1,16 +1,6 @@
 // Fectches dependencies and inits variables
-const {
-    SlashCommandBuilder,
-    EmbedBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle
-} = require('discord.js');
-const {
-    getDescription,
-    getVersion,
-    POST
-} = require('../commonFunctions.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { getDescription, getVersion, POST } = require('../commonFunctions.js');
 const config = require('../config.json');
 const languages = require('../languages.json');
 const fs = require('fs')
@@ -24,69 +14,38 @@ module.exports = {
             option
             .setName("username")
             .setDescription("Specifies the username (in MC) of person to stalk")
-            .setRequired(true)
-        )
+            .setRequired(true))
         .addBooleanOption(option =>
             option
-            .setName('stop_stalking')
-            .setDescription('Selecting "true" will make the bot stop notifying you')
-        ),
-
-
+            .setName('stalk')
+            .setDescription('Set to false to stop stalking')),
     async execute(interaction) {
         // Status message
-        await interaction.reply({
-            content: 'Retrieving stats...',
-            ephemeral: true
-        });
+        await interaction.deferReply({ ephemeral: true });
 
-        if (interaction.options.getBoolean('stop_stalking') == true) {
-            const pingList = getPingList();
-            delete pingList[interaction.user.id];
-            fs.writeFileSync('./data/stalk.json', JSON.stringify(pingList));
-
-            const newEmbed = new EmbedBuilder()
-                .setColor("#02a337")
-                .setTitle(`Stopped Stalking`)
-                .setAuthor({
-                    name: 'MC Server Scanner',
-                    iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'
-                })
-                .addFields({
-                    name: 'Success',
-                    value: `You've stopped stalking the player '${interaction.options.getString('username')}'.`
-                })
-            await interaction.editReply({
-                content: '',
-                embeds: [newEmbed],
-                ephemeral: true
-            });
-        } else {
-            const pingList = getPingList();
+        const pingList = getPingList();
+        var newEmbed;
+        if (interaction.options.getBoolean('stalk') == null ? true : interaction.options.getBoolean('stalk')) {
             pingList[interaction.user.id] = interaction.options.getString('username');
             fs.writeFileSync('./data/stalk.json', JSON.stringify(pingList));
 
-            const newEmbed = new EmbedBuilder()
+            newEmbed = new EmbedBuilder()
                 .setColor("#02a337")
                 .setTitle(`Stalking ${interaction.options.getString('username')}`)
-                .setAuthor({
-                    name: 'MC Server Scanner',
-                    iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'
-                })
-                .addFields({
-                    name: 'Success',
-                    // Cornbread needs to fact check this
-                    value: `You will be notified every 1 hour when player '${interaction.options.getString('username')}' is playing (on servers in our database). Note that you can only stalk 1 person at a time.`
+                .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+                .addFields({ name: 'Success', value: `You will be notified when '${interaction.options.getString('username')}' is playing on a server in the database.` })
+        } else {
+            delete pingList[interaction.user.id];
+            fs.writeFileSync('./data/stalk.json', JSON.stringify(pingList));
 
-                })
-            await interaction.editReply({
-                content: '',
-                embeds: [newEmbed],
-                ephemeral: true
-            });
+            newEmbed = new EmbedBuilder()
+                .setColor("#02a337")
+                .setTitle(`Stopped Stalking`)
+                .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+                .addFields({ name: 'Success', value: `You've stopped stalking ${interaction.options.getString('username')}.` })
         }
-
-    },
+        await interaction.editReply({ embeds: [newEmbed] });
+    }
 };
 
 function getPingList() {
