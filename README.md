@@ -5,7 +5,7 @@
     <img src="https://img.shields.io/github/last-commit/kgurchiek/Minecraft-Server-Scanner-Discord-Bot" alt="GitHub last commit"/>
     <img src="https://img.shields.io/github/languages/code-size/kgurchiek/Minecraft-Server-Scanner-Discord-Bot" alt="GitHub code size in bytes"/>
     <br>
-    <img src="https://raw.githubusercontent.com/kgurchiek/Minecraft-Server-Scanner-Discord-Bot/main/logo.webp" alt="Minecraft Server Scanner Logo" width="20%"/>
+    <img src="https://raw.githubusercontent.com/kgurchiek/Minecraft-Server-Scanner-Discord-Bot/main/ICON.png" alt="Minecraft Server Scanner Logo" width="20%"/>
 </div>
 
 > This product includes GeoLite2 data created by [MaxMind](https://www.maxmind.com).
