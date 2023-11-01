@@ -25,7 +25,7 @@ module.exports = {
           		{ name: 'description (regex)', value: 'The description of the server', inline: true },
           		{ name: 'player (player name)', value: 'The name of a player to search for', inline: true },
 				{ name: 'hasplayerlist (boolean)', value: 'Whether or not the server has player list enabled', inline: true },
-          		{ name: 'seenafter (unix timestamp)', value: `The oldest time a sever can be last seen. This doesn't mean the server is offline, it could be that the ping was lost due to packet loss. Recommended: ${Math.round(new Date().getTime() / 1000) - 3600} (1 hour ago)\n` + '​', inline: true },
+          		{ name: 'seenafter (unix timestamp)', value: `The oldest time a server can be last seen. This doesn't mean the server is offline, it could be that the ping was lost due to packet loss. Recommended: ${Math.round(new Date().getTime() / 1000) - 3600} (1 hour ago)\n` + '​', inline: true },
 				{ name: 'iprange (ip subnet)', value: 'The ip subnet a server\'s ip has to be within', inline: true },
 				{ name: 'port (integer)', value: 'The port the server is hosted on', inline: true },
 				{ name: 'country (country name)', value: 'The country the server is hosted in', inline: true },

@@ -22,7 +22,7 @@ You can contact me via discord: cornbread2100
 
 **If you just want to use the bot, you don't have to host it, you can try it out in its [official Discord server](https://discord.gg/TSWcF2m67m)**
 
-### Configuration
+
 
 Put the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers/) into config.json. To make future searches much faster, search results are cached. If it has been a while, the results will be fetched again. In the config, refreshDelay controls how many seconds to wait before refreshing the database. Approximately 600 (10 minutes) is recommended.
 
