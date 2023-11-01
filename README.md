@@ -13,7 +13,7 @@
 > [!NOTE]
 > This product includes GeoLite2 data created by [MaxMind](https://www.maxmind.com).
 
-## About
+## 📝 About
 
 This is the complete code for a Node.js Minecraft server scanner discord bot I made. This bot doesn't do the scanning itself, it just displays the scanned servers in my database, which is actively extended by a separate scanning program. You can access it yourself at <https://api.cornbread2100.com/scannedServers>.
 
@@ -21,15 +21,16 @@ If you find any bugs, please report them in the [official discord server](https:
 
 You can contact me via discord: [cornbread2100](https://discord.com/users/720658048611516559)
 
-## Hosting the bot yourself
+## 🌐 Hosting the bot yourself
 
-**If you just want to use the bot, you don't have to host it, you can try it out on its [official Discord server](https://discord.gg/TSWcF2m67m)**.
+> [!IMPORTANT]
+> You can try the bot on its [official Discord server](https://discord.gg/TSWcF2m67m) without hosting it.
 
 Put the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers) into config.json. To make future searches much faster, search results are cached. If it has been a while, the results will be fetched again. In the config, `refreshDelay` controls how many seconds to wait before refreshing the database. Approximately 600 (10 minutes) is recommended.
 
 You'll need Node.js version v18 or later to run the bot. Run `node deploy-commands.js` in your terminal before running the bot. This will register the slash commands, otherwise they won't show up in Discord. You'll need to install the 'maxmind' and discord.js v14 package to run the bot. If you don't know how to do this, just run this command: `npm i maxmind discord.js`. Run `node index.js` to start the bot when you're ready. 
 
-### Usage
+## 💻 Usage
 
 | Command | Description | Arguments |
 | --- | --- | --- |
