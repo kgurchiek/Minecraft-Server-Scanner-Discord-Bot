@@ -26,7 +26,7 @@ You can contact me via discord: [cornbread2100](https://discord.com/users/720658
 > [!IMPORTANT]
 > You can try the bot on its [official Discord server](https://discord.gg/TSWcF2m67m) without hosting it.
 
-Put the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers) into config.json. To make future searches much faster, search results are cached. If it has been a while, the results will be fetched again. In the config, `refreshDelay` controls how many seconds to wait before refreshing the database. Approximately 600 (10 minutes) is recommended.
+Put the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers) into config.json. To make future searches much faster, search results are cached. If it has been a while, the results will be fetched again.
 
 You'll need Node.js version v18 or later to run the bot. Run `node deploy-commands.js` in your terminal before running the bot. This will register the slash commands, otherwise they won't show up in Discord. You'll need to install the 'maxmind' and discord.js v14 package to run the bot. If you don't know how to do this, just run this command: `npm i maxmind discord.js`. Run `node index.js` to start the bot when you're ready. 
 
