@@ -72,7 +72,7 @@ module.exports = {
     .addIntegerOption(option =>
       option
         .setName("seenafter")
-        .setDescription("The oldest time a sever can be last seen (this doesn't mean it's offline, use /help for more info)"))
+        .setDescription("The oldest time a server can be last seen (this doesn't mean it's offline, use /help for more info)"))
     .addStringOption(option =>
       option
         .setName("iprange")

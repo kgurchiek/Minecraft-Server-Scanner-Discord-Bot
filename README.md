@@ -85,7 +85,7 @@ Searches for the server a player is currently playing on. Note: this is very oft
 Whether or not the server has player list enabled. This is true by default, but some servers disable it, especially if they're popular (The player list is limited to 12 players, so servers that are typically more active than 12 players will turn it off).
 
 ##### seenafter (unix timestamp)
-The oldest time a sever can be last seen. This doesn't mean the server is offline, it could be that the ping was lost due to packet loss.
+The oldest time a server can be last seen. This doesn't mean the server is offline, it could be that the ping was lost due to packet loss.
 
 ##### iprange (ip subent)
 The ip subnet a server's ip has to be within
