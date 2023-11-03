@@ -5,7 +5,7 @@ const config = require('../config.json');
 const languages = require('../languages.json');
 const fs = require('fs')
 
-async function embed(ping, message) {
+async function embed(ip, port, ping, message) {
   const oldPlayersID = `oldPlayers${message.id}`;
   if (ping == 'timeout') {
     var errorEmbed = new EmbedBuilder()
@@ -185,25 +185,18 @@ async function stalkCheck() {
   const pingList = getPingList();
   for (const user in pingList) {
     for (const player of pingList[user]) {
-      if (players[player] == null) {
+      if (players[player] == 'timeout') continue;
+      const result = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { 'players.sample': { '$exists': true, "$elemMatch": { "name": player }}}))[0];
+      if (players[player] == null || (result.ip != players[player].ip && parsedPing.port != players[player].port)) {
         var tries = 0;
         var ping = 'timeout';
-        while (tries < 3 && ping == 'timeout') ping = await (await fetch(`https://ping.cornbread2100.com/ping/?ip=${ip}&port=${port}`)).text();
-        players[player] = ping == 'timeout' ? null : JSON.parse(ping);
-        embed(ping, await client.users.cache.get(user).send({ content: `<@${user}>, ${player} is online.` }));
-      } else {
-        var tries = 0;
-        var ping = 'timeout';
-        while (tries < 3 && ping == 'timeout') ping = await (await fetch(`https://ping.cornbread2100.com/ping/?ip=${ip}&port=${port}`)).text();
-        const parsedPing = JSON.parse(ping);
-        if (ping == 'timeout') players[player] = null;
-        else if (parsedPing.ip != players[player] && parsedPing.port != players[player].port) {
-          embed(ping, await client.users.cache.get(user).send({ content: `<@${user}>, ${player} is online.` }));
-          players[player] = parsedPing;
-        }
+        while (tries < 3 && ping == 'timeout') ping = await (await fetch(`https://ping.cornbread2100.com/ping/?ip=${result.ip}&port=${result.port}`)).text();
+        players[player] = ping == 'timeout' ? 'timeout' : JSON.parse(ping);
+        embed(result.ip, result.port, ping, await client.users.cache.get(user).send({ content: `<@${user}>, ${player} is online.` }));
       }
     }
   }
+  for (const player of players) if (players[player] == 'timeout') players[player] = null;
 }
 stalkCheck();
 setInterval(stalkCheck, 600000); // every 10 minutes
