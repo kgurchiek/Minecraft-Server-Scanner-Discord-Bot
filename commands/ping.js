@@ -22,7 +22,7 @@ module.exports = {
       option.setName('port')
 	    .setDescription('The port of the server to ping')),
     async execute(interaction) {
-      const oldPlayersID = `oldPlayers${interaction.user.id}`;
+      const oldPlayersID = `oldPlayers${interaction.id}`;
       const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
       const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
       // Ping status
