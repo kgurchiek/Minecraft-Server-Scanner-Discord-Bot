@@ -1,9 +1,10 @@
-// Fectches dependencies and inits variables
+// Fetches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getDescription, getVersion, POST } = require('../commonFunctions.js');
 const config = require('../config.json');
 const languages = require('../languages.json');
-const fs = require('fs')
+const fs = require('fs');
+const client = require('../index.js');
 
 async function embed(ip, port, ping, message) {
   const oldPlayersID = `oldPlayers${message.id}`;
@@ -157,7 +158,7 @@ module.exports = {
         .setColor("#02a337")
         .setTitle(`Stalking ${interaction.options.getString('username')}`)
         .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-        .addFields({ name: 'Success', value: `You will be notified when '${interaction.options.getString('username')}' is playing on a server in the database.` })
+        .addFields({ name: 'Success', value: `You will be notified when ${interaction.options.getString('username')} is playing on a server in the database.` })
     } else {
       pingList[interaction.user.id] = pingList[interaction.user.id].filter(username => username != interaction.options.getString('username'));
 
@@ -168,7 +169,7 @@ module.exports = {
         .addFields({ name: 'Success', value: `You've stopped stalking ${interaction.options.getString('username')}.` })
     }
     fs.writeFileSync('./data/stalk.json', JSON.stringify(pingList));
-    await interaction.reply({ embeds: [newEmbed] });
+    await interaction.editReply({ embeds: [newEmbed] });
   }
 };
 
@@ -187,6 +188,7 @@ async function stalkCheck() {
     for (const player of pingList[user]) {
       if (players[player] == 'timeout') continue;
       const result = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { 'players.sample': { '$exists': true, "$elemMatch": { "name": player }}}))[0];
+      if (result == null) continue;
       if (players[player] == null || (result.ip != players[player].ip && parsedPing.port != players[player].port)) {
         var tries = 0;
         var ping = 'timeout';
@@ -196,7 +198,7 @@ async function stalkCheck() {
       }
     }
   }
-  for (const player of players) if (players[player] == 'timeout') players[player] = null;
+  if (Object.keys(players).length > 0) for (const player of players) if (players[player] == 'timeout') players[player] = null;
 }
 stalkCheck();
 setInterval(stalkCheck, 600000); // every 10 minutes

@@ -7,6 +7,7 @@ const { POST } = require('./commonFunctions.js');
 // Initialize Discord.js (Along with the commands)
 const client = new Client({ partials: [Partials.Channel], intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
 client.commands = new Collection();
+module.exports.client = client;
 
 // Reads the files in the commands directory
 const commandsPath = path.join(__dirname, 'commands');
@@ -67,5 +68,3 @@ client.on(Events.InteractionCreate, async interaction => {
 
 // Log the bot into the Discord API
 client.login(config.token);
-
-module.exports.client = client;
