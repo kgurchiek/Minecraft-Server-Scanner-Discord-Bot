@@ -188,7 +188,46 @@ async function stalkCheck() {
   for (const user in pingList) {
     for (const player of pingList[user]) {
       if (players[player] == 'inactive') continue;
-      const result = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { 'players.sample': { '$exists': true, "$elemMatch": { "name": player }},  'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 600 }}))[0];
+      const result = (await POST(`https://api.cornbread2100.com/aggregate`, [
+        {
+          '$redact': {
+            '$cond': {
+              'if': {
+                '$and': [
+                  {
+                    '$eq': [
+                      '$lastSeen',
+                      {
+                        '$arrayElemAt': [
+                          '$players.sample.lastSeen',
+                          { '$indexOfArray': ['$players.sample.lastSeen', '$lastSeen'] }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    '$eq': [
+                      player,
+                      {
+                        '$arrayElemAt': [
+                          '$players.sample.name',
+                          { '$indexOfArray': ['$players.sample.name', player] }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    '$gt': ['$lastSeen', Math.round(new Date().getTime() / 1000) - 600]
+                  }
+                ]
+              },
+              'then': '$$KEEP',
+              'else': '$$PRUNE'
+            }
+          }
+        },
+        { "$limit": 1 }
+      ]))[0];
       if (result == null) {
         players[player] = 'inactive';
         continue;
