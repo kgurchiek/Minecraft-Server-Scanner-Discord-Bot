@@ -372,7 +372,7 @@ module.exports = {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
   
-        newEmbed.addFields({ name: server.cracked == true ? 'Auth' : server.cracked == false ? 'Premium' : 'Unknown', value: 'Cracked' })
+        newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
@@ -459,7 +459,7 @@ module.exports = {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
   
-        newEmbed.addFields({ name: server.cracked == true ? 'Auth' : server.cracked == false ? 'Premium' : 'Unknown', value: 'Cracked' })
+        newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
 
@@ -577,7 +577,7 @@ module.exports = {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
   
-        newEmbed.addFields({ name: server.cracked == true ? 'Auth' : server.cracked == false ? 'Premium' : 'Unknown', value: 'Cracked' })
+        newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
@@ -812,7 +812,7 @@ module.exports = {
         newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
       }
 
-      newEmbed.addFields({ name: server.cracked == true ? 'Auth' : server.cracked == false ? 'Premium' : 'Unknown', value: 'Cracked' })
+      newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
     } else {
       await interactReplyMessage.edit('No matches could be found');
