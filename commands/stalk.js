@@ -241,5 +241,5 @@ async function stalkCheck() {
   }
   if (Object.keys(players).length > 0) for (const player in players) if (players[player] == 'inactive') players[player] = null;
 }
-stalkCheck();
-setInterval(stalkCheck, 600000); // every 10 minutes
+//stalkCheck();
+//setInterval(stalkCheck, 600000); // every 10 minutes
