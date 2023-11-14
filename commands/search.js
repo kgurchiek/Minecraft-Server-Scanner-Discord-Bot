@@ -90,7 +90,11 @@ module.exports = {
       option
         .setName("org")
         .setDescription("The organization hosting the server")
-        .setAutocomplete(true)),
+        .setAutocomplete(true))
+    .addBooleanOption(option =>
+      option
+        .setName("cracked")
+        .setDescription("Whether or not the server is cracked (offline mode)")),
   async autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused(true);
     if (focusedValue.name == 'country') await interaction.respond(countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice.name, value: choice.code })));
@@ -123,7 +127,7 @@ module.exports = {
       consider: false
     };
     var playerCap = {
-      value: 10,
+      value: 20,
       consider: false
     }
     var isFull = {
@@ -131,7 +135,7 @@ module.exports = {
       consider: false
     };
     var version = {
-      value: '1.19.2',
+      value: '',
       consider: false
     };
     var hasImage = {
@@ -143,7 +147,7 @@ module.exports = {
       consider: false
     };
     var player = {
-      value: 'Steve',
+      value: '',
       consider: false
     };
     var hasPlayerList = {
@@ -168,6 +172,10 @@ module.exports = {
     }
     var org = {
       value: '',
+      consider: false
+    }
+    var cracked = {
+      value: false,
       consider: false
     }
 
@@ -660,6 +668,10 @@ module.exports = {
       org.consider = true;
       org.value = interaction.options.getString('org');
     }
+    if (interaction.options.getBoolean('cracked') != null) {
+      cracked.consider = true;
+      cracked.value = interaction.options.getBoolean('cracked');
+    }
 
     var argumentList = '**Searching with these arguments:**';
     if (minOnline.consider) argumentList += `\n**minonline:** ${minOnline.value}`;
@@ -695,6 +707,7 @@ module.exports = {
     if (port.consider) argumentList += `\n**port: **${port.value}`;
     if (country.consider) argumentList += `\n**country: **:flag_${country.value.toLowerCase()}: ${country.value}`;
     if (org.consider) argumentList += `\n**org: **${org.value}`;
+    if (cracked.consider) argumentList += `\n**auth: **${cracked.value ? 'Cracked' : 'Premium' }`;
 
     await interactReplyMessage.edit(argumentList);
 
@@ -750,6 +763,7 @@ module.exports = {
     if (port.consider) mongoFilter['port'] = port.value;
     if (country.consider) mongoFilter['geo.country'] = country.value;
     if (org.consider) mongoFilter['org'] = { '$regex': org.value, '$options': 'i' };
+    if (cracked.consider) mongoFilter['cracked'] = cracked.value;
 
     const totalResults = parseInt(await POST('https://api.cornbread2100.com/countServers', mongoFilter));
 
