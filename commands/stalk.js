@@ -4,7 +4,6 @@ const { getDescription, getVersion, POST } = require('../commonFunctions.js');
 const config = require('../config.json');
 const languages = require('../languages.json');
 const fs = require('fs');
-const { client } = require('../index.js');
 const maxmind = require('maxmind');
 var cityLookup;
 var asnLookup;
@@ -184,11 +183,10 @@ function getPingList() {
 
 const players = {};
 async function stalkCheck() {
+  const { client } = require('../index.js');
   const pingList = getPingList();
   for (const user in pingList) {
-    console.log(user);
     for (const player of pingList[user]) {
-      console.log(player);
       if (players[player] == 'inactive') continue;
       const result = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { 'players.sample': { '$exists': true, "$elemMatch": { "name": player }},  'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 600 }}))[0];
       if (result == null) {
