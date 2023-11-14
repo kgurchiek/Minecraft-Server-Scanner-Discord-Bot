@@ -347,15 +347,14 @@ module.exports = {
             }
           }
         }
-
+  
         newEmbed.addFields(
           { name: 'Players', value: playersString },
           { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
         )
-
-        await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-        const oldPage = currentEmbed;
-
+  
+        buttonTimeoutCheck();
+  
         var location = await cityLookup.get(server.ip);
         if (location == null) {
           newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
@@ -372,16 +371,9 @@ module.exports = {
         } else {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
-
-        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-        if (auth == 'true') {
-          newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
-        } else if (auth == 'false') {
-          newEmbed.addFields({ name: 'Auth', value: 'Premium' })
-        } else {
-          newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
-        }
-        if (currentEmbed == oldPage) await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+  
+        newEmbed.addFields({ name: server.cracked == true ? 'Auth' : server.cracked == false ? 'Premium' : 'Unknown', value: 'Cracked' })
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       // Event listener for 'Last Page' button
@@ -442,15 +434,14 @@ module.exports = {
             }
           }
         }
-
+  
         newEmbed.addFields(
           { name: 'Players', value: playersString },
           { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
         )
   
-        await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-        const oldPage = currentEmbed;
-
+        buttonTimeoutCheck();
+  
         var location = await cityLookup.get(server.ip);
         if (location == null) {
           newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
@@ -467,16 +458,9 @@ module.exports = {
         } else {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
-
-        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-        if (auth == 'true') {
-          newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
-        } else if (auth == 'false') {
-          newEmbed.addFields({ name: 'Auth', value: 'Premium' })
-        } else {
-          newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
-        }
-        if (currentEmbed == oldPage) await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+  
+        newEmbed.addFields({ name: server.cracked == true ? 'Auth' : server.cracked == false ? 'Premium' : 'Unknown', value: 'Cracked' })
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
 
       oldPlayersCollector.on('collect', async interaction => { 
@@ -556,27 +540,26 @@ module.exports = {
         var playersString = `${server.players.online}/${server.players.max}`;
         if (server.players.sample != null) {
           var oldString;
-          const sortedPlayers = [...server.players.sample]
-          sortedPlayers.sort((a, b) => b.lastSeen - a.lastSeen);
-          for (var i = 0; i < sortedPlayers.length; i++) {
-            oldString = playersString;
-            playersString += `\n${sortedPlayers[i].name} ${sortedPlayers[i].lastSeen == server.lastSeen ? '`online`' : '<t:' + sortedPlayers[i].lastSeen + ':R>'}`;
-            if (i + 1 < sortedPlayers.length) playersString += '\n';
-            if (playersString.length > 1020 && i + 1 < sortedPlayers.length || playersString.length > 1024) {
-              playersString = oldString + '\n...';
-              break;
+          for (var i = 0; i < server.players.sample.length; i++) {
+            if (server.players.sample[i].lastSeen == server.lastSeen) {
+              oldString = playersString;
+              playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+              if (i + 1 < server.players.sample.length) playersString += '\n';
+              if (playersString.length > 1024) {
+                playersString = oldString;
+                break;
+              }
             }
           }
         }
-
+  
         newEmbed.addFields(
           { name: 'Players', value: playersString },
           { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
         )
   
-        await interactionUpdate.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-        const oldPage = currentEmbed;
-
+        buttonTimeoutCheck();
+  
         var location = await cityLookup.get(server.ip);
         if (location == null) {
           newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
@@ -593,16 +576,9 @@ module.exports = {
         } else {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
-
-        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-        if (auth == 'true') {
-          newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
-        } else if (auth == 'false') {
-          newEmbed.addFields({ name: 'Auth', value: 'Premium' })
-        } else {
-          newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
-        }
-        if (currentEmbed == oldPage) await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+  
+        newEmbed.addFields({ name: server.cracked == true ? 'Auth' : server.cracked == false ? 'Premium' : 'Unknown', value: 'Cracked' })
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       return buttons;
@@ -818,8 +794,6 @@ module.exports = {
       )
 
       buttonTimeoutCheck();
-      await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-      const oldPage = currentEmbed;
 
       var location = await cityLookup.get(server.ip);
       if (location == null) {
@@ -838,17 +812,10 @@ module.exports = {
         newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
       }
 
-      const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-      if (auth == 'true') {
-        newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
-      } else if (auth == 'false') {
-        newEmbed.addFields({ name: 'Auth', value: 'Premium' })
-      } else {
-        newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
-      }
-      if (currentEmbed == oldPage) await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+      newEmbed.addFields({ name: server.cracked == true ? 'Auth' : server.cracked == false ? 'Premium' : 'Unknown', value: 'Cracked' })
+      await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
     } else {
-      await interactReplyMessage.edit("no matches could be found");
+      await interactReplyMessage.edit('No matches could be found');
     } 
     lastButtonPress = new Date();
 
