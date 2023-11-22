@@ -36,9 +36,11 @@ You'll need Node.js version v18 or later to run the bot. Run `node deploy-comman
 
 | Command | Description | Arguments |
 | --- | --- | --- |
+| /cornbread | Fetches a random cornbread image | None |
 | /help | Shows the bot's list of commands | None |
-| /stats | Sends some stats about the bot | None |
-| /random | Fetches a random online Minecraft server | None |
 | /ping | Fetches info from a given Minecraft server | ip (required), port (optional, defaults to 25565) |
+| /random | Fetches a random online Minecraft server | None |
 | /search | Searches the database for a server with specific properties | playerCap (integer), minonline (integer), maxonline (integer), isfull (true/false), version (regex), hasimage (true/false), description (regex), strictdescription (true/false), player (player name), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (country name), org (organization name, uses regex), cracked (true/false) |
+| /stalk | Sends you a message when a user is playing the game | username (required), stalk (optional, defaults to true) |
+| /stats | Sends some stats about the bot | None |
 | /streamsnipe | Searches the database for live Twitch streamers | language (language name) |
