@@ -33,14 +33,10 @@ module.exports = {
       option
         .setName("skip")
         .setDescription("skips to a page of results"))
-    .addIntegerOption(option =>
+    .addStringOption(option =>
       option
-        .setName("minonline")
-        .setDescription("The minimum number of online players"))
-    .addIntegerOption(option =>
-      option
-        .setName("maxonline")
-        .setDescription("The maximum number of online players"))
+        .setName("onlineplayers")
+        .setDescription("A range of online players"))
     .addIntegerOption(option =>
       option
         .setName("playercap")
@@ -588,13 +584,36 @@ module.exports = {
     if (interaction.options.getInteger('skip') != null) {
       currentEmbed = interaction.options.getInteger('skip') - 1;
     }
-    if (interaction.options.getInteger('minonline') != null) {
-      minOnline.consider = true;
-      minOnline.value = interaction.options.getInteger('minonline');
-    }
-    if (interaction.options.getInteger('maxonline') != null) {
-      maxOnline.consider = true;
-      maxOnline.value = interaction.options.getInteger('maxonline');
+    var onlinePlayers;
+    if (interaction.options.getString('onlineplayers') != null) {
+      onlinePlayers = interaction.options.getString('onlineplayers');
+      if (onlinePlayers.startsWith('>=')) {
+        minOnline.value = parseInt(onlinePlayers.substring(2));
+        minOnline.consider = true;
+      } else if (onlinePlayers.startsWith('<=')) {
+        maxOnline.value = parseInt(onlinePlayers.substring(2));
+        maxOnline.consider = true;
+      } else if (onlinePlayers.startsWith('>')) {
+        minOnline.value = parseInt(onlinePlayers.substring(1));
+        minOnline.consider = true;
+      } else if (onlinePlayers.startsWith('<')) {
+        maxOnline.value = parseInt(onlinePlayers.substring(1));
+        maxOnline.consider = true;
+      } else if (onlinePlayers.includes('-')) {
+        const [min, max] = onlinePlayers.split('-');
+        minOnline.value = parseInt(min);
+        maxOnline.value = parseInt(max);
+        minOnline.consider = maxOnline.consider = true;
+      } else {
+        minOnline.value = maxOnline.value = parseInt(onlinePlayers);
+        minOnline.consider = maxOnline.consider = true;
+      }
+      if (isNaN(minOnline.value) || isNaN(maxOnline.value)) {
+        const newEmbed = new EmbedBuilder()
+          .setColor("#ff0000")
+          .setTitle('Error')
+          .setDescription('Invalid online player range')
+      }
     }
     if (interaction.options.getInteger('playercap') != null) {
       playerCap.consider = true;
@@ -650,8 +669,7 @@ module.exports = {
     }
 
     var argumentList = '**Searching with these arguments:**';
-    if (minOnline.consider) argumentList += `\n**minonline:** ${minOnline.value}`;
-    if (maxOnline.consider) argumentList += `\n**maxonline:** ${maxOnline.value}`;
+    if (onlinePlayers != null) argumentList += `\n**onlineplayers:** ${onlinePlayers}`;
     if (playerCap.consider) argumentList += `\n**playercap:** ${playerCap.value}`;
     if (isFull.consider) {
       if (isFull.value) {
@@ -689,11 +707,11 @@ module.exports = {
 
     if (minOnline.consider) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online']['$gte'] = minOnline.value;
+      mongoFilter['players.online'][`$gt${ onlineplayers[1] == '=' ? 'e' : '' }`] = minOnline.value;
     }
     if (maxOnline.consider) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online']['$lte'] = maxOnline.value;
+      mongoFilter['players.online'][`$lt${ onlineplayers[1] == '=' ? 'e' : '' }`] = maxOnline.value;
     }
     if (playerCap.consider) mongoFilter['players.max'] = playerCap.value;
     if (isFull.consider) {
