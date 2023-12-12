@@ -68,7 +68,8 @@ module.exports = {
     .addIntegerOption(option =>
       option
         .setName("seenafter")
-        .setDescription("The oldest time a server can be last seen (this doesn't mean it's offline, use /help for more info)"))
+        .setDescription("The oldest time a server can be last seen (this doesn't mean it's offline, use /help for more info)")
+        .setAutocomplete(true))
     .addStringOption(option =>
       option
         .setName("iprange")
@@ -93,8 +94,17 @@ module.exports = {
         .setDescription("Whether or not the server is cracked (offline mode)")),
   async autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused(true);
-    if (focusedValue.name == 'country') await interaction.respond(countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice.name, value: choice.code })));
-    if (focusedValue.name == 'org') await interaction.respond(orgs.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice, value: `^${choice}$` })));
+    switch (focusedValue.name) {
+      case 'seenafter':
+        await interaction.respond([{ name: '1 hour ago', value: Math.round(new Date().getTime() / 1000) - 3600}, { name: '6 hours ago', value: Math.round(new Date().getTime() / 1000) - 21600 }, { name: '1 day ago', value: Math.round(new Date().getTime() / 1000) - 86400 }])
+        break;
+      case 'country':
+        await interaction.respond(countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice.name, value: choice.code })));
+        break;
+      case: 'org':
+        await interaction.respond(orgs.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice, value: `^${choice}$` })));
+        break;
+    }
   },
   async execute(interaction) {
     // Status message
