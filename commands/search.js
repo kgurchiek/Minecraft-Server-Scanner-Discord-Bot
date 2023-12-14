@@ -717,7 +717,7 @@ module.exports = {
 
     if (minOnline.consider) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online'][`$gt${ onlineplayers[1] == '=' ? 'e' : '' }`] = minOnline.value;
+      mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' ? 'e' : '' }`] = minOnline.value;
     }
     if (maxOnline.consider) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
