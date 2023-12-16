@@ -721,7 +721,7 @@ module.exports = {
     }
     if (maxOnline.consider) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online'][`$lt${ onlineplayers[1] == '=' ? 'e' : '' }`] = maxOnline.value;
+      mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' ? 'e' : '' }`] = maxOnline.value;
     }
     if (playerCap.consider) mongoFilter['players.max'] = playerCap.value;
     if (isFull.consider) {
