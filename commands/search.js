@@ -717,11 +717,11 @@ module.exports = {
 
     if (minOnline.consider) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' ? 'e' : '' }`] = minOnline.value;
+      mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = minOnline.value;
     }
     if (maxOnline.consider) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' ? 'e' : '' }`] = maxOnline.value;
+      mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = maxOnline.value;
     }
     if (playerCap.consider) mongoFilter['players.max'] = playerCap.value;
     if (isFull.consider) {
