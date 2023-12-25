@@ -221,16 +221,16 @@ module.exports = {
         const streamLinks = [];
         var thumbnail;
         for (const player of server.players.sample) {
-          if (streamers.includes(player.name)) {
-            streamLinks.push(`https://twitch.tv/${streams[streamers.indexOf(player.name)].user_login}`);
-            if (!thumbnail) thumbnail = streams[streamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+          if (twitchStreamers.includes(player.name)) {
+            streamLinks.push(`https://twitch.tv/${player.name}`);
+            if (!thumbnail) thumbnail = twitchStreams[twitchStreamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+          }
+          if (kickStreamers.includes(player.name)) {
+            streamLinks.push(`https://kick.com/${player.name}`);
+            if (!thumbnail) thumbnail = kickStreams[kickStreamers.indexOf(player.name)].thumbnail.src;
           }
         }
-        for (var i = 0; i < streamLinks.length; i++) {
-          newEmbed.addFields(
-            { name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] }
-          )
-        }
+        for (var i = 0; i < streamLinks.length; i++) newEmbed.addFields({ name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] })
         newEmbed.setImage(thumbnail);
 
         var location = await cityLookup.get(server.ip);
@@ -249,16 +249,9 @@ module.exports = {
         } else {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
-
-        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-        if (auth == 'true') {
-          newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
-        } else if (auth == 'false') {
-          newEmbed.addFields({ name: 'Auth', value: 'Premium' })
-        } else {
-          newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
-        }
-        if (currentEmbed == oldPage) await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+  
+        newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       // Event listener for 'Last Page' button
@@ -366,16 +359,16 @@ module.exports = {
         const streamLinks = [];
         var thumbnail;
         for (const player of server.players.sample) {
-          if (streamers.includes(player.name)) {
-            streamLinks.push(`https://twitch.tv/${streams[streamers.indexOf(player.name)].user_login}`);
-            if (!thumbnail) thumbnail = streams[streamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+          if (twitchStreamers.includes(player.name)) {
+            streamLinks.push(`https://twitch.tv/${player.name}`);
+            if (!thumbnail) thumbnail = twitchStreams[twitchStreamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+          }
+          if (kickStreamers.includes(player.name)) {
+            streamLinks.push(`https://kick.com/${player.name}`);
+            if (!thumbnail) thumbnail = kickStreams[kickStreamers.indexOf(player.name)].thumbnail.src;
           }
         }
-        for (var i = 0; i < streamLinks.length; i++) {
-          newEmbed.addFields(
-            { name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] }
-          )
-        }
+        for (var i = 0; i < streamLinks.length; i++) newEmbed.addFields({ name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] })
         newEmbed.setImage(thumbnail);
 
         var location = await cityLookup.get(server.ip);
@@ -394,16 +387,9 @@ module.exports = {
         } else {
           newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
         }
-
-        const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-        if (auth == 'true') {
-          newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
-        } else if (auth == 'false') {
-          newEmbed.addFields({ name: 'Auth', value: 'Premium' })
-        } else {
-          newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
-        }
-        if (currentEmbed == oldPage) await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+  
+        newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
+        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       });
 
       // Event listener for 'Show Old Players' button
@@ -495,16 +481,16 @@ module.exports = {
         const streamLinks = [];
         var thumbnail;
         for (const player of server.players.sample) {
-          if (streamers.includes(player.name)) {
-            streamLinks.push(`https://twitch.tv/${streams[streamers.indexOf(player.name)].user_login}`);
-            if (!thumbnail) thumbnail = streams[streamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+          if (twitchStreamers.includes(player.name)) {
+            streamLinks.push(`https://twitch.tv/${player.name}`);
+            if (!thumbnail) thumbnail = twitchStreams[twitchStreamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+          }
+          if (kickStreamers.includes(player.name)) {
+            streamLinks.push(`https://kick.com/${player.name}`);
+            if (!thumbnail) thumbnail = kickStreams[kickStreamers.indexOf(player.name)].thumbnail.src;
           }
         }
-        for (var i = 0; i < streamLinks.length; i++) {
-          newEmbed.addFields(
-            { name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] }
-          )
-        }
+        for (var i = 0; i < streamLinks.length; i++) newEmbed.addFields({ name: `Stream${i > 0 ? i + 1 : ''}`, value: streamLinks[i] })
         newEmbed.setImage(thumbnail);
 
         var location = await cityLookup.get(server.ip);
@@ -540,30 +526,84 @@ module.exports = {
       return buttons;
     }
 
-    const options = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Client-ID': config.twitchClientId,
-        'Authorization': `Bearer ${twitchAccessToken}`
+    var twitchDone = false;
+    var twitchStreams = [];
+    var kickDone = false;
+    var kickStreams = [];
+
+    (async () => {
+      const options = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Client-ID': config.twitchClientId,
+          'Authorization': `Bearer ${twitchAccessToken}`
+        }
       }
-    };
-    var response = await (await fetch('https://api.twitch.tv/helix/streams?game_id=27471&first=100', options)).json();
-    var streams = response.data;
-    do {
-      response = await (await fetch(`https://api.twitch.tv/helix/streams?game_id=27471&first=100&after=${response.pagination.cursor}`, options)).json();
-      streams = streams.concat(response.data);
-    } while (response.pagination.cursor)
-    if (interaction.options.getString('language')) streams = streams.filter(item => item.language == interaction.options.getString('language'));
+      var response = await (await fetch('https://api.twitch.tv/helix/streams?game_id=27471&first=100', options)).json();
+      twitchStreams = response.data;
+      do {
+        response = await (await fetch(`https://api.twitch.tv/helix/streams?game_id=27471&first=100&after=${response.pagination.cursor}`, options)).json();
+        twitchStreams = twitchStreams.concat(response.data);
+      } while (response.pagination.cursor)
+      if (interaction.options.getString('language')) streams = streams.filter(item => item.language == interaction.options.getString('language'));
+      twitchDone = true;
+    })();
 
-    await interactReplyMessage.edit('Searching servers...');
+    (async () => {
+      try {
+        let next;
+        for (let i = 1; next == null || next.data.length > 0; i++) {
+          next = await (await fetch(`https://kick.com/stream/livestreams/en?page=${i}&limit=12&subcategory=minecraft%C2%A0&sort=desc`, {
+            'credentials': 'include',
+            'headers': {
+                'User-Agent': '0',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Sec-GPC': '1',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'X-Socket-ID': '0'
+            },
+            'method': 'GET',
+            'mode': 'cors'
+        })).json();
+          kickStreams = kickStreams.concat(next.data);
+        }
+        kickDone = true;
+      } catch (e) {
+        await (new Promise (resolve => setTimeout(resolve, 5000)));
+        let next;
+        for (let i = 1; next == null || next.data.length > 0; i++) {
+          next = await (await fetch(`https://kick.com/stream/livestreams/en?page=${i}&limit=12&subcategory=minecraft%C2%A0&sort=desc`, {
+            'credentials': 'include',
+            'headers': {
+                'User-Agent': '0',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Sec-GPC': '1',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'X-Socket-ID': '0'
+            },
+            'method': 'GET',
+            'mode': 'cors'
+        })).json();
+          kickStreams = kickStreams.concat(next.data);
+        }
+        kickDone = true;
+      }
+    })();
 
-    const streamers = [];
-    for (const stream of streams) {
-      streamers.push(stream.user_name);
-    }
-    mongoFilter['players.sample'] = { '$elemMatch': { 'name': { '$in': streamers } } }
-    mongoFilter['ip'] = { '$ne': '109.123.240.84' }
+    await (new Promise(resolve => setInterval(() => { if (twitchDone && kickDone) resolve(); }, 100)))
+
+    await interactReplyMessage.edit(`Found ${twitchStreams.length} Twitch streams and ${kickStreams.length} Kick streams. Searching servers...`);
+
+    const twitchStreamers = [];
+    for (const stream of twitchStreams) twitchStreamers.push(stream.user_name);
+    const kickStreamers = [];
+    for (const stream of kickStreams) kickStreamers.push(stream.channel.user.username);
+    mongoFilter['players.sample'] = { '$elemMatch': { 'name': { '$in': twitchStreamers.concat(kickStreamers) } } };
 
     const totalResults = parseInt(await POST('https://api.cornbread2100.com/countServers', mongoFilter));
 
@@ -618,14 +658,17 @@ module.exports = {
       )
 
       buttonTimeoutCheck();
-      await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
 
       const streamLinks = [];
       var thumbnail;
       for (const player of server.players.sample) {
-        if (streamers.includes(player.name)) {
-          streamLinks.push(`https://twitch.tv/${streams[streamers.indexOf(player.name)].user_login}`);
-          if (!thumbnail) thumbnail = streams[streamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+        if (twitchStreamers.includes(player.name)) {
+          streamLinks.push(`https://twitch.tv/${player.name}`);
+          if (!thumbnail) thumbnail = twitchStreams[twitchStreamers.indexOf(player.name)].thumbnail_url.replaceAll('-{width}x{height}', '');
+        }
+        if (kickStreamers.includes(player.name)) {
+          streamLinks.push(`https://kick.com/${player.name}`);
+          if (!thumbnail) thumbnail = kickStreams[kickStreamers.indexOf(player.name)].thumbnail.src;
         }
       }
       for (var i = 0; i < streamLinks.length; i++) {
@@ -652,14 +695,7 @@ module.exports = {
         newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
       }
 
-      const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-      if (auth == 'true') {
-        newEmbed.addFields({ name: 'Auth', value: 'Cracked' })
-      } else if (auth == 'false') {
-        newEmbed.addFields({ name: 'Auth', value: 'Premium' })
-      } else {
-        newEmbed.addFields({ name: 'Auth', value: 'Unknown' })
-      }
+      newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
     } else {
       await interactReplyMessage.edit("no matches could be found");
