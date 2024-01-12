@@ -773,7 +773,7 @@ module.exports = {
 
     // If at least one server was found, send the message
     if (totalResults > 0) {
-      const server = (await POST('https://api.cornbread2100.com/servers?limit=1', mongoFilter))[0];
+      const server = (await POST(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1`, mongoFilter))[0];
 
       if (server.players.sample != null && Array.isArray(server.players.sample)) {
         for (const player of server.players.sample) {
