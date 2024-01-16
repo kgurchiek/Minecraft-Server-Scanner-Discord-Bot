@@ -699,7 +699,7 @@ module.exports = {
     if (description.consider) argumentList += `\n**description:** ${description.value}`;
     if (player.consider) argumentList += `\n**player:** ${player.value}`;
     if (hasPlayerList.consider) argumentList += hasPlayerList.value ? '\n**Player List Enabled**' : '\n**Player List Disabled**';
-    if (hasImage.consider) {
+    if (hasPlayerList.consider) {
       if (hasPlayerList.value) {
         argumentList += '\n**Player List Enabled**';
       } else {
