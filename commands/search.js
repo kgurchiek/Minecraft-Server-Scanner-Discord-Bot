@@ -49,6 +49,10 @@ module.exports = {
       option
         .setName("version")
         .setDescription("The version of the server (uses regex)"))
+    .addIntegerOption(option =>
+      option
+        .setName("protocol")
+        .setDescription("The protocol version of the server"))
     .addBooleanOption(option =>
       option
         .setName("hasimage")
@@ -122,68 +126,6 @@ module.exports = {
     const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
     var lastButtonPress = null;
     const mongoFilter = {};
-
-    // Get arguments
-    var minOnline = {
-      value: 0,
-      consider: false
-    };
-    var maxOnline = {
-      value: 0,
-      consider: false
-    };
-    var playerCap = {
-      value: 20,
-      consider: false
-    }
-    var isFull = {
-      value: false,
-      consider: false
-    };
-    var version = {
-      value: '',
-      consider: false
-    };
-    var hasImage = {
-      value: false,
-      consider: false
-    };
-    var description = {
-      value: '',
-      consider: false
-    };
-    var player = {
-      value: '',
-      consider: false
-    };
-    var hasPlayerList = {
-      value: false,
-      consider: false
-    };
-    var seenAfter = {
-      value: 0,
-      consider: false
-    }
-    var ipRange = {
-      value: '',
-      consider: false
-    }
-    var port = {
-      value: 0,
-      consider: false
-    }
-    var country = {
-      value: '',
-      consider: false
-    }
-    var org = {
-      value: '',
-      consider: false
-    }
-    var cracked = {
-      value: false,
-      consider: false
-    }
 
     // Creates interactable buttons
     var currentEmbed = 0;
@@ -590,34 +532,22 @@ module.exports = {
       return buttons;
     }
     
-    // Checks which values were provided
-    if (interaction.options.getInteger('skip') != null) {
-      currentEmbed = interaction.options.getInteger('skip') - 1;
-    }
+    // Get arguments
+    if (interaction.options.getInteger('skip') != null) currentEmbed = interaction.options.getInteger('skip') - 1;
     var onlinePlayers;
+    var minOnline;
+    var maxOnline;
     if (interaction.options.getString('onlineplayers') != null) {
       onlinePlayers = interaction.options.getString('onlineplayers');
-      if (onlinePlayers.startsWith('>=')) {
-        minOnline.value = parseInt(onlinePlayers.substring(2));
-        minOnline.consider = true;
-      } else if (onlinePlayers.startsWith('<=')) {
-        maxOnline.value = parseInt(onlinePlayers.substring(2));
-        maxOnline.consider = true;
-      } else if (onlinePlayers.startsWith('>')) {
-        minOnline.value = parseInt(onlinePlayers.substring(1));
-        minOnline.consider = true;
-      } else if (onlinePlayers.startsWith('<')) {
-        maxOnline.value = parseInt(onlinePlayers.substring(1));
-        maxOnline.consider = true;
-      } else if (onlinePlayers.includes('-')) {
+      if (onlinePlayers.startsWith('>=')) minOnline = parseInt(onlinePlayers.substring(2));
+      else if (onlinePlayers.startsWith('<=')) maxOnline = parseInt(onlinePlayers.substring(2));
+      else if (onlinePlayers.startsWith('>')) minOnline = parseInt(onlinePlayers.substring(1));
+      else if (onlinePlayers.startsWith('<')) maxOnline = parseInt(onlinePlayers.substring(1));
+      else if (onlinePlayers.includes('-')) {
         const [min, max] = onlinePlayers.split('-');
-        minOnline.value = parseInt(min);
-        maxOnline.value = parseInt(max);
-        minOnline.consider = maxOnline.consider = true;
-      } else {
-        minOnline.value = maxOnline.value = parseInt(onlinePlayers);
-        minOnline.consider = maxOnline.consider = true;
-      }
+        minOnline = parseInt(min);
+        maxOnline = parseInt(max);
+      } else minOnline = maxOnline = parseInt(onlinePlayers);
       if (isNaN(minOnline.value) || isNaN(maxOnline.value)) {
         const newEmbed = new EmbedBuilder()
           .setColor("#ff0000")
@@ -625,99 +555,50 @@ module.exports = {
           .setDescription('Invalid online player range')
       }
     }
-    if (interaction.options.getInteger('playercap') != null) {
-      playerCap.consider = true;
-      playerCap.value = interaction.options.getInteger('playercap');
-    }
-    if (interaction.options.getBoolean('isfull') != null) {
-      isFull.consider = true;
-      isFull.value = interaction.options.getBoolean('isfull');
-    }
-    if (interaction.options.getString('version') != null) {
-      version.consider = true;
-      version.value = interaction.options.getString('version');
-    }
-    if (interaction.options.getBoolean('hasimage') != null) {
-      hasImage.consider = true;
-      hasImage.value = interaction.options.getBoolean('hasimage');
-    }
-    if (interaction.options.getString('description') != null) {
-      description.consider = true;
-      description.value = interaction.options.getString('description');
-    }
-    if (interaction.options.getString('player') != null) {
-      player.consider = true;
-      player.value = interaction.options.getString('player');
-    }
-    if (interaction.options.getBoolean('hasplayerlist') != null) {
-      hasPlayerList.consider = true;
-      hasPlayerList.value = interaction.options.getBoolean('hasplayerlist');
-    }
-    if (interaction.options.getInteger('seenafter') != null) {
-      seenAfter.consider = true;
-      seenAfter.value = interaction.options.getInteger('seenafter');
-    }
-    if (interaction.options.getString('iprange') != null) {
-      ipRange.consider = true;
-      ipRange.value = interaction.options.getString('iprange');
-    }
-    if (interaction.options.getInteger('port') != null) {
-      port.consider = true;
-      port.value = interaction.options.getInteger('port');
-    }
-    if (interaction.options.getString('country') != null) {
-      country.consider = true;
-      country.value = interaction.options.getString('country');
-    }
-    if (interaction.options.getString('org') != null) {
-      org.consider = true;
-      org.value = interaction.options.getString('org');
-    }
-    if (interaction.options.getBoolean('cracked') != null) {
-      cracked.consider = true;
-      cracked.value = interaction.options.getBoolean('cracked');
-    }
+    var playerCap = interaction.options.getInteger('playercap');
+    var isFull = interaction.options.getBoolean('isfull');
+    var version = interaction.options.getString('version');
+    var protocol = interaction.options.getinteger('protocol');
+    var hasImage = interaction.options.getBoolean('hasimage');
+    var description = interaction.options.getString('description');
+    var player = interaction.options.getString('player');
+    var hasPlayerList = interaction.options.getBoolean('hasplayerlist');
+    var seenAfter = interaction.options.getInteger('seenafter');
+    var ipRange = interaction.options.getString('iprange');
+    var port = interaction.options.getInteger('port');
+    var country = interaction.options.getString('country');
+    var org = interaction.options.getString('org');
+    var cracked = interaction.options.getBoolean('cracked');
 
     var argumentList = '**Searching with these arguments:**';
     if (onlinePlayers != null) argumentList += `\n**onlineplayers:** ${onlinePlayers}`;
-    if (playerCap.consider) argumentList += `\n**playercap:** ${playerCap.value}`;
-    if (isFull.consider) {
-      if (isFull.value) {
-        argumentList += '\n**Is Full**';
-      } else {
-        argumentList += '\n**Not Full**';
-      }
-    }
-    if (version.consider) argumentList += `\n**version:** ${version.value}`;
-    if (hasImage.consider) {
-      if (hasImage.value) {
-        argumentList += '\n**Has Image**';
-      } else {
-        argumentList += '\n**Doesn\'t Have Image**'
-      }
-    }
-    if (description.consider) argumentList += `\n**description:** ${description.value}`;
-    if (player.consider) argumentList += `\n**player:** ${player.value}`;
-    if (hasPlayerList.consider) argumentList += hasPlayerList.value ? '\n**Player List Enabled**' : '\n**Player List Disabled**';
-    if (seenAfter.consider) argumentList += `\n**seenafter: **<t:${seenAfter.value}:f>`;
-    if (ipRange.consider) argumentList += `\n**iprange: **${ipRange.value}`;
-    if (port.consider) argumentList += `\n**port: **${port.value}`;
-    if (country.consider) argumentList += `\n**country: **:flag_${country.value.toLowerCase()}: ${country.value}`;
-    if (org.consider) argumentList += `\n**org: **${org.value}`;
-    if (cracked.consider) argumentList += `\n**auth: **${cracked.value ? 'Cracked' : 'Premium' }`;
+    if (playerCap != null) argumentList += `\n**playercap:** ${playerCap.value}`;
+    if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
+    if (version != null) argumentList += `\n**version:** ${version.value}`;
+    if (protocol != null) argumentList += `\n**protocol:** ${protocol.value}`;
+    if (hasImage != null) { argumentList += `\n**hasimage:** ${hasImage ? 'Has' : 'Doesn\'t Have'} Image`;
+    if (description != null) argumentList += `\n**description:** ${description.value}`;
+    if (player != null) argumentList += `\n**player:** ${player.value}`;
+    if (hasPlayerList != null) argumentList += hasPlayerList.value ? '\n**Player List Enabled**' : '\n**Player List Disabled**';
+    if (seenAfter != null) argumentList += `\n**seenafter: **<t:${seenAfter.value}:f>`;
+    if (ipRange != null) argumentList += `\n**iprange: **${ipRange.value}`;
+    if (port != null) argumentList += `\n**port: **${port.value}`;
+    if (country != null) argumentList += `\n**country: **:flag_${country.value.toLowerCase()}: ${country.value}`;
+    if (org != null) argumentList += `\n**org: **${org.value}`;
+    if (cracked != null) argumentList += `\n**auth: **${cracked.value ? 'Cracked' : 'Premium' }`;
 
     await interactReplyMessage.edit(argumentList);
 
-    if (minOnline.consider) {
+    if (minOnline != null) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
       mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = minOnline.value;
     }
-    if (maxOnline.consider) {
+    if (maxOnline != null) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
       mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = maxOnline.value;
     }
-    if (playerCap.consider) mongoFilter['players.max'] = playerCap.value;
-    if (isFull.consider) {
+    if (playerCap != null) mongoFilter['players.max'] = playerCap.value;
+    if (isFull != null) {
       if (isFull.value) {
         mongoFilter['$expr'] = { '$eq': ['$players.online', '$players.max'] };
       } else { 
@@ -725,20 +606,21 @@ module.exports = {
       }
       mongoFilter['players'] = { '$ne': null };
     }
-    if (version.consider) mongoFilter['version.name'] = { '$regex': version.value, '$options': 'i' };
-    if (hasImage.consider) mongoFilter['hasFavicon'] = hasImage.value;
-    if (description.consider) mongoFilter['$or'] = [ {'description': {'$regex': description.value, '$options': 'i'}}, {'description.text': {'$regex': description.value, '$options': 'i'}}, { 'description.extra.text': { '$regex': description.value, '$options': 'i', } }, ];
-    if (player.consider) {
+    if (version != null) mongoFilter['version.name'] = { '$regex': version.value, '$options': 'i' };
+    if (protocol != null) mongoFilter['version.protocol'] = protocol.value;
+    if (hasImage != null) mongoFilter['hasFavicon'] = hasImage.value;
+    if (description != null) mongoFilter['$or'] = [ {'description': {'$regex': description.value, '$options': 'i'}}, {'description.text': {'$regex': description.value, '$options': 'i'}}, { 'description.extra.text': { '$regex': description.value, '$options': 'i', } }, ];
+    if (player != null) {
       mongoFilter['players'] = { '$ne': null };
       mongoFilter['players.sample'] = { '$exists': true, "$elemMatch": { "name": player.value }};
     }
-    if (hasPlayerList.consider) {
+    if (hasPlayerList != null) {
       if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = {};
       mongoFilter['players.sample']['$exists'] = hasPlayerList.value;
       if (hasPlayerList.value) mongoFilter['players.sample']['$not'] = { '$size': 0 };
     }
-    if (seenAfter.consider) mongoFilter['lastSeen'] = { '$gte': seenAfter.value };
-    if (ipRange.consider) {
+    if (seenAfter != null) mongoFilter['lastSeen'] = { '$gte': seenAfter.value };
+    if (ipRange != null) {
       const [ip, range] = ipRange.value.split('/');
       const ipCount = 2**(32 - range)
       const octets = ip.split('.');
@@ -757,10 +639,10 @@ module.exports = {
 
       mongoFilter['ip'] = { '$regex': `^${octets[0]}\.${octets[1]}\.${octets[2]}\.${octets[3]}\$`, '$options': 'i' }
     }
-    if (port.consider) mongoFilter['port'] = port.value;
-    if (country.consider) mongoFilter['geo.country'] = country.value;
-    if (org.consider) mongoFilter['org'] = { '$regex': org.value, '$options': 'i' };
-    if (cracked.consider) mongoFilter['cracked'] = cracked.value;
+    if (port != null) mongoFilter['port'] = port.value;
+    if (country != null) mongoFilter['geo.country'] = country.value;
+    if (org != null) mongoFilter['org'] = { '$regex': org.value, '$options': 'i' };
+    if (cracked != null) mongoFilter['cracked'] = cracked.value;
 
     const totalResults = parseInt(await POST('https://api.cornbread2100.com/countServers', mongoFilter));
 
