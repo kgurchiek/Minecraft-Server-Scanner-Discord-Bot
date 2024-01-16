@@ -699,13 +699,6 @@ module.exports = {
     if (description.consider) argumentList += `\n**description:** ${description.value}`;
     if (player.consider) argumentList += `\n**player:** ${player.value}`;
     if (hasPlayerList.consider) argumentList += hasPlayerList.value ? '\n**Player List Enabled**' : '\n**Player List Disabled**';
-    if (hasPlayerList.consider) {
-      if (hasPlayerList.value) {
-        argumentList += '\n**Player List Enabled**';
-      } else {
-        argumentList += '\n**Player List Disabled**'
-      }
-    }
     if (seenAfter.consider) argumentList += `\n**seenafter: **<t:${seenAfter.value}:f>`;
     if (ipRange.consider) argumentList += `\n**iprange: **${ipRange.value}`;
     if (port.consider) argumentList += `\n**port: **${port.value}`;
