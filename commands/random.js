@@ -169,5 +169,5 @@ module.exports = {
       }
     }
     if (hasOldPlayers) buttonTimeoutCheck();
-  },
+  }
 }

@@ -35,5 +35,5 @@ module.exports = {
 				 
 		)
     interaction.reply({ embeds: [exampleEmbed], ephemeral:true });
-	},
-};
+	}
+}

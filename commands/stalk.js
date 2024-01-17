@@ -171,7 +171,7 @@ module.exports = {
     fs.writeFileSync('./data/stalk.json', JSON.stringify(pingList));
     await interaction.editReply({ embeds: [newEmbed] });
   }
-};
+}
 
 function getPingList() {
   if (fs.existsSync('./data/stalk.json')) {

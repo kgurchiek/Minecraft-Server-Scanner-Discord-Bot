@@ -734,5 +734,5 @@ module.exports = {
         setTimeout(function() { buttonTimeoutCheck() }, 500);
       }
     }
-  },
-};
+  }
+}
