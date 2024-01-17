@@ -599,7 +599,7 @@ module.exports = {
     }
     if (playerCap != null) mongoFilter['players.max'] = playerCap;
     if (isFull != null) {
-      if (isFull) mongoFilter['$expr'] = { (isFull ? '$eq' : ): ['$players.online', '$players.max'] };
+      if (isFull) mongoFilter['$expr'] = { '$eq': ['$players.online', '$players.max'] };
       else mongoFilter['$expr'] = { '$ne': ['$players.online', '$players.max'] };
     }
     if (version != null) mongoFilter['version.name'] = { '$regex': version, '$options': 'i' };
