@@ -528,7 +528,7 @@ module.exports = {
 
     var twitchDone = false;
     var twitchStreams = [];
-    var kickDone = false;
+    var kickDone = true;
     var kickStreams = [];
 
     (async () => {
@@ -550,7 +550,7 @@ module.exports = {
       twitchDone = true;
     })();
 
-    (async () => {
+    /*(async () => {
       try {
         let next;
         for (let i = 1; next == null || next.data.length > 0; i++) {
@@ -593,7 +593,7 @@ module.exports = {
         }
         kickDone = true;
       }
-    })();
+    })();*/
 
     await (new Promise(resolve => setInterval(() => { if (twitchDone && kickDone) resolve(); }, 100)))
 
