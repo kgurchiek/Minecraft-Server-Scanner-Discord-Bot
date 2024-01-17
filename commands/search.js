@@ -548,7 +548,7 @@ module.exports = {
         minOnline = parseInt(min);
         maxOnline = parseInt(max);
       } else minOnline = maxOnline = parseInt(onlinePlayers);
-      if (isNaN(minOnline.value) || isNaN(maxOnline.value)) {
+      if (isNaN(minOnline) || isNaN(maxOnline)) {
         const newEmbed = new EmbedBuilder()
           .setColor("#ff0000")
           .setTitle('Error')
@@ -572,56 +572,56 @@ module.exports = {
 
     var argumentList = '**Searching with these arguments:**';
     if (onlinePlayers != null) argumentList += `\n**onlineplayers:** ${onlinePlayers}`;
-    if (playerCap != null) argumentList += `\n**playercap:** ${playerCap.value}`;
+    if (playerCap != null) argumentList += `\n**playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
-    if (version != null) argumentList += `\n**version:** ${version.value}`;
-    if (protocol != null) argumentList += `\n**protocol:** ${protocol.value}`;
+    if (version != null) argumentList += `\n**version:** ${version}`;
+    if (protocol != null) argumentList += `\n**protocol:** ${protocol}`;
     if (hasImage != null) argumentList += `\n**hasimage:** ${hasImage ? 'Has' : 'Doesn\'t Have'} Image`;
-    if (description != null) argumentList += `\n**description:** ${description.value}`;
-    if (player != null) argumentList += `\n**player:** ${player.value}`;
-    if (hasPlayerList != null) argumentList += hasPlayerList.value ? '\n**Player List Enabled**' : '\n**Player List Disabled**';
-    if (seenAfter != null) argumentList += `\n**seenafter: **<t:${seenAfter.value}:f>`;
-    if (ipRange != null) argumentList += `\n**iprange: **${ipRange.value}`;
-    if (port != null) argumentList += `\n**port: **${port.value}`;
-    if (country != null) argumentList += `\n**country: **:flag_${country.value.toLowerCase()}: ${country.value}`;
-    if (org != null) argumentList += `\n**org: **${org.value}`;
-    if (cracked != null) argumentList += `\n**auth: **${cracked.value ? 'Cracked' : 'Premium' }`;
+    if (description != null) argumentList += `\n**description:** ${description}`;
+    if (player != null) argumentList += `\n**player:** ${player}`;
+    if (hasPlayerList != null) argumentList += hasPlayerList ? '\n**Player List Enabled**' : '\n**Player List Disabled**';
+    if (seenAfter != null) argumentList += `\n**seenafter: **<t:${seenAfter}:f>`;
+    if (ipRange != null) argumentList += `\n**iprange: **${ipRange}`;
+    if (port != null) argumentList += `\n**port: **${port}`;
+    if (country != null) argumentList += `\n**country: **:flag_${country.toLowerCase()}: ${country}`;
+    if (org != null) argumentList += `\n**org: **${org}`;
+    if (cracked != null) argumentList += `\n**auth: **${cracked ? 'Cracked' : 'Premium' }`;
 
     await interactReplyMessage.edit(argumentList);
 
     if (minOnline != null) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = minOnline.value;
+      mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = minOnline;
     }
     if (maxOnline != null) {
       if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = maxOnline.value;
+      mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = maxOnline;
     }
-    if (playerCap != null) mongoFilter['players.max'] = playerCap.value;
+    if (playerCap != null) mongoFilter['players.max'] = playerCap;
     if (isFull != null) {
-      if (isFull.value) {
+      if (isFull) {
         mongoFilter['$expr'] = { '$eq': ['$players.online', '$players.max'] };
       } else { 
         mongoFilter['$expr'] = { '$ne': ['$players.online', '$players.max'] };
       }
       mongoFilter['players'] = { '$ne': null };
     }
-    if (version != null) mongoFilter['version.name'] = { '$regex': version.value, '$options': 'i' };
-    if (protocol != null) mongoFilter['version.protocol'] = protocol.value;
-    if (hasImage != null) mongoFilter['hasFavicon'] = hasImage.value;
-    if (description != null) mongoFilter['$or'] = [ {'description': {'$regex': description.value, '$options': 'i'}}, {'description.text': {'$regex': description.value, '$options': 'i'}}, { 'description.extra.text': { '$regex': description.value, '$options': 'i', } }, ];
+    if (version != null) mongoFilter['version.name'] = { '$regex': version, '$options': 'i' };
+    if (protocol != null) mongoFilter['version.protocol'] = protocol;
+    if (hasImage != null) mongoFilter['hasFavicon'] = hasImage;
+    if (description != null) mongoFilter['$or'] = [ {'description': {'$regex': description, '$options': 'i'}}, {'description.text': {'$regex': description, '$options': 'i'}}, { 'description.extra.text': { '$regex': description, '$options': 'i', } }, ];
     if (player != null) {
       mongoFilter['players'] = { '$ne': null };
-      mongoFilter['players.sample'] = { '$exists': true, "$elemMatch": { "name": player.value }};
+      mongoFilter['players.sample'] = { '$exists': true, "$elemMatch": { "name": player }};
     }
     if (hasPlayerList != null) {
       if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = {};
-      mongoFilter['players.sample']['$exists'] = hasPlayerList.value;
-      if (hasPlayerList.value) mongoFilter['players.sample']['$not'] = { '$size': 0 };
+      mongoFilter['players.sample']['$exists'] = hasPlayerList;
+      if (hasPlayerList) mongoFilter['players.sample']['$not'] = { '$size': 0 };
     }
-    if (seenAfter != null) mongoFilter['lastSeen'] = { '$gte': seenAfter.value };
+    if (seenAfter != null) mongoFilter['lastSeen'] = { '$gte': seenAfter };
     if (ipRange != null) {
-      const [ip, range] = ipRange.value.split('/');
+      const [ip, range] = ipRange.split('/');
       const ipCount = 2**(32 - range)
       const octets = ip.split('.');
       for (var i = 0; i < octets.length; i++) {
@@ -639,10 +639,10 @@ module.exports = {
 
       mongoFilter['ip'] = { '$regex': `^${octets[0]}\.${octets[1]}\.${octets[2]}\.${octets[3]}\$`, '$options': 'i' }
     }
-    if (port != null) mongoFilter['port'] = port.value;
-    if (country != null) mongoFilter['geo.country'] = country.value;
-    if (org != null) mongoFilter['org'] = { '$regex': org.value, '$options': 'i' };
-    if (cracked != null) mongoFilter['cracked'] = cracked.value;
+    if (port != null) mongoFilter['port'] = port;
+    if (country != null) mongoFilter['geo.country'] = country;
+    if (org != null) mongoFilter['org'] = { '$regex': org, '$options': 'i' };
+    if (cracked != null) mongoFilter['cracked'] = cracked;
 
     const totalResults = parseInt(await POST('https://api.cornbread2100.com/countServers', mongoFilter));
 
