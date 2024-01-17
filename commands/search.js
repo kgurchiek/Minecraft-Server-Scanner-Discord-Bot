@@ -598,7 +598,10 @@ module.exports = {
       mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = maxOnline;
     }
     if (playerCap != null) mongoFilter['players.max'] = playerCap;
-    if (isFull != null) mongoFilter['$expr'] = { `${isFull ? '$eq' : '$ne'}`: ['$players.online', '$players.max'] };
+    if (isFull != null) {
+      if (isFull) mongoFilter['$expr'] = { (isFull ? '$eq' : ): ['$players.online', '$players.max'] };
+      else mongoFilter['$expr'] = { '$ne': ['$players.online', '$players.max'] };
+    }
     if (version != null) mongoFilter['version.name'] = { '$regex': version, '$options': 'i' };
     if (protocol != null) mongoFilter['version.protocol'] = protocol;
     if (hasImage != null) mongoFilter['hasFavicon'] = hasImage;
