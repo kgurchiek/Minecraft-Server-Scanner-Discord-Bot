@@ -576,7 +576,7 @@ module.exports = {
     if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
     if (version != null) argumentList += `\n**version:** ${version.value}`;
     if (protocol != null) argumentList += `\n**protocol:** ${protocol.value}`;
-    if (hasImage != null) { argumentList += `\n**hasimage:** ${hasImage ? 'Has' : 'Doesn\'t Have'} Image`;
+    if (hasImage != null) argumentList += `\n**hasimage:** ${hasImage ? 'Has' : 'Doesn\'t Have'} Image`;
     if (description != null) argumentList += `\n**description:** ${description.value}`;
     if (player != null) argumentList += `\n**player:** ${player.value}`;
     if (hasPlayerList != null) argumentList += hasPlayerList.value ? '\n**Player List Enabled**' : '\n**Player List Disabled**';
