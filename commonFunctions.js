@@ -1,3 +1,5 @@
+const axios = require('axios');
+
 function minecraftToAnsi(text) {
   colors = {
     '0': 30,
@@ -128,8 +130,17 @@ function getVersion(rawVersion) {
   return version;
 }
 
-async function POST(url, body) {
-  return JSON.parse(await (await fetch(url, { method: 'POST', body: JSON.stringify(body) })).text());
+function POST(url, body) {
+  return new Promise((resolve) => {
+    axios.post(url, body)
+      .then((response) => {
+        resolve(response.data)
+      })
+      .catch((error) => {
+        resolve({ error })
+        console.log('POST Error:', error);
+      });
+  })
 }
 
 module.exports = {
