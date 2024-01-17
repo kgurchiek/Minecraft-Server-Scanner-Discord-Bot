@@ -598,22 +598,12 @@ module.exports = {
       mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = maxOnline;
     }
     if (playerCap != null) mongoFilter['players.max'] = playerCap;
-    if (isFull != null) {
-      if (isFull) {
-        mongoFilter['$expr'] = { '$eq': ['$players.online', '$players.max'] };
-      } else { 
-        mongoFilter['$expr'] = { '$ne': ['$players.online', '$players.max'] };
-      }
-      mongoFilter['players'] = { '$ne': null };
-    }
+    if (isFull != null) mongoFilter['$expr'] = { `${isFull ? '$eq' : '$ne'}`: ['$players.online', '$players.max'] };
     if (version != null) mongoFilter['version.name'] = { '$regex': version, '$options': 'i' };
     if (protocol != null) mongoFilter['version.protocol'] = protocol;
     if (hasImage != null) mongoFilter['hasFavicon'] = hasImage;
     if (description != null) mongoFilter['$or'] = [ {'description': {'$regex': description, '$options': 'i'}}, {'description.text': {'$regex': description, '$options': 'i'}}, { 'description.extra.text': { '$regex': description, '$options': 'i', } }, ];
-    if (player != null) {
-      mongoFilter['players'] = { '$ne': null };
-      mongoFilter['players.sample'] = { '$exists': true, "$elemMatch": { "name": player }};
-    }
+    if (player != null) mongoFilter['players.sample'] = { '$elemMatch': { 'name': player }};
     if (hasPlayerList != null) {
       if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = {};
       mongoFilter['players.sample']['$exists'] = hasPlayerList;
