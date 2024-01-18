@@ -30,9 +30,9 @@ module.exports = {
 					{ name: 'org (organization name, uses regex)', value: 'The organization the ip belongs to', inline: true },
 					{ name: 'cracked (true/false)', value: 'Whether or not the server is cracked (offline mode)\n' + '​', inline: true },
 				{ name: '/player', value: 'Gets servers that live Twitch streamers are playing on' + '​', inline: true },
-					{ name: 'skip (integer)', value: 'Skips to a page of results', inline: true }
+					{ name: 'skip (integer)', value: 'Skips to a page of results', inline: true },
 					{ name: 'username', value: 'The username of the player', inline: true },
-					{ name: 'uuid (uuid v4)', value: 'The uuid of the player\n' + '​', inline: true }
+					{ name: 'uuid (uuid v4)', value: 'The uuid of the player\n' + '​', inline: true },
 				{ name: '/streamsnipe', value: 'Gets servers that live Twitch streamers are playing on' + '​', inline: true },
 					{ name: 'language (language name)', value: 'The language of the Twitch stream (you must use the autocomplete for it to work)\n' + '​', inline: true }
 		)
