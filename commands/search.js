@@ -544,7 +544,7 @@ module.exports = {
         minOnline = parseInt(min);
         maxOnline = parseInt(max);
       } else minOnline = maxOnline = parseInt(onlinePlayers);
-      if (isNaN(minOnline) || isNaN(maxOnline)) {
+      if ((minOnline != null && isNaN(minOnline)) || (maxOnline != null && isNaN(maxOnline))) {
         const newEmbed = new EmbedBuilder()
           .setColor("#ff0000")
           .setTitle('Error')
