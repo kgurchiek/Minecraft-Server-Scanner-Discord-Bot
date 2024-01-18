@@ -585,13 +585,17 @@ module.exports = {
 
     await interactReplyMessage.edit(argumentList);
 
-    if (minOnline != null) {
-      if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = minOnline;
-    }
-    if (maxOnline != null) {
-      if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = maxOnline;
+    if (minOnline == maxOnline) {
+      if (minOnline != null) mongoFilter['players.online'] = minOnline;
+    } else {
+      if (minOnline != null) {
+        if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
+        mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = minOnline;
+      }
+      if (maxOnline != null) {
+        if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
+        mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = maxOnline;
+      }
     }
     if (playerCap != null) mongoFilter['players.max'] = playerCap;
     if (isFull != null) {
