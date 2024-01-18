@@ -27,85 +27,20 @@ function timeSinceDate(date1) {
 // Exports an object with the parameters for the target server
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("search")
-    .setDescription("Searches the current database for a server with specific properties")
+    .setName('player')
+    .setDescription('Searches for servers a player has played on')
     .addIntegerOption(option =>
       option
-        .setName("skip")
-        .setDescription("skips to a page of results"))
+        .setName('skip')
+        .setDescription('Skips to a page of results'))
     .addStringOption(option =>
       option
-        .setName("onlineplayers")
-        .setDescription("A range of online players"))
-    .addIntegerOption(option =>
-      option
-        .setName("playercap")
-        .setDescription("The server's maximum player capacity"))
-    .addBooleanOption(option =>
-      option
-        .setName("isfull")
-        .setDescription("whether or not the server is full"))
+        .setName('username')
+        .setDescription('The username of the player'))
     .addStringOption(option =>
       option
-        .setName("version")
-        .setDescription("The version of the server (uses regex)"))
-    .addIntegerOption(option =>
-      option
-        .setName("protocol")
-        .setDescription("The protocol version of the server"))
-    .addBooleanOption(option =>
-      option
-        .setName("hasimage")
-        .setDescription("Whether or not the server has a custom favicon"))
-    .addStringOption(option =>
-      option
-        .setName("description")
-        .setDescription("The description of the server (uses regex)"))
-    .addBooleanOption(option =>
-      option
-        .setName("hasplayerlist")
-        .setDescription("Whether or not the server has player list enabled"))
-    .addIntegerOption(option =>
-      option
-        .setName("seenafter")
-        .setDescription("The oldest time a server can be last seen (this doesn't mean it's offline, use /help for more info)")
-        .setAutocomplete(true))
-    .addStringOption(option =>
-      option
-        .setName("iprange")
-        .setDescription("The ip subnet a server's ip has to be within"))
-    .addIntegerOption(option =>
-      option
-        .setName("port")
-        .setDescription("The port the server is hosted on"))
-    .addStringOption(option =>
-      option
-        .setName("country")
-        .setDescription("The country the server is hosted in")
-        .setAutocomplete(true))
-    .addStringOption(option =>
-      option
-        .setName("org")
-        .setDescription("The organization hosting the server")
-        .setAutocomplete(true))
-    .addBooleanOption(option =>
-      option
-        .setName("cracked")
-        .setDescription("Whether or not the server is cracked (offline mode)")),
-  async autocomplete(interaction) {
-    const focusedValue = interaction.options.getFocused(true);
-    switch (focusedValue.name) {
-      case 'seenafter':
-        await interaction.respond([{ name: '1 hour ago', value: Math.round(new Date().getTime() / 1000) - 3600}, { name: '6 hours ago', value: Math.round(new Date().getTime() / 1000) - 21600 }, { name: '1 day ago', value: Math.round(new Date().getTime() / 1000) - 86400 }])
-        break;
-      case 'country':
-        await interaction.respond(countryCodes.filter(choice => choice.name.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice.name, value: choice.code })));
-        break;
-      case 'org':
-        await interaction.respond(orgs.filter(choice => choice.toLowerCase().includes(focusedValue.value.toLowerCase())).splice(0, 25).map(choice => ({ name: choice, value: `^${choice}$` })));
-        break;
-    }
-  },
+        .setName('uuid')
+        .setDescription('The uuid of the player')),
   async execute(interaction) {
     // Status message
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
@@ -167,7 +102,7 @@ module.exports = {
       // Event listener for 'Next Page' button
       searchNextResultCollector.on('collect', async interaction => {
         var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
+          .setColor('#02a337')
           .setTitle('Search Results')
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
           .addFields(
@@ -180,7 +115,7 @@ module.exports = {
         currentEmbed++;
         if (currentEmbed == totalResults) currentEmbed = 0;
 
-        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
+        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { ip: servers[currentEmbed].ip, port: servers[currentEmbed].port }))[0];
 
         if (server.players.sample != null && Array.isArray(server.players.sample)) {
           for (const player of server.players.sample) {
@@ -263,7 +198,7 @@ module.exports = {
 
         // Updates UI when 'Next Page' pressed
         newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
+          .setColor('#02a337')
           .setTitle('Search Results')
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
           .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
@@ -323,7 +258,7 @@ module.exports = {
       // Event listener for 'Last Page' button
       searchLastResultCollector.on('collect', async interaction => {
         var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
+          .setColor('#02a337')
           .setTitle('Search Results')
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
           .addFields(
@@ -337,7 +272,7 @@ module.exports = {
         currentEmbed--;
         if (currentEmbed == -1) currentEmbed = totalResults - 1;
 
-        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
+        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { ip: servers[currentEmbed].ip, port: servers[currentEmbed].port }))[0];
     
         if (server.players.sample != null && Array.isArray(server.players.sample)) {
           for (const player of server.players.sample) {
@@ -350,7 +285,7 @@ module.exports = {
 
         // Updates UI when 'Last Page' pressed
         var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
+          .setColor('#02a337')
           .setTitle('Search Results')
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
           .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
@@ -409,7 +344,7 @@ module.exports = {
 
       oldPlayersCollector.on('collect', async interaction => { 
         var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
+          .setColor('#02a337')
           .setTitle('Search Results')
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
           .addFields(
@@ -419,7 +354,7 @@ module.exports = {
         const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [] });
         lastButtonPress = new Date();
 
-        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
+        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { ip: servers[currentEmbed].ip, port: servers[currentEmbed].port }))[0];
 
         if (server.players.sample != null && Array.isArray(server.players.sample)) {
           for (const player of server.players.sample) {
@@ -468,7 +403,7 @@ module.exports = {
 
         // Updates UI when 'Last Page' pressed
         var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
+          .setColor('#02a337')
           .setTitle('Search Results')
           .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
           .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
@@ -530,127 +465,39 @@ module.exports = {
     
     // Get arguments
     if (interaction.options.getInteger('skip') != null) currentEmbed = interaction.options.getInteger('skip') - 1;
-    var onlinePlayers;
-    var minOnline;
-    var maxOnline;
-    if (interaction.options.getString('onlineplayers') != null) {
-      onlinePlayers = interaction.options.getString('onlineplayers');
-      if (onlinePlayers.startsWith('>=')) minOnline = parseInt(onlinePlayers.substring(2));
-      else if (onlinePlayers.startsWith('<=')) maxOnline = parseInt(onlinePlayers.substring(2));
-      else if (onlinePlayers.startsWith('>')) minOnline = parseInt(onlinePlayers.substring(1));
-      else if (onlinePlayers.startsWith('<')) maxOnline = parseInt(onlinePlayers.substring(1));
-      else if (onlinePlayers.includes('-')) {
-        const [min, max] = onlinePlayers.split('-');
-        minOnline = parseInt(min);
-        maxOnline = parseInt(max);
-      } else minOnline = maxOnline = parseInt(onlinePlayers);
-      if (isNaN(minOnline) || isNaN(maxOnline)) {
-        const newEmbed = new EmbedBuilder()
-          .setColor("#ff0000")
-          .setTitle('Error')
-          .setDescription('Invalid online player range')
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed] });
-        return;
-      }
+    var username = interaction.options.getString('username');
+    var uuid = interaction.options.getString('uuid');
+
+    if (username == null && uuid == null) {
+      const newEmbed = new EmbedBuilder()
+        .setColor("#ff0000")
+        .setTitle('Error')
+        .setDescription('Must enter a username or uuid')
+      await interactReplyMessage.edit({ content: '', embeds: [newEmbed] });
+      return;
     }
-    var playerCap = interaction.options.getInteger('playercap');
-    var isFull = interaction.options.getBoolean('isfull');
-    var version = interaction.options.getString('version');
-    var protocol = interaction.options.getInteger('protocol');
-    var hasImage = interaction.options.getBoolean('hasimage');
-    var description = interaction.options.getString('description');
-    var hasPlayerList = interaction.options.getBoolean('hasplayerlist');
-    var seenAfter = interaction.options.getInteger('seenafter');
-    var ipRange = interaction.options.getString('iprange');
-    var port = interaction.options.getInteger('port');
-    var country = interaction.options.getString('country');
-    var org = interaction.options.getString('org');
-    var cracked = interaction.options.getBoolean('cracked');
 
     var argumentList = '**Searching with these arguments:**';
-    if (onlinePlayers != null) argumentList += `\n**onlineplayers:** ${onlinePlayers}`;
-    if (playerCap != null) argumentList += `\n**playercap:** ${playerCap}`;
-    if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
-    if (version != null) argumentList += `\n**version:** ${version}`;
-    if (protocol != null) argumentList += `\n**protocol:** ${protocol}`;
-    if (hasImage != null) argumentList += `\n**hasimage:** ${hasImage ? 'Has' : 'Doesn\'t Have'} Image`;
-    if (description != null) argumentList += `\n**description:** ${description}`;
-    if (hasPlayerList != null) argumentList += hasPlayerList ? '\n**Player List Enabled**' : '\n**Player List Disabled**';
-    if (seenAfter != null) argumentList += `\n**seenafter: **<t:${seenAfter}:f>`;
-    if (ipRange != null) argumentList += `\n**iprange: **${ipRange}`;
-    if (port != null) argumentList += `\n**port: **${port}`;
-    if (country != null) argumentList += `\n**country: **:flag_${country.toLowerCase()}: ${country}`;
-    if (org != null) argumentList += `\n**org: **${org}`;
-    if (cracked != null) argumentList += `\n**auth: **${cracked ? 'Cracked' : 'Premium' }`;
+    if (username != null) argumentList += `\n**username:** ${username}`;
+    if (uuid != null) argumentList += `\n**uuid:** ${uuid}`;
 
     await interactReplyMessage.edit(argumentList);
 
-    if (minOnline != null) {
-      if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = minOnline;
-    }
-    if (maxOnline != null) {
-      if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-      mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = maxOnline;
-    }
-    if (playerCap != null) mongoFilter['players.max'] = playerCap;
-    if (isFull != null) {
-      if (isFull) mongoFilter['$expr'] = { '$eq': ['$players.online', '$players.max'] };
-      else mongoFilter['$expr'] = { '$ne': ['$players.online', '$players.max'] };
-    }
-    if (version != null) mongoFilter['version.name'] = { '$regex': version, '$options': 'i' };
-    if (protocol != null) mongoFilter['version.protocol'] = protocol;
-    if (hasImage != null) mongoFilter['hasFavicon'] = hasImage;
-    if (description != null) mongoFilter['$or'] = [ {'description': {'$regex': description, '$options': 'i'}}, {'description.text': {'$regex': description, '$options': 'i'}}, { 'description.extra.text': { '$regex': description, '$options': 'i', } }, ];
-    if (hasPlayerList != null) {
-      if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = {};
-      mongoFilter['players.sample']['$exists'] = hasPlayerList;
-      if (hasPlayerList) mongoFilter['players.sample']['$not'] = { '$size': 0 };
-    }
-    if (seenAfter != null) mongoFilter['lastSeen'] = { '$gte': seenAfter };
-    if (ipRange != null) {
-      const [ip, range] = ipRange.split('/');
-      const ipCount = 2**(32 - range)
-      const octets = ip.split('.');
-      for (var i = 0; i < octets.length; i++) {
-        if (256**i < ipCount) {
-          var min = octets[octets.length - i - 1];
-          var max = 255;
-          if (256**(i + 1) < ipCount) {
-            min = 0;
-          } else {
-            max = ipCount / 256;
-          }
-          octets[octets.length - i - 1] = `(${min}|[1-9]\\d{0,2}|[1-9]\\d{0,1}\\d|${max})`;
-        }
-      }
+    if (username != null) mongoFilter['username'] = username;
+    if (uuid != null) mongoFilter['uuid'] = uuid;
 
-      mongoFilter['ip'] = { '$regex': `^${octets[0]}\.${octets[1]}\.${octets[2]}\.${octets[3]}\$`, '$options': 'i' }
-    }
-    if (port != null) mongoFilter['port'] = port;
-    if (country != null) mongoFilter['geo.country'] = country;
-    if (org != null) mongoFilter['org'] = { '$regex': org, '$options': 'i' };
-    if (cracked != null) mongoFilter['cracked'] = cracked;
-
-    const totalResults = parseInt(await POST('https://api.cornbread2100.com/countServers', mongoFilter));
+    const servers = (await POST('https://api.cornbread2100.com/players', mongoFilter)).servers;
+    const totalResults = servers == null ? 0 : servers.length;
+    if (currentEmbed > totalResults) currentEmbed = totalResults - 1;
 
     // If at least one server was found, send the message
     if (totalResults > 0) {
-      const server = (await POST(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1`, mongoFilter))[0];
-
-      if (server.players.sample != null && Array.isArray(server.players.sample)) {
-        for (const player of server.players.sample) {
-          if (player.lastSeen != server.lastSeen) {
-            hasOldPlayers = true;
-            break;
-          }
-        }
-      }
+      const server = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { ip: servers[currentEmbed].ip, port: servers[currentEmbed].port }))[0];
         
       var buttons = createButtons(totalResults);
 
       var newEmbed = new EmbedBuilder()
-        .setColor("#02a337")
+        .setColor('#02a337')
         .setTitle('Search Results')
         .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
         .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
@@ -706,7 +553,7 @@ module.exports = {
       newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
     } else {
-      await interactReplyMessage.edit('No matches could be found');
+      await interactReplyMessage.edit(`No servers recorded for ${username == null ? 'uuid' : 'user'} \`${username == null ? uuid : username}\`.`);
     } 
     lastButtonPress = new Date();
 

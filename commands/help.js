@@ -22,7 +22,6 @@ module.exports = {
 					{ name: 'version (regex)', value: 'The version of the server', inline: true },
 					{ name: 'hasimage (true/false)', value: 'Whether or not the server has a custom favicon', inline: true },
 					{ name: 'description (regex)', value: 'The description of the server', inline: true },
-					{ name: 'player (player name)', value: 'The name of a player to search for', inline: true },
 					{ name: 'hasplayerlist (boolean)', value: 'Whether or not the server has player list enabled', inline: true },
 					{ name: 'seenafter (unix timestamp)', value: `The oldest time a server can be last seen. This doesn't mean the server is offline, it could be that the ping was lost due to packet loss. Recommended: ${Math.round(new Date().getTime() / 1000) - 3600} (1 hour ago)\n` + '​', inline: true },
 					{ name: 'iprange (ip subnet)', value: 'The ip subnet a server\'s ip has to be within', inline: true },
@@ -30,10 +29,13 @@ module.exports = {
 					{ name: 'country (country name)', value: 'The country the server is hosted in', inline: true },
 					{ name: 'org (organization name, uses regex)', value: 'The organization the ip belongs to', inline: true },
 					{ name: 'cracked (true/false)', value: 'Whether or not the server is cracked (offline mode)\n' + '​', inline: true },
+				{ name: '/player', value: 'Gets servers that live Twitch streamers are playing on' + '​', inline: true },
+					{ name: 'skip (integer)', value: 'Skips to a page of results', inline: true }
+					{ name: 'username', value: 'The username of the player', inline: true },
+					{ name: 'uuid (uuid v4)', value: 'The uuid of the player\n' + '​', inline: true }
 				{ name: '/streamsnipe', value: 'Gets servers that live Twitch streamers are playing on' + '​', inline: true },
-					{ name: 'language (language name)', value: 'The language of the Twitch stream (you must use the autocomplete for it to work)\n' + '​', inline: true },
-				 
+					{ name: 'language (language name)', value: 'The language of the Twitch stream (you must use the autocomplete for it to work)\n' + '​', inline: true }
 		)
-    interaction.reply({ embeds: [exampleEmbed], ephemeral:true });
+    interaction.reply({ embeds: [exampleEmbed], ephemeral: true });
 	}
 }
