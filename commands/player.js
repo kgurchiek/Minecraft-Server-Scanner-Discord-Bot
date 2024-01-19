@@ -483,7 +483,7 @@ module.exports = {
 
     await interactReplyMessage.edit(argumentList);
 
-    if (username != null) mongoFilter['username'] = username;
+    if (username != null) mongoFilter['name'] = username;
     if (uuid != null) mongoFilter['uuid'] = uuid;
 
     const servers = (await POST('https://api.cornbread2100.com/players', mongoFilter)).servers;
