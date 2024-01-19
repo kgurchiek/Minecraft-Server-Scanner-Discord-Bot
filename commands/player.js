@@ -1,6 +1,6 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion, POST } = require('../commonFunctions.js');
+const { getDescription, getVersion } = require('../commonFunctions.js');
 const countryCodes = require('../countryCodes.json');
 const orgs = require('../orgs.json');
 const buttonTimeout = 60; // In seconds
@@ -115,8 +115,8 @@ module.exports = {
         currentEmbed++;
         if (currentEmbed == totalResults) currentEmbed = 0;
 
-        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { ip: servers[currentEmbed].ip, port: servers[currentEmbed].port }))[0];
-
+        const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query=${encodeURIComponent(JSON.stringify({ ip: Object.keys(servers)[currentEmbed].split(':')[0].replaceAll('_', '.'), port: parseInt(Object.keys(servers)[currentEmbed].split(':')[1]) }))}`)).json())[0];
+      
         if (server.players.sample != null && Array.isArray(server.players.sample)) {
           for (const player of server.players.sample) {
             if (player.lastSeen != server.lastSeen) {
@@ -272,8 +272,8 @@ module.exports = {
         currentEmbed--;
         if (currentEmbed == -1) currentEmbed = totalResults - 1;
 
-        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { ip: servers[currentEmbed].ip, port: servers[currentEmbed].port }))[0];
-    
+        const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query=${encodeURIComponent(JSON.stringify({ ip: Object.keys(servers)[currentEmbed].split(':')[0].replaceAll('_', '.'), port: parseInt(Object.keys(servers)[currentEmbed].split(':')[1]) }))}`)).json())[0];
+      
         if (server.players.sample != null && Array.isArray(server.players.sample)) {
           for (const player of server.players.sample) {
             if (player.lastSeen != server.lastSeen) {
@@ -354,8 +354,8 @@ module.exports = {
         const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [] });
         lastButtonPress = new Date();
 
-        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { ip: servers[currentEmbed].ip, port: servers[currentEmbed].port }))[0];
-
+        const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query=${encodeURIComponent(JSON.stringify({ ip: Object.keys(servers)[currentEmbed].split(':')[0].replaceAll('_', '.'), port: parseInt(Object.keys(servers)[currentEmbed].split(':')[1]) }))}`)).json())[0];
+      
         if (server.players.sample != null && Array.isArray(server.players.sample)) {
           for (const player of server.players.sample) {
             if (player.lastSeen != server.lastSeen) {
@@ -486,14 +486,14 @@ module.exports = {
     if (username != null) mongoFilter['name'] = username;
     if (uuid != null) mongoFilter['uuid'] = uuid;
 
-    const servers = (await POST('https://api.cornbread2100.com/players', mongoFilter)).servers;
-    const totalResults = servers == null ? 0 : servers.length;
+    const servers = (await (await fetch(`https://api.cornbread2100.com/players?limit=1&query=${encodeURIComponent(JSON.stringify(mongoFilter))}`)).json())[0].servers;
+    const totalResults = servers == null ? 0 : Object.keys(servers).length;
     if (currentEmbed > totalResults) currentEmbed = totalResults - 1;
 
     // If at least one server was found, send the message
     if (totalResults > 0) {
-      const server = (await POST(`https://api.cornbread2100.com/servers?limit=1`, { ip: servers[currentEmbed].ip, port: servers[currentEmbed].port }))[0];
-        
+      const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query=${encodeURIComponent(JSON.stringify({ ip: Object.keys(servers)[currentEmbed].split(':')[0].replaceAll('_', '.'), port: parseInt(Object.keys(servers)[currentEmbed].split(':')[1]) }))}`)).json())[0];
+      
       var buttons = createButtons(totalResults);
 
       var newEmbed = new EmbedBuilder()
