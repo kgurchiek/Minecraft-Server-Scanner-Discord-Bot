@@ -486,7 +486,7 @@ module.exports = {
     if (username != null) mongoFilter['name'] = username;
     if (uuid != null) mongoFilter['uuid'] = uuid;
 
-    const servers = (await (await fetch(`https://api.cornbread2100.com/players?limit=1&query=${encodeURIComponent(JSON.stringify(mongoFilter))}`)).json())[0].servers;
+    const servers = (await (await fetch(`https://api.cornbread2100.com/players?limit=1&query=${encodeURIComponent(JSON.stringify(mongoFilter))}`)).json())[0]?.servers;
     const totalResults = servers == null ? 0 : Object.keys(servers).length;
     if (currentEmbed > totalResults) currentEmbed = totalResults - 1;
 
