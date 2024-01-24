@@ -188,54 +188,21 @@ async function stalkCheck() {
   for (const user in pingList) {
     for (const player of pingList[user]) {
       if (players[player] == 'inactive') continue;
-      const result = (await POST(`https://api.cornbread2100.com/aggregate`, [
-        {
-          '$redact': {
-            '$cond': {
-              'if': {
-                '$and': [
-                  {
-                    '$eq': [
-                      '$lastSeen',
-                      {
-                        '$arrayElemAt': [
-                          '$players.sample.lastSeen',
-                          { '$indexOfArray': ['$players.sample.lastSeen', '$lastSeen'] }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    '$eq': [
-                      player,
-                      {
-                        '$arrayElemAt': [
-                          '$players.sample.name',
-                          { '$indexOfArray': ['$players.sample.name', player] }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    '$gt': ['$lastSeen', Math.round(new Date().getTime() / 1000) - 600]
-                  }
-                ]
-              },
-              'then': '$$KEEP',
-              'else': '$$PRUNE'
-            }
-          }
-        },
-        { "$limit": 1 }
-      ]))[0];
-      if (result == null) {
+      const resultCount = await (await fetch(`https://api.cornbread2100.com/countPlayers&query={"name":"${player}"}`)).json();
+      if (resultCount == 0) {
         players[player] = 'inactive';
         continue;
       }
-      if (players[player] == null || (result.ip != players[player].ip && result.port != players[player].port)) {
-        players[player] = result;
-        await client.users.fetch(user)
-        embed(result.ip, result.port, result, await client.users.cache.get(user).send({ content: `<@${user}>, ${player} is online.` }));
+      const results = await (await fetch(`https://api.cornbread2100.com/players&query={"name":"${player}"}`)).json();
+      for (const server in results.servers) {
+        if (new Date().getTime() / 1000 - result.servers[server] < 1300) {
+          const result = { ip: server.split(':')[0], port: parseInt(server.split(':')[1]), lastSeen: results.servers[server] };
+          if (players[player] == null || (result.ip != players[player].ip && result.port != players[player].port && result.lastSeen < players[player].lastSeen)) {
+            players[player] = result;
+            await client.users.fetch(user)
+            embed(result.ip, result.port, result, await client.users.cache.get(user).send({ content: `<@${user}>, ${player} is online.` }));
+          }
+        }
       }
     }
   }
