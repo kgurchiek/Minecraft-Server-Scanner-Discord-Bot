@@ -13,14 +13,7 @@ module.exports = {
     // Status message
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
 
-    const userTag = await client.users.fetch("720658048611516559");
-    var totalSeconds = (interaction.client.uptime / 1000);
-    const days = Math.floor(totalSeconds / 86400);
-    totalSeconds %= 86400;
-    const hours = Math.floor(totalSeconds / 3600);
-    totalSeconds %= 3600;
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = Math.floor(totalSeconds % 60);
+    const userTag = await client.users.fetch("720658048611516559"); 
     var users = 0;
     client.guilds.cache.forEach(guild => {
       if (guild.id != 110373943822540800) users += guild.memberCount; // exclude Discord bot list server
@@ -33,7 +26,7 @@ module.exports = {
         { name: 'Author:', value: userTag.username },
         { name: 'Total Servers:', value: String(totalServers), inline: true },
         { name: 'Total Players:', value: String(totalPlayers), inline: true },
-        { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. ${users} users. Uptime: ${days}:${hours}:${minutes}:${seconds}.`}
+        { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. ${users} users. Last restart: <t:${new Date().getTime() / 1000 - client.uptime}:R>`}
       )
     await interaction.editReply({ content: '', embeds: [newEmbed], ephemeral:true });
   } 
