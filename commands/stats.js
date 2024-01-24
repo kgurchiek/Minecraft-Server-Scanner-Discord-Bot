@@ -26,7 +26,7 @@ module.exports = {
         { name: 'Author:', value: userTag.username },
         { name: 'Total Servers:', value: String(totalServers), inline: true },
         { name: 'Total Players:', value: String(totalPlayers), inline: true },
-        { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. ${users} users. Last restart: <t:${Math.floor(new Date().getTime() / 1000) - client.uptime}:R>`}
+        { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. ${users} users. Last restart: <t:${Math.floor((new Date().getTime() - client.uptime) / 1000)}:R>`}
       )
     await interaction.editReply({ content: '', embeds: [newEmbed], ephemeral:true });
   } 
