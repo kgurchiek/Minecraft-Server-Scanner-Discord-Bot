@@ -8,7 +8,7 @@ module.exports = {
     .setName('stats')
     .setDescription('Sends helpful info about the bot'),
   async execute(interaction) {
-    const { client, totalServers } = require('../index.js');
+    const { client, totalServers, totalPlayers } = require('../index.js');
 
     // Status message
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
@@ -32,6 +32,7 @@ module.exports = {
       .addFields(
         { name: 'Author:', value: userTag.username },
         { name: 'Total Servers:', value: String(totalServers) },
+        { name: 'Total Players:', value: String(totalPlayers), inline: true },
         { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. ${users} users. Uptime: ${days}:${hours}:${minutes}:${seconds}.`}
       )
     await interaction.editReply({ content: '', embeds: [newEmbed], ephemeral:true });
