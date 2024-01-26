@@ -377,33 +377,31 @@ module.exports = {
       var buttons = createButtons(totalResults);
       var newEmbed = createEmbed(server, currentEmbed, totalResults);
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-    } else {
-      await interactReplyMessage.edit('No matches could be found');
-    } 
-    lastButtonPress = new Date();
-
-    // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
-    const buttonTimeoutCheck = setInterval(async () => {
-      if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
-        clearInterval(buttonTimeoutCheck);
-        searchNextResultCollector.stop();
-        searchLastResultCollector.stop();
-        oldPlayersCollector.stop();
-        buttons = new ActionRowBuilder()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId(lastResultID)
-              .setLabel('◀')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true),
-            new ButtonBuilder()
-              .setCustomId(nextResultID)
-              .setLabel('▶')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true)
-          );
-        await interactReplyMessage.edit({ content: '', components: [buttons] });
-      }
-    }, 500);
+      
+      lastButtonPress = new Date();
+      // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
+      const buttonTimeoutCheck = setInterval(async () => {
+        if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
+          clearInterval(buttonTimeoutCheck);
+          searchNextResultCollector.stop();
+          searchLastResultCollector.stop();
+          oldPlayersCollector.stop();
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('◀')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('▶')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+          await interactReplyMessage.edit({ content: '', components: [buttons] });
+        }
+      }, 500);
+    } else await interactReplyMessage.edit('No matches could be found');
   }
 }
