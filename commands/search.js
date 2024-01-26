@@ -1,6 +1,6 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion, POST } = require('../commonFunctions.js');
+const { getDescription, getVersion } = require('../commonFunctions.js');
 const countryCodes = require('../countryCodes.json');
 const orgs = require('../orgs.json');
 const buttonTimeout = 60; // In seconds
@@ -24,74 +24,119 @@ function timeSinceDate(date1) {
   return date2Total - date1Total;
 }
 
+function createEmbed(server, currentEmbed, totalResults) {
+  const newEmbed = new EmbedBuilder()
+    .setColor("#02a337")
+    .setTitle('Search Results')
+    .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+    .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
+    .addFields(
+      { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
+      { name: 'IP', value: server.ip },
+      { name: 'Port', value: (server.port + '') },
+      { name: 'Version', value: `${getVersion(server.version)} (${server.version.protocol})` },
+      { name: 'Description', value: getDescription(server.description) }
+    )
+    .setTimestamp();
+  
+  var playersString = `${server.players.online}/${server.players.max}`;
+  if (server.players.sample != null && server.players.sample.length > 0) {
+    playersString += '\n```\n';
+    var oldString;
+    for (var i = 0; i < server.players.sample.length; i++) {
+      oldString = playersString;
+      playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+      if (i + 1 < server.players.sample.length) playersString += '\n';
+      if (playersString.length > 1024) {
+        playersString = oldString;
+        break;
+      }
+    }
+    playersString += '```';
+  }
+  newEmbed.addFields(
+    { name: 'Players', value: playersString },
+    { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` }
+  )
+
+  if (server.geo?.country == null) newEmbed.addFields({ name: 'Country: ', value: 'Unknown' })
+  else newEmbed.addFields({ name: 'Country: ', value: `:flag_${server.geo.country.toLowerCase()}: ${server.geo.country}` })
+  
+  if (server.org == null) newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
+  else newEmbed.addFields({ name: 'Organization: ', value: server.org });
+
+  newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
+  return newEmbed;
+}
+
 // Exports an object with the parameters for the target server
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("search")
-    .setDescription("Searches the current database for a server with specific properties")
+    .setName('search')
+    .setDescription('Searches the current database for a server with specific properties')
     .addIntegerOption(option =>
       option
-        .setName("skip")
-        .setDescription("skips to a page of results"))
+        .setName('skip')
+        .setDescription('skips to a page of results'))
     .addStringOption(option =>
       option
-        .setName("onlineplayers")
-        .setDescription("A range of online players"))
+        .setName('onlineplayers')
+        .setDescription('A range of online players'))
     .addIntegerOption(option =>
       option
-        .setName("playercap")
-        .setDescription("The server's maximum player capacity"))
+        .setName('playercap')
+        .setDescription('The server\'s maximum player capacity'))
     .addBooleanOption(option =>
       option
-        .setName("isfull")
-        .setDescription("whether or not the server is full"))
+        .setName('isfull')
+        .setDescription('whether or not the server is full'))
     .addStringOption(option =>
       option
-        .setName("version")
-        .setDescription("The version of the server (uses regex)"))
+        .setName('version')
+        .setDescription('The version of the server (uses regex)'))
     .addIntegerOption(option =>
       option
-        .setName("protocol")
-        .setDescription("The protocol version of the server"))
+        .setName('protocol')
+        .setDescription('The protocol version of the server'))
     .addBooleanOption(option =>
       option
-        .setName("hasimage")
-        .setDescription("Whether or not the server has a custom favicon"))
+        .setName('hasimage')
+        .setDescription('Whether or not the server has a custom favicon'))
     .addStringOption(option =>
       option
-        .setName("description")
-        .setDescription("The description of the server (uses regex)"))
+        .setName('description')
+        .setDescription('The description of the server (uses regex)'))
     .addBooleanOption(option =>
       option
-        .setName("hasplayerlist")
-        .setDescription("Whether or not the server has player list enabled"))
+        .setName('hasplayerlist')
+        .setDescription('Whether or not the server has player list enabled'))
     .addIntegerOption(option =>
       option
-        .setName("seenafter")
-        .setDescription("The oldest time a server can be last seen (this doesn't mean it's offline, use /help for more info)")
+        .setName('seenafter')
+        .setDescription('The oldest time a server can be last seen (this doesn\'t mean it\'s offline, use /help for more info)')
         .setAutocomplete(true))
     .addStringOption(option =>
       option
-        .setName("iprange")
-        .setDescription("The ip subnet a server's ip has to be within"))
+        .setName('iprange')
+        .setDescription('The ip subnet a server\'s ip has to be within'))
     .addIntegerOption(option =>
       option
-        .setName("port")
-        .setDescription("The port the server is hosted on"))
+        .setName('port')
+        .setDescription('The port the server is hosted on'))
     .addStringOption(option =>
       option
-        .setName("country")
-        .setDescription("The country the server is hosted in")
+        .setName('country')
+        .setDescription('The country the server is hosted in')
         .setAutocomplete(true))
     .addStringOption(option =>
       option
-        .setName("org")
-        .setDescription("The organization hosting the server")
+        .setName('org')
+        .setDescription('The organization hosting the server')
         .setAutocomplete(true))
     .addBooleanOption(option =>
       option
-        .setName("cracked")
-        .setDescription("Whether or not the server is cracked (offline mode)")),
+        .setName('cracked')
+        .setDescription('Whether or not the server is cracked (offline mode)')),
   async autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused(true);
     switch (focusedValue.name) {
@@ -107,6 +152,7 @@ module.exports = {
     }
   },
   async execute(interaction) {
+    const user = interaction.user;
     // Status message
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
 
@@ -121,408 +167,94 @@ module.exports = {
     const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
     const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
     var lastButtonPress = null;
-    const mongoFilter = {};
 
     // Creates interactable buttons
     var currentEmbed = 0;
     var hasOldPlayers = false;
+    var showingOldPlayers = false;
+    var server;
     function createButtons(totalResults) {
       var buttons;
-    
-      if (totalResults > 1) {
-        buttons = new ActionRowBuilder()
-          .addComponents(
+      
+      function updateButtons() {
+        if (totalResults > 1) {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('◀')
+                .setStyle(ButtonStyle.Primary),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('▶')
+                .setStyle(ButtonStyle.Primary))
+        } else {
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('◀')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('▶')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true))
+        }
+        if (hasOldPlayers) {
+          buttons.addComponents(
             new ButtonBuilder()
-              .setCustomId(lastResultID)
-              .setLabel('Last Page')
-              .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-              .setCustomId(nextResultID)
-              .setLabel('Next Page')
-              .setStyle(ButtonStyle.Primary)
-          );
-      } else {
-        buttons = new ActionRowBuilder()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId(lastResultID)
-              .setLabel('Last Page')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true),
-            new ButtonBuilder()
-              .setCustomId(nextResultID)
-              .setLabel('Next Page')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true)
-          );
+            .setCustomId(oldPlayersID)
+            .setLabel(`${showingOldPlayers ? 'Online Players' : 'Player History'}`)
+            .setStyle(ButtonStyle.Primary))
+        }
       }
-      if (hasOldPlayers) {
-        buttons.addComponents(
-          new ButtonBuilder()
-          .setCustomId(oldPlayersID)
-          .setLabel('Show Old Players')
-          .setStyle(ButtonStyle.Primary))
-      }
+      updateButtons();
     
       // Event listener for 'Next Page' button
       searchNextResultCollector.on('collect', async interaction => {
-        var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
-          .setTitle('Search Results')
-          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-          .addFields(
-            { name: 'Updating page...', value: '​' },
-          )
-          .setTimestamp();
-        const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [] });
+        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s search, use /search to create your own', ephemeral: true });
+        await interaction.deferUpdate();
         lastButtonPress = new Date();
-
+        showingOldPlayers = false;
         currentEmbed++;
         if (currentEmbed == totalResults) currentEmbed = 0;
-
-        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
-
-        if (server.players.sample != null && Array.isArray(server.players.sample)) {
-          for (const player of server.players.sample) {
-            if (player.lastSeen != server.lastSeen) {
-              hasOldPlayers = true;
-              break;
-            }
-          }
-        }
-
-        if (totalResults > 1) {
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('Last Page')
-                .setStyle(ButtonStyle.Primary),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('Next Page')
-                .setStyle(ButtonStyle.Primary)
-            );
-        } else {
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('Last Page')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('Next Page')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true)
-            );
-        }
-        if (hasOldPlayers) {
-          buttons.addComponents(
-            new ButtonBuilder()
-            .setCustomId(oldPlayersID)
-            .setLabel('Show Old Players')
-            .setStyle(ButtonStyle.Primary))
-        }
-
-        if (totalResults > 1) {
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('Last Page')
-                .setStyle(ButtonStyle.Primary),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('Next Page')
-                .setStyle(ButtonStyle.Primary)
-            );
-        } else {
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('Last Page')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('Next Page')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true)
-            );
-        }
-        if (hasOldPlayers) {
-          buttons.addComponents(
-            new ButtonBuilder()
-            .setCustomId(oldPlayersID)
-            .setLabel('Show Old Players')
-            .setStyle(ButtonStyle.Primary))
-        }
-
-        // Updates UI when 'Next Page' pressed
-        newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
-          .setTitle('Search Results')
-          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
-          .addFields(
-            { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
-            { name: 'IP', value: server.ip },
-            { name: 'Port', value: (server.port + '') },
-            { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
-            { name: 'Description', value: getDescription(server.description) }
-          )
-          .setTimestamp();
-
-        var playersString = `${server.players.online}/${server.players.max}`;
-        if (server.players.sample != null) {
-          var oldString;
-          for (var i = 0; i < server.players.sample.length; i++) {
-            if (server.players.sample[i].lastSeen == server.lastSeen) {
-              oldString = playersString;
-              playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-              if (i + 1 < server.players.sample.length) playersString += '\n';
-              if (playersString.length > 1024) {
-                playersString = oldString;
-                break;
-              }
-            }
-          }
-        }
-  
-        newEmbed.addFields(
-          { name: 'Players', value: playersString },
-          { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
-        )
-  
-        buttonTimeoutCheck();
-  
-        var location = await cityLookup.get(server.ip);
-        if (location == null) {
-          newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
-        } else {
-          if (location.country != null) {
-            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
-          } else {
-            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
-          }
-        }
-        var org = await asnLookup.get(server.ip);
-        if (org == null) {
-          newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
-        } else {
-          newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
-        }
-  
-        newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+        hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+        updateButtons();
+        newEmbed = createEmbed(server, currentEmbed, totalResults);
+        await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       // Event listener for 'Last Page' button
       searchLastResultCollector.on('collect', async interaction => {
-        var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
-          .setTitle('Search Results')
-          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-          .addFields(
-            { name: 'Updating page...', value: '​' },
-          )
-          .setTimestamp();
-        const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [] });
-        
+        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s search, use /search to create your own', ephemeral: true });
+        await interaction.deferUpdate();
         lastButtonPress = new Date();
-
+        showingOldPlayers = false;
         currentEmbed--;
         if (currentEmbed == -1) currentEmbed = totalResults - 1;
-
-        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
-    
-        if (server.players.sample != null && Array.isArray(server.players.sample)) {
-          for (const player of server.players.sample) {
-            if (player.lastSeen != server.lastSeen) {
-              hasOldPlayers = true;
-              break;
-            }
-          }
-        }
-
-        // Updates UI when 'Last Page' pressed
-        var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
-          .setTitle('Search Results')
-          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
-          .addFields(
-            { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
-            { name: 'IP', value: server.ip },
-            { name: 'Port', value: (server.port + '') },
-            { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
-            { name: 'Description', value: getDescription(server.description) }
-          )
-          .setTimestamp();
-
-        var playersString = `${server.players.online}/${server.players.max}`;
-        if (server.players.sample != null) {
-          var oldString;
-          for (var i = 0; i < server.players.sample.length; i++) {
-            if (server.players.sample[i].lastSeen == server.lastSeen) {
-              oldString = playersString;
-              playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-              if (i + 1 < server.players.sample.length) playersString += '\n';
-              if (playersString.length > 1024) {
-                playersString = oldString;
-                break;
-              }
-            }
-          }
-        }
-  
-        newEmbed.addFields(
-          { name: 'Players', value: playersString },
-          { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
-        )
-  
-        buttonTimeoutCheck();
-  
-        var location = await cityLookup.get(server.ip);
-        if (location == null) {
-          newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
-        } else {
-          if (location.country != null) {
-            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
-          } else {
-            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
-          }
-        }
-        var org = await asnLookup.get(server.ip);
-        if (org == null) {
-          newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
-        } else {
-          newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
-        }
-  
-        newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+        hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+        updateButtons();
+        newEmbed = createEmbed(server, currentEmbed, totalResults);
+        await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
       });
 
-      oldPlayersCollector.on('collect', async interaction => { 
-        var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
-          .setTitle('Search Results')
-          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-          .addFields(
-            { name: 'Updating page...', value: '​' },
-          )
-          .setTimestamp();
-        const interactionUpdate = await interaction.update({ content: '', embeds: [newEmbed], components: [] });
+      oldPlayersCollector.on('collect', async interaction => {
+        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s search, use /search to create your own', ephemeral: true });
+        await interaction.deferUpdate();
         lastButtonPress = new Date();
-
-        const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}`, mongoFilter))[0];
-
-        if (server.players.sample != null && Array.isArray(server.players.sample)) {
-          for (const player of server.players.sample) {
-            if (player.lastSeen != server.lastSeen) {
-              hasOldPlayers = true;
-              break;
-            }
-          }
+        showingOldPlayers = !showingOldPlayers;
+        updateButtons();
+        newEmbed = createEmbed(server, currentEmbed, totalResults);
+        if (showingOldPlayers) {
+          var playersString = `${server.players.online}/${server.players.max}\n`;
+          for (const player in server.players.history) playersString += `\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
+          newEmbed.data.fields[5].value = playersString;
         }
-
-        if (totalResults > 1) {
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('Last Page')
-                .setStyle(ButtonStyle.Primary),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('Next Page')
-                .setStyle(ButtonStyle.Primary)
-            );
-        } else {
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('Last Page')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('Next Page')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true)
-            );
-        }
-        if (hasOldPlayers) {
-          buttons.addComponents(
-            new ButtonBuilder()
-            .setCustomId(oldPlayersID)
-            .setLabel('Show Old Players')
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(true))
-        }
-
-        // Updates UI when 'Last Page' pressed
-        var newEmbed = new EmbedBuilder()
-          .setColor("#02a337")
-          .setTitle('Search Results')
-          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-          .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
-          .addFields(
-            { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
-            { name: 'IP', value: server.ip },
-            { name: 'Port', value: (server.port + '') },
-            { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
-            { name: 'Description', value: getDescription(server.description) }
-          )
-          .setTimestamp();
-
-        var playersString = `${server.players.online}/${server.players.max}`;
-        if (server.players.sample != null) {
-          var oldString;
-          for (var i = 0; i < server.players.sample.length; i++) {
-            if (server.players.sample[i].lastSeen == server.lastSeen) {
-              oldString = playersString;
-              playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-              if (i + 1 < server.players.sample.length) playersString += '\n';
-              if (playersString.length > 1024) {
-                playersString = oldString;
-                break;
-              }
-            }
-          }
-        }
-  
-        newEmbed.addFields(
-          { name: 'Players', value: playersString },
-          { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
-        )
-  
-        buttonTimeoutCheck();
-  
-        var location = await cityLookup.get(server.ip);
-        if (location == null) {
-          newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
-        } else {
-          if (location.country != null) {
-            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
-          } else {
-            newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
-          }
-        }
-        var org = await asnLookup.get(server.ip);
-        if (org == null) {
-          newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
-        } else {
-          newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
-        }
-  
-        newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+        await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       return buttons;
@@ -546,7 +278,7 @@ module.exports = {
       } else minOnline = maxOnline = parseInt(onlinePlayers);
       if ((minOnline != null && isNaN(minOnline)) || (maxOnline != null && isNaN(maxOnline))) {
         const newEmbed = new EmbedBuilder()
-          .setColor("#ff0000")
+          .setColor('#ff0000')
           .setTitle('Error')
           .setDescription('Invalid online player range')
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed] });
@@ -585,9 +317,9 @@ module.exports = {
 
     await interactReplyMessage.edit(argumentList);
 
-    if (minOnline == maxOnline) {
-      if (minOnline != null) mongoFilter['players.online'] = minOnline;
-    } else {
+    const mongoFilter = {};
+    if (minOnline == maxOnline) { if (minOnline != null) mongoFilter['players.online'] = minOnline; }
+    else {
       if (minOnline != null) {
         if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
         mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = minOnline;
@@ -636,78 +368,14 @@ module.exports = {
     if (org != null) mongoFilter['org'] = { '$regex': org, '$options': 'i' };
     if (cracked != null) mongoFilter['cracked'] = cracked;
 
-    const totalResults = parseInt(await POST('https://api.cornbread2100.com/countServers', mongoFilter));
+    const totalResults = await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}`)).json();
 
     // If at least one server was found, send the message
     if (totalResults > 0) {
-      const server = (await POST(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1`, mongoFilter))[0];
-
-      if (server.players.sample != null && Array.isArray(server.players.sample)) {
-        for (const player of server.players.sample) {
-          if (player.lastSeen != server.lastSeen) {
-            hasOldPlayers = true;
-            break;
-          }
-        }
-      }
-        
+      server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+      hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
       var buttons = createButtons(totalResults);
-
-      var newEmbed = new EmbedBuilder()
-        .setColor("#02a337")
-        .setTitle('Search Results')
-        .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-        .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
-        .addFields(
-          { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
-          { name: 'IP', value: server.ip },
-          { name: 'Port', value: (server.port + '') },
-          { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
-          { name: 'Description', value: getDescription(server.description) }
-        )
-        .setTimestamp()
-
-      var playersString = `${server.players.online}/${server.players.max}`;
-      if (server.players.sample != null) {
-        var oldString;
-        for (var i = 0; i < server.players.sample.length; i++) {
-          if (server.players.sample[i].lastSeen == server.lastSeen) {
-            oldString = playersString;
-            playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-            if (i + 1 < server.players.sample.length) playersString += '\n';
-            if (playersString.length > 1024) {
-              playersString = oldString;
-              break;
-            }
-          }
-        }
-      }
-
-      newEmbed.addFields(
-        { name: 'Players', value: playersString },
-        { name: 'Last Seen', value: `<t:${server.lastSeen}:f>` }
-      )
-
-      buttonTimeoutCheck();
-
-      var location = await cityLookup.get(server.ip);
-      if (location == null) {
-        newEmbed.addFields({ name: 'Country: ', value: `Unknown` })
-      } else {
-        if (location.country != null) {
-          newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
-        } else {
-          newEmbed.addFields({ name: 'Country: ', value: `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` })
-        }
-      }
-      var org = await asnLookup.get(server.ip);
-      if (org == null) {
-        newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
-      } else {
-        newEmbed.addFields({ name: 'Organization: ', value: org.autonomous_system_organization });
-      }
-
-      newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
+      var newEmbed = createEmbed(server, currentEmbed, totalResults);
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
     } else {
       await interactReplyMessage.edit('No matches could be found');
@@ -715,37 +383,27 @@ module.exports = {
     lastButtonPress = new Date();
 
     // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
-    async function buttonTimeoutCheck() {
+    const buttonTimeoutCheck = setInterval(async () => {
       if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
+        clearInterval(buttonTimeoutCheck);
+        searchNextResultCollector.stop();
+        searchLastResultCollector.stop();
+        oldPlayersCollector.stop();
         buttons = new ActionRowBuilder()
           .addComponents(
             new ButtonBuilder()
               .setCustomId(lastResultID)
-              .setLabel('Last Page')
+              .setLabel('◀')
               .setStyle(ButtonStyle.Secondary)
               .setDisabled(true),
             new ButtonBuilder()
               .setCustomId(nextResultID)
-              .setLabel('Next Page')
+              .setLabel('▶')
               .setStyle(ButtonStyle.Secondary)
               .setDisabled(true)
           );
-        if (hasOldPlayers) {
-          buttons.addComponents(
-            new ButtonBuilder()
-            .setCustomId(oldPlayersID)
-            .setLabel('Show Old Players')
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(true))
-        }
         await interactReplyMessage.edit({ content: '', components: [buttons] });
-
-        searchNextResultCollector.stop();
-        searchLastResultCollector.stop();
-        oldPlayersCollector.stop();
-      } else {
-        setTimeout(function() { buttonTimeoutCheck() }, 500);
       }
-    }
+    }, 500);
   }
 }
