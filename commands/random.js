@@ -95,7 +95,7 @@ module.exports = {
       return;
     }
 
-    const hasOldPlayers = true// server.players.history != null && typeof server.players.history == 'object';
+    const hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
     var showingOldPlayers = false;
 
     var buttons = new ActionRowBuilder()
