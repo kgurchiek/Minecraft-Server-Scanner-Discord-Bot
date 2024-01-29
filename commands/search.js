@@ -206,7 +206,7 @@ module.exports = {
           buttons.addComponents(
             new ButtonBuilder()
             .setCustomId(oldPlayersID)
-            .setLabel(`${showingOldPlayers ? 'Online Players' : 'Player History'}`)
+            .setLabel(showingOldPlayers ? 'Online Players' : 'Player History')
             .setStyle(ButtonStyle.Primary))
         }
       }
@@ -214,7 +214,7 @@ module.exports = {
     
       // Event listener for 'Next Page' button
       searchNextResultCollector.on('collect', async interaction => {
-        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s search, use /search to create your own', ephemeral: true });
+        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
         await interaction.deferUpdate();
         lastButtonPress = new Date();
         showingOldPlayers = false;
@@ -229,7 +229,7 @@ module.exports = {
     
       // Event listener for 'Last Page' button
       searchLastResultCollector.on('collect', async interaction => {
-        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s search, use /search to create your own', ephemeral: true });
+        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
         await interaction.deferUpdate();
         lastButtonPress = new Date();
         showingOldPlayers = false;
@@ -243,18 +243,17 @@ module.exports = {
       });
 
       oldPlayersCollector.on('collect', async interaction => {
-        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s search, use /search to create your own', ephemeral: true });
-        await interaction.deferUpdate();
+        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
         lastButtonPress = new Date();
         showingOldPlayers = !showingOldPlayers;
         updateButtons();
         newEmbed = createEmbed(server, currentEmbed, totalResults);
         if (showingOldPlayers) {
-          var playersString = `${server.players.online}/${server.players.max}`;
-          for (const player in server.players.history) playersString += `\n\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
+          var playersString = `${server.players.online}/${server.players.max}\n`;
+          for (const player in server.players.history) playersString += `\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
           newEmbed.data.fields[5].value = playersString;
         }
-        await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
+        await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
       });
     
       return buttons;
@@ -377,31 +376,33 @@ module.exports = {
       var buttons = createButtons(totalResults);
       var newEmbed = createEmbed(server, currentEmbed, totalResults);
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-      
-      lastButtonPress = new Date();
-      // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
-      const buttonTimeoutCheck = setInterval(async () => {
-        if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
-          clearInterval(buttonTimeoutCheck);
-          searchNextResultCollector.stop();
-          searchLastResultCollector.stop();
-          oldPlayersCollector.stop();
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('◀')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('▶')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true)
-            );
-          await interactReplyMessage.edit({ content: '', components: [buttons] });
-        }
-      }, 500);
-    } else await interactReplyMessage.edit('No matches could be found');
+    } else {
+      await interactReplyMessage.edit('No matches could be found');
+    } 
+    lastButtonPress = new Date();
+
+    // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
+    const buttonTimeoutCheck = setInterval(async () => {
+      if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
+        clearInterval(buttonTimeoutCheck);
+        searchNextResultCollector.stop();
+        searchLastResultCollector.stop();
+        oldPlayersCollector.stop();
+        buttons = new ActionRowBuilder()
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId(lastResultID)
+              .setLabel('◀')
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true),
+            new ButtonBuilder()
+              .setCustomId(nextResultID)
+              .setLabel('▶')
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true)
+          );
+        await interactReplyMessage.edit({ content: '', components: [buttons] });
+      }
+    }, 500);
   }
 }

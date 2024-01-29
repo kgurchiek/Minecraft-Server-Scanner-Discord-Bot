@@ -21,33 +21,82 @@ function timeSinceDate(date1) {
   return date2Total - date1Total;
 }
 
+function createEmbed(server, currentEmbed, totalResults) {
+  const newEmbed = new EmbedBuilder()
+    .setColor("#02a337")
+    .setTitle('Search Results')
+    .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+    .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
+    .addFields(
+      { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
+      { name: 'IP', value: server.ip },
+      { name: 'Port', value: (server.port + '') },
+      { name: 'Version', value: `${getVersion(server.version)} (${server.version.protocol})` },
+      { name: 'Description', value: getDescription(server.description) }
+    )
+    .setTimestamp();
+  
+  var playersString = `${server.players.online}/${server.players.max}`;
+  if (server.players.sample != null && server.players.sample.length > 0) {
+    playersString += '\n```\n';
+    var oldString;
+    for (var i = 0; i < server.players.sample.length; i++) {
+      oldString = playersString;
+      playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
+      if (i + 1 < server.players.sample.length) playersString += '\n';
+      if (playersString.length > 1024) {
+        playersString = oldString;
+        break;
+      }
+    }
+    playersString += '```';
+  }
+  newEmbed.addFields(
+    { name: 'Players', value: playersString },
+    { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` }
+  )
+
+  if (server.geo?.country == null) newEmbed.addFields({ name: 'Country: ', value: 'Unknown' })
+  else newEmbed.addFields({ name: 'Country: ', value: `:flag_${server.geo.country.toLowerCase()}: ${server.geo.country}` })
+  
+  if (server.org == null) newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
+  else newEmbed.addFields({ name: 'Organization: ', value: server.org });
+
+  newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
+  return newEmbed;
+}
+
 module.exports = {
   // Define 'random' command
   data: new SlashCommandBuilder()
     .setName('random')
 	  .setDescription('Gets a random online Minecraft server'),
   async execute(interaction) {
+    const user = interaction.user;
     var lastButtonPress = new Date();
     const oldPlayersID = `oldPlayers${interaction.user.id}`;
     const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
     const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
     // Status message
-    const interactionReplyMessage = await interaction.reply("Getting a server, please wait...");
+    const interactionReplyMessage = await interaction.reply('Getting a server, please wait...');
     
     // Get a random server from the database
     const totalServers = parseInt(await POST('https://api.cornbread2100.com/countServers', { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}));
     var index = Math.floor((Math.random() * totalServers));
     const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${index}`, { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}))[0];
     
-    var hasOldPlayers = false;
-    if (server.players.sample != null && Array.isArray(server.players.sample)) {
-      for (const player of server.players.sample) {
-        if (player.lastSeen != server.lastSeen) {
-          hasOldPlayers = true;
-          break;
-        }
-      }
+    if (server == null) {
+      const embed = new EmbedBuilder()
+        .setColor('#ff0000')
+        .setTitle('No recent servers found')
+        .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+        .setDescription('This is a bug, please ping @cornbread2100 in the official support server (https://discord.gg/3u2fNRAMAN)')
+        await interaction.editReply({ content: '', embeds: [embed] });
+      return;
     }
+
+    const hasOldPlayers = true// server.players.history != null && typeof server.players.history == 'object';
+    var showingOldPlayers = false;
 
     var buttons = new ActionRowBuilder()
       .addComponents(
@@ -57,96 +106,20 @@ module.exports = {
           .setStyle(ButtonStyle.Primary)
       );
     
-    var newEmbed = new EmbedBuilder()
-      .setColor("#02a337")
-      .setTitle('Random Server')
-      .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-      .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
-      .addFields(
-        { name:  `Server ${index}/${totalServers}`, value: ' ' },
-        { name: 'IP', value: server.ip },
-        { name: 'Port', value: String(server.port) },
-        { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
-        { name: 'Description', value: getDescription(server.description) }
-      )
-      .setTimestamp()
-
-    var playersString = `${server.players.online}/${server.players.max}`;
-    if (server.players.sample != null) {
-      var oldString;
-      for (var i = 0; i < server.players.sample.length; i++) {
-        if (server.players.sample[i].lastSeen == server.lastSeen) {
-          oldString = playersString;
-          playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-          if (i + 1 < server.players.sample.length) playersString += '\n';
-          if (playersString.length > 1024) {
-            playersString = oldString;
-            break;
-          }
-        }
-      }
-    }
-
-    newEmbed.addFields({ name: 'Players', value: playersString })
-    await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: hasOldPlayers ? [buttons] : [] });
-
-    var location = await cityLookup.get(server.ip);
-    newEmbed.addFields({ name: 'Country: ', value: location == null ? 'Unknown' : location.country == null ? `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` : `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
-    var org = await asnLookup.get(server.ip);
-    newEmbed.addFields({ name: 'Organization: ', value: org == null ? 'Unknown' : org.autonomous_system_organization });
-
-    const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-    newEmbed.addFields({ name: 'Auth', value: auth == 'true' ? 'Cracked' : auth == 'false' ? 'Premium' : 'Unknown' })
-    await interactionReplyMessage.edit({ content:'', embeds: [newEmbed], components: hasOldPlayers ? [buttons] : [] });
+    var embed = createEmbed(server, index, totalServers);
+    await interaction.editReply({ content:'', embeds: [embed], components: hasOldPlayers ? [buttons] : [] });
 
     oldPlayersCollector.on('collect', async interaction => {
+      if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
       lastButtonPress = new Date();
-      var newEmbed = new EmbedBuilder()
-        .setColor("#02a337")
-        .setTitle('Random Server')
-        .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-        .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
-        .addFields(
-          { name:  `Server ${index}/${totalServers}`, value: ' ' },
-          { name: 'IP', value: server.ip },
-          { name: 'Port', value: String(server.port) },
-          { name: 'Version', value: getVersion(server.version) + ` (${server.version.protocol})` },
-          { name: 'Description', value: getDescription(server.description) }
-        )
-        .setTimestamp()
-
-      var buttons = new ActionRowBuilder()
-        .addComponents(
-          new ButtonBuilder()
-            .setCustomId(oldPlayersID)
-            .setLabel('Show Old Players')
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(true)
-        );
-
-      var playersString = `${server.players.online}/${server.players.max}`;
-      if (server.players.sample != null) {
-        var oldString;
-        for (var i = 0; i < server.players.sample.length; i++) {
-          oldString = playersString;
-          playersString += `\n${server.players.sample[i].name} ${server.players.sample[i].lastSeen == server.lastSeen ? '`online`' : '<t:' + server.players.sample[i].lastSeen + ':R>'}`;
-          if (i + 1 < server.players.sample.length) playersString += '\n';
-          if (playersString.length > 1020 && i + 1 < server.players.sample.length || playersString.length > 1024) {
-            playersString = oldString + '\n...';
-            break;
-          }
-        }
+      showingOldPlayers = !showingOldPlayers;
+      buttons.components[0].data.label = showingOldPlayers ? 'Online Players' : 'Player History';
+      if (showingOldPlayers) {
+        var playersString = `${server.players.online}/${server.players.max}`;
+        for (const player in server.players.history) playersString += `\n\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
+        embed.data.fields[5].value = playersString;
       }
-      newEmbed.addFields({ name: 'Players', value: playersString })
-
-      var location = await cityLookup.get(server.ip);
-      newEmbed.addFields({ name: 'Country: ', value: location == null ? 'Unknown' : location.country == null ? `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` : `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
-      var org = await asnLookup.get(server.ip);
-      newEmbed.addFields({ name: 'Organization: ', value: org == null ? 'Unknown' : org.autonomous_system_organization });
-
-      const auth = await (await fetch(`https://ping.cornbread2100.com/cracked/?ip=${server.ip}&port=${server.port}&protocol=${server.version.protocol}`)).text();
-      newEmbed.addFields({ name: 'Auth', value: auth == 'true' ? 'Cracked' : auth == 'false' ? 'Premium' : 'Unknown' })
-      await interaction.update({ content:'', embeds: [newEmbed], components: hasOldPlayers ? [buttons] : [] });
+      await interaction.update({ content: '', embeds: [embed], components: [buttons] });
     });
     
     
