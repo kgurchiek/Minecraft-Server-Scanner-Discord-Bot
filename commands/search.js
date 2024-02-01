@@ -249,9 +249,9 @@ module.exports = {
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
           if (showingOldPlayers) {
-            var playersString = `${server.players.online}/${server.players.max}\n`;
-            for (const player in server.players.history) playersString += `\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
-            newEmbed.data.fields[5].value = playersString;
+            var playersString = `${server.players.online}/${server.players.max}`;
+            for (const player in server.players.history) playersString += `\n\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
+            newEmbed.data.fields[4].value = playersString;
           }
           await interaction.update({ embeds: [newEmbed], components: [buttons] });
         });
