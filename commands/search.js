@@ -27,11 +27,10 @@ function timeSinceDate(date1) {
 function createEmbed(server, currentEmbed, totalResults) {
   const newEmbed = new EmbedBuilder()
     .setColor("#02a337")
-    .setTitle('Search Results')
+    .setTitle(`Result ${currentEmbed + 1}/${totalResults}`)
     .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
     .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
     .addFields(
-      { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
       { name: 'IP', value: server.ip },
       { name: 'Port', value: (server.port + '') },
       { name: 'Version', value: `${getVersion(server.version)} (${server.version.protocol})` },
@@ -80,8 +79,8 @@ module.exports = {
         .setDescription('skips to a page of results'))
     .addStringOption(option =>
       option
-        .setName('onlineplayers')
-        .setDescription('A range of online players'))
+        .setName('playercount')
+        .setDescription('A range of online player counts'))
     .addIntegerOption(option =>
       option
         .setName('playercap')
@@ -263,20 +262,20 @@ module.exports = {
     
     // Get arguments
     if (interaction.options.getInteger('skip') != null) currentEmbed = interaction.options.getInteger('skip') - 1;
-    var onlinePlayers;
+    var playerCount;
     var minOnline;
     var maxOnline;
-    if (interaction.options.getString('onlineplayers') != null) {
-      onlinePlayers = interaction.options.getString('onlineplayers');
-      if (onlinePlayers.startsWith('>=')) minOnline = parseInt(onlinePlayers.substring(2));
-      else if (onlinePlayers.startsWith('<=')) maxOnline = parseInt(onlinePlayers.substring(2));
-      else if (onlinePlayers.startsWith('>')) minOnline = parseInt(onlinePlayers.substring(1));
-      else if (onlinePlayers.startsWith('<')) maxOnline = parseInt(onlinePlayers.substring(1));
-      else if (onlinePlayers.includes('-')) {
-        const [min, max] = onlinePlayers.split('-');
+    if (interaction.options.getString('playercount') != null) {
+      playerCount = interaction.options.getString('playercount');
+      if (playerCount.startsWith('>=')) minOnline = parseInt(playerCount.substring(2));
+      else if (playerCount.startsWith('<=')) maxOnline = parseInt(playerCount.substring(2));
+      else if (playerCount.startsWith('>')) minOnline = parseInt(playerCount.substring(1));
+      else if (playerCount.startsWith('<')) maxOnline = parseInt(playerCount.substring(1));
+      else if (playerCount.includes('-')) {
+        const [min, max] = playerCount.split('-');
         minOnline = parseInt(min);
         maxOnline = parseInt(max);
-      } else minOnline = maxOnline = parseInt(onlinePlayers);
+      } else minOnline = maxOnline = parseInt(playerCount);
       if ((minOnline != null && isNaN(minOnline)) || (maxOnline != null && isNaN(maxOnline))) {
         const newEmbed = new EmbedBuilder()
           .setColor('#ff0000')
@@ -301,7 +300,7 @@ module.exports = {
     var cracked = interaction.options.getBoolean('cracked');
 
     var argumentList = '**Searching with these arguments:**';
-    if (onlinePlayers != null) argumentList += `\n**onlineplayers:** ${onlinePlayers}`;
+    if (playerCount != null) argumentList += `\n**playercount:** ${playerCount}`;
     if (playerCap != null) argumentList += `\n**playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
     if (version != null) argumentList += `\n**version:** ${version}`;
@@ -323,11 +322,11 @@ module.exports = {
     else {
       if (minOnline != null) {
         if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-        mongoFilter['players.online'][`$gt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = minOnline;
+        mongoFilter['players.online'][`$gt${ playerCount[1] == '=' || !isNaN(playerCount[0]) ? 'e' : '' }`] = minOnline;
       }
       if (maxOnline != null) {
         if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-        mongoFilter['players.online'][`$lt${ onlinePlayers[1] == '=' || !isNaN(onlinePlayers[0]) ? 'e' : '' }`] = maxOnline;
+        mongoFilter['players.online'][`$lt${ playerCount[1] == '=' || !isNaN(playerCount[0]) ? 'e' : '' }`] = maxOnline;
       }
     }
     if (playerCap != null) mongoFilter['players.max'] = playerCap;
@@ -369,15 +368,15 @@ module.exports = {
     if (org != null) mongoFilter['org'] = { '$regex': org, '$options': 'i' };
     if (cracked != null) mongoFilter['cracked'] = cracked;
 
-    var totalResults;
-    (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}`)).json()))).then(response => totalResults = response)
-
     server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}`)).json())[0];
     if (server != null) {
+      var totalResults;
+      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}`)).json()))).then(response => totalResults = response)
+
       hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
       var buttons = createButtons(0);
       var newEmbed = createEmbed(server, currentEmbed, 0);
-      newEmbed.data.fields[0].name = `Counting...`;
+      newEmbed.data.title = 'Counting...';
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
       await (new Promise(resolve => {
         const waitForCount = setInterval(() => {

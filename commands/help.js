@@ -16,7 +16,7 @@ module.exports = {
 					{ name: 'ip', value: 'The ip address of the server', inline: true },
 			    { name: 'port', value: 'The port of the server (defaults to 25565)\n' + '​', inline: true },
 		    { name: '/search', value: 'searches for a server with specific properties'},
-					{ name: 'onlineplayers (range)', value: 'A range of how many players on on the server (e.g. 4, >10, <=5, 11-20)', inline: true },
+					{ name: 'playercount (range)', value: 'A range of how many players on on the server (e.g. 4, >10, <=5, 11-20)', inline: true },
 					{ name: 'playercap (integer)', value: 'The maximum player capacity of the server', inline: true },
 					{ name: 'isfull (true/false)', value: 'Whether or not the server is full', inline: true },
 					{ name: 'version (regex)', value: 'The version of the server', inline: true },

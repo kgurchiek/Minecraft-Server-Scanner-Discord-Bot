@@ -40,6 +40,6 @@ You'll need Node.js version v18 or later to run the bot. Run `node deploy-comman
 | /stats | Sends some stats about the bot | None |
 | /random | Fetches a random online Minecraft server | None |
 | /ping | Fetches info from a given Minecraft server | ip (required), port (optional, defaults to 25565) |
-| /search | Searches the database for a server with specific properties | skip (integer), onlineplayers (range), playerCap (integer), isfull (true/false), version (regex), hasimage (true/false), description (regex), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (country name), org (organization name, uses regex), cracked (true/false) |
+| /search | Searches the database for a server with specific properties | skip (integer), playercount (range), playerCap (integer), isfull (true/false), version (regex), hasimage (true/false), description (regex), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (country name), org (organization name, uses regex), cracked (true/false) |
 | /player | Searches for servers a player has played on | skip (integer), username, uuid (uuid v4) |
 | /streamsnipe | Searches the database for live Twitch streamers | language (language name) |
