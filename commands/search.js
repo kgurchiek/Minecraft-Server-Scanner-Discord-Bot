@@ -212,49 +212,51 @@ module.exports = {
       }
       updateButtons();
     
-      // Event listener for 'Next Page' button
-      searchNextResultCollector.on('collect', async interaction => {
-        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
-        await interaction.deferUpdate();
-        lastButtonPress = new Date();
-        showingOldPlayers = false;
-        currentEmbed++;
-        if (currentEmbed == totalResults) currentEmbed = 0;
-        server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}`)).json())[0];
-        hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
-        updateButtons();
-        newEmbed = createEmbed(server, currentEmbed, totalResults);
-        await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
-      });
-    
-      // Event listener for 'Last Page' button
-      searchLastResultCollector.on('collect', async interaction => {
-        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
-        await interaction.deferUpdate();
-        lastButtonPress = new Date();
-        showingOldPlayers = false;
-        currentEmbed--;
-        if (currentEmbed == -1) currentEmbed = totalResults - 1;
-        server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}`)).json())[0];
-        hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
-        updateButtons();
-        newEmbed = createEmbed(server, currentEmbed, totalResults);
-        await interaction.editReply({ content: '', embeds: [newEmbed], components: [buttons] });
-      });
+      if (totalResults > 0) {
+        // Event listener for 'Next Page' button
+        searchNextResultCollector.on('collect', async interaction => {
+          if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
+          await interaction.deferUpdate();
+          lastButtonPress = new Date();
+          showingOldPlayers = false;
+          currentEmbed++;
+          if (currentEmbed == totalResults) currentEmbed = 0;
+          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+          hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+          updateButtons();
+          newEmbed = createEmbed(server, currentEmbed, totalResults);
+          await interaction.editReply({ embeds: [newEmbed], components: [buttons] });
+        });
+      
+        // Event listener for 'Last Page' button
+        searchLastResultCollector.on('collect', async interaction => {
+          if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
+          await interaction.deferUpdate();
+          lastButtonPress = new Date();
+          showingOldPlayers = false;
+          currentEmbed--;
+          if (currentEmbed == -1) currentEmbed = totalResults - 1;
+          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+          hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+          updateButtons();
+          newEmbed = createEmbed(server, currentEmbed, totalResults);
+          await interaction.editReply({ embeds: [newEmbed], components: [buttons] });
+        });
 
-      oldPlayersCollector.on('collect', async interaction => {
-        if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
-        lastButtonPress = new Date();
-        showingOldPlayers = !showingOldPlayers;
-        updateButtons();
-        newEmbed = createEmbed(server, currentEmbed, totalResults);
-        if (showingOldPlayers) {
-          var playersString = `${server.players.online}/${server.players.max}\n`;
-          for (const player in server.players.history) playersString += `\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
-          newEmbed.data.fields[5].value = playersString;
-        }
-        await interaction.update({ content: '', embeds: [newEmbed], components: [buttons] });
-      });
+        oldPlayersCollector.on('collect', async interaction => {
+          if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
+          lastButtonPress = new Date();
+          showingOldPlayers = !showingOldPlayers;
+          updateButtons();
+          newEmbed = createEmbed(server, currentEmbed, totalResults);
+          if (showingOldPlayers) {
+            var playersString = `${server.players.online}/${server.players.max}\n`;
+            for (const player in server.players.history) playersString += `\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
+            newEmbed.data.fields[5].value = playersString;
+          }
+          await interaction.update({ embeds: [newEmbed], components: [buttons] });
+        });
+      }
     
       return buttons;
     }
@@ -367,42 +369,52 @@ module.exports = {
     if (org != null) mongoFilter['org'] = { '$regex': org, '$options': 'i' };
     if (cracked != null) mongoFilter['cracked'] = cracked;
 
-    const totalResults = await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}`)).json();
+    var totalResults;
+    (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}`)).json()))).then(response => totalResults = response)
 
-    // If at least one server was found, send the message
-    if (totalResults > 0) {
-      server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+    server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+    if (server != null) {
       hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
-      var buttons = createButtons(totalResults);
-      var newEmbed = createEmbed(server, currentEmbed, totalResults);
+      var buttons = createButtons(0);
+      var newEmbed = createEmbed(server, currentEmbed, 0);
+      newEmbed.data.fields[0].name = `Counting...`;
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-    } else {
-      await interactReplyMessage.edit('No matches could be found');
-    } 
-    lastButtonPress = new Date();
-
-    // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
-    const buttonTimeoutCheck = setInterval(async () => {
-      if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
-        clearInterval(buttonTimeoutCheck);
-        searchNextResultCollector.stop();
-        searchLastResultCollector.stop();
-        oldPlayersCollector.stop();
-        buttons = new ActionRowBuilder()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId(lastResultID)
-              .setLabel('◀')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true),
-            new ButtonBuilder()
-              .setCustomId(nextResultID)
-              .setLabel('▶')
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true)
-          );
-        await interactReplyMessage.edit({ content: '', components: [buttons] });
-      }
-    }, 500);
+      await (new Promise(resolve => {
+        const waitForCount = setInterval(() => {
+          if (totalResults != null) {
+            clearInterval(waitForCount);
+            resolve();
+          }
+        }, 100)
+      }));
+      
+      buttons = createButtons(totalResults);
+      newEmbed = createEmbed(server, currentEmbed, totalResults);
+      await interactReplyMessage.edit({ embeds: [newEmbed], components: [buttons] })
+      // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
+      lastButtonPress = new Date();
+      const buttonTimeoutCheck = setInterval(async () => {
+        if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
+          clearInterval(buttonTimeoutCheck);
+          searchNextResultCollector.stop();
+          searchLastResultCollector.stop();
+          oldPlayersCollector.stop();
+          buttons = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('◀')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('▶')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(true)
+            );
+          await interactReplyMessage.edit({ components: [buttons] });
+        }
+      }, 500);
+    } else await interactReplyMessage.edit({ content: 'No matches could be found', embeds: [], components: [] }); 
   }
 }
