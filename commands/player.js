@@ -65,10 +65,11 @@ module.exports = {
     if (uuid != null) mongoFilter.uuid = uuid;
 
     const player = (await (await fetch(`https://api.cornbread2100.com/players?limit=1&query=${JSON.stringify(mongoFilter)}`)).json())[0];
-    const servers = [];
-    for (const server in player.servers) servers.push({ host: server.replaceAll('_', '.'), lastSeen: player.servers[server].lastSeen });
-    servers.sort((a, b) => b.lastSeen - a.lastSeen);
-    if (player != null) {
+    if (player == null || player.servers == null || Object.keys(servers).length == 0) await interactReplyMessage.edit(`No data recorded for player \`${username == null ? uuid : username }\`.`);
+    else {
+      const servers = [];
+      for (const server in player.servers) servers.push({ host: server.replaceAll('_', '.'), lastSeen: player.servers[server].lastSeen });
+      servers.sort((a, b) => b.lastSeen - a.lastSeen);
       const embed = new EmbedBuilder()
         .setColor('#02a337')
         .setTitle(`${username == null ? uuid : username }'s History`)
@@ -76,6 +77,6 @@ module.exports = {
       embed.data.description = '';
       for (const server of servers) embed.data.description += `${embed.data.description == '' ? '' : '\n'}**${server.host}** <t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>`;
       interactReplyMessage.edit({ content: '', embeds: [embed] });
-    } else await interactReplyMessage.edit(`No data recorded for player \`${username == null ? uuid : username }\`.`);
+    }
   }
 }
