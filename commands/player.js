@@ -65,18 +65,16 @@ module.exports = {
     if (uuid != null) mongoFilter.uuid = uuid;
 
     const player = (await (await fetch(`https://api.cornbread2100.com/players?limit=1&query=${JSON.stringify(mongoFilter)}`)).json())[0];
-    if (player == null || player.servers == null || Object.keys(servers).length == 0) await interactReplyMessage.edit(`No data recorded for player \`${username == null ? uuid : username }\`.`);
-    else {
-      const servers = [];
-      for (const server in player.servers) servers.push({ host: server.replaceAll('_', '.'), lastSeen: player.servers[server].lastSeen });
-      servers.sort((a, b) => b.lastSeen - a.lastSeen);
-      const embed = new EmbedBuilder()
-        .setColor('#02a337')
-        .setTitle(`${username == null ? uuid : username }'s History`)
-        .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-      embed.data.description = '';
-      for (const server of servers) embed.data.description += `${embed.data.description == '' ? '' : '\n'}**${server.host}** <t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>`;
-      interactReplyMessage.edit({ content: '', embeds: [embed] });
-    }
+    if (player == null || player.servers == null || Object.keys(players.servers).length == 0) return await interactReplyMessage.edit(`No data recorded for player \`${username == null ? uuid : username }\`.`);
+    const servers = [];
+    for (const server in player.servers) servers.push({ host: server.replaceAll('_', '.'), lastSeen: player.servers[server].lastSeen });
+    servers.sort((a, b) => b.lastSeen - a.lastSeen);
+    const embed = new EmbedBuilder()
+      .setColor('#02a337')
+      .setTitle(`${username == null ? uuid : username }'s History`)
+      .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+    embed.data.description = '';
+    for (const server of servers) embed.data.description += `${embed.data.description == '' ? '' : '\n'}**${server.host}** <t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>`;
+    interactReplyMessage.edit({ content: '', embeds: [embed] });
   }
 }
