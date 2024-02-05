@@ -65,7 +65,7 @@ module.exports = {
     if (uuid != null) mongoFilter.uuid = uuid;
 
     const player = (await (await fetch(`https://api.cornbread2100.com/players?limit=1&query=${JSON.stringify(mongoFilter)}`)).json())[0];
-    if (player == null || player.servers == null || Object.keys(players.servers).length == 0) return await interactReplyMessage.edit(`No data recorded for player \`${username == null ? uuid : username }\`.`);
+    if (player == null || player.servers == null || Object.keys(player.servers).length == 0) return await interactReplyMessage.edit(`No data recorded for player \`${username == null ? uuid : username }\`.`);
     const servers = [];
     for (const server in player.servers) servers.push({ host: server.replaceAll('_', '.'), lastSeen: player.servers[server].lastSeen });
     servers.sort((a, b) => b.lastSeen - a.lastSeen);
