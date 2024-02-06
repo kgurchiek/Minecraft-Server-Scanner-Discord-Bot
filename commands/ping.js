@@ -58,10 +58,10 @@ module.exports = {
       option.setName('port')
 	    .setDescription('The port of the server to ping')),
     async execute(interaction) {
-      await interaction.reply(`Pinging \`${ip}:${port}\`, please wait...`);
       // Fetch IP and Port from the command
       const ip = interaction.options.getString('ip');
       const port = interaction.options.getInteger('port') || 25565;
+      await interaction.reply(`Pinging \`${ip}:${port}\`, please wait...`);
 
       const text = await (await fetch(`https://ping.cornbread2100.com/ping/?ip=${ip}&port=${port}`)).text();
       if (text == 'timeout') {
