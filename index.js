@@ -4,6 +4,9 @@ const path = require('node:path');
 const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder, ActivityType } = require('discord.js');
 const { POST } = require('./commonFunctions.js');
 
+// Catch all errors
+process.on('uncaughtException', console.error);
+
 // Initialize Discord.js (Along with the commands)
 const client = new Client({ partials: [Partials.Channel], intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
 client.commands = new Collection();
