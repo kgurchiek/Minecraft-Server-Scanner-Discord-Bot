@@ -37,10 +37,7 @@ function createEmbed(server, ip, port) {
     }
     playersString += '```';
   }
-  newEmbed.addFields(
-    { name: 'Players', value: playersString },
-    { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` }
-  )
+  newEmbed.addFields({ name: 'Players', value: playersString })
 
   return newEmbed;
 }
