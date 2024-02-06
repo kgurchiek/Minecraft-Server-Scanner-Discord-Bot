@@ -53,8 +53,10 @@ function createEmbed(server, currentEmbed, totalResults) {
     }
     playersString += '```';
   }
+  newEmbed.addFields({ name: 'Players', value: playersString });
+  const discoverDate = parseInt(server._id.slice(0,8), 16);
   newEmbed.addFields(
-    { name: 'Players', value: playersString },
+    { name: 'Discovered', value: `<t:${discoverDate}:${(new Date().getTime() / 1000) - discoverDate > 86400 ? 'D' : 'R'}>`},
     { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` }
   )
 

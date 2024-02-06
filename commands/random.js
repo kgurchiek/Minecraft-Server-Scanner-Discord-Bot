@@ -51,8 +51,10 @@ function createEmbed(server, currentEmbed, totalResults) {
     }
     playersString += '```';
   }
+  newEmbed.addFields({ name: 'Players', value: playersString });
+  const discoverDate = parseInt(server._id.slice(0,8), 16);
   newEmbed.addFields(
-    { name: 'Players', value: playersString },
+    { name: 'Discovered', value: `<t:${discoverDate}:${(new Date().getTime() / 1000) - discoverDate > 86400 ? 'D' : 'R'}>`},
     { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` }
   )
 
@@ -81,9 +83,9 @@ module.exports = {
     const interactionReplyMessage = await interaction.reply('Getting a server, please wait...');
     
     // Get a random server from the database
-    const totalServers = parseInt(await POST('https://api.cornbread2100.com/countServers', { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}));
+    const totalServers = await (await fetch(`https://api.cornbread2100.com/countServers?skip=${index}&query={"lastSeen":{"$gte":${Math.round(new Date().getTime() / 1000) - 3600}}}`)).json();
     var index = Math.floor((Math.random() * totalServers));
-    const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${index}`, { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}))[0];
+    const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${index}`, { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }})).json())[0];
     
     if (server == null) {
       const embed = new EmbedBuilder()
