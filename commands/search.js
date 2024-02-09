@@ -214,7 +214,7 @@ module.exports = {
           new ButtonBuilder()
           .setLabel('API')
           .setStyle(ButtonStyle.Link)
-          .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFIlter))}`)
+          .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}`)
         )
       }
       updateButtons();
