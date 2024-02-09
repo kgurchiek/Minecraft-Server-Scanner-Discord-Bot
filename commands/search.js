@@ -210,6 +210,12 @@ module.exports = {
             .setLabel(showingOldPlayers ? 'Online Players' : 'Player History')
             .setStyle(ButtonStyle.Primary))
         }
+        buttons.addComponents(
+          new ButtonBuilder()
+          .setLabel('API')
+          .setStyle(ButtonStyle.Link)
+          .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFIlter))}`)
+        )
       }
       updateButtons();
     
@@ -411,7 +417,11 @@ module.exports = {
                 .setCustomId(nextResultID)
                 .setLabel('▶')
                 .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true)
+                .setDisabled(true),
+              new ButtonBuilder()
+              .setLabel('API')
+              .setStyle(ButtonStyle.Link)
+              .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mognoFilter))}`)
             );
           await interactReplyMessage.edit({ components: [buttons] });
         }
