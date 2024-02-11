@@ -421,7 +421,7 @@ module.exports = {
               new ButtonBuilder()
               .setLabel('API')
               .setStyle(ButtonStyle.Link)
-              .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mognoFilter))}`)
+              .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}`)
             );
           await interactReplyMessage.edit({ components: [buttons] });
         }
