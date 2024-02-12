@@ -53,6 +53,8 @@ module.exports = {
       const errorEmbed = new EmbedBuilder()
         .setColor('#ff0000')
         .addFields({ name: 'User Error', value: 'Must enter a username or uuid' })
+      await interactReplyMessage.edit({ content: '', embeds: [errorEmbed] })
+      return
     }
 
     var argumentList = '**Checking database for player:**';
