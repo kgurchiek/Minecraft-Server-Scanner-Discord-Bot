@@ -26,7 +26,7 @@ function timeSinceDate(date1) {
 
 function createEmbed(server, currentEmbed, totalResults) {
   const newEmbed = new EmbedBuilder()
-    .setColor("#02a337")
+    .setColor('#02a337')
     .setTitle(`Result ${currentEmbed + 1}/${totalResults}`)
     .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
     .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
@@ -91,6 +91,10 @@ module.exports = {
       option
         .setName('isfull')
         .setDescription('whether or not the server is full'))
+    .addStringOption(option =>
+      option
+        .setName('player')
+        .setDescription('The name of the player to search for'))
     .addStringOption(option =>
       option
         .setName('version')
@@ -214,7 +218,7 @@ module.exports = {
           new ButtonBuilder()
           .setLabel('API')
           .setStyle(ButtonStyle.Link)
-          .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}`)
+          .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayer=${player}`}`)
         )
       }
       updateButtons();
@@ -228,7 +232,7 @@ module.exports = {
           showingOldPlayers = false;
           currentEmbed++;
           if (currentEmbed == totalResults) currentEmbed = 0;
-          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json())[0];
           hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
@@ -243,7 +247,7 @@ module.exports = {
           showingOldPlayers = false;
           currentEmbed--;
           if (currentEmbed == -1) currentEmbed = totalResults - 1;
-          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json())[0];
           hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
@@ -295,6 +299,7 @@ module.exports = {
     }
     var playerCap = interaction.options.getInteger('playercap');
     var isFull = interaction.options.getBoolean('isfull');
+    var player = interaction.options.getString('player');
     var version = interaction.options.getString('version');
     var protocol = interaction.options.getInteger('protocol');
     var hasImage = interaction.options.getBoolean('hasimage');
@@ -311,6 +316,7 @@ module.exports = {
     if (playerCount != null) argumentList += `\n**playercount:** ${playerCount}`;
     if (playerCap != null) argumentList += `\n**playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
+    if (player != null) argumentList += `\n**player:** ${player}`;
     if (version != null) argumentList += `\n**version:** ${version}`;
     if (protocol != null) argumentList += `\n**protocol:** ${protocol}`;
     if (hasImage != null) argumentList += `\n**hasimage:** ${hasImage ? 'Has' : 'Doesn\'t Have'} Image`;
@@ -342,6 +348,7 @@ module.exports = {
       if (isFull) mongoFilter['$expr'] = { '$eq': ['$players.online', '$players.max'] };
       else mongoFilter['$expr'] = { '$ne': ['$players.online', '$players.max'] };
     }
+    if (player != null) mongoFilter['players.sample.name'] = player;
     if (version != null) mongoFilter['version.name'] = { '$regex': version, '$options': 'i' };
     if (protocol != null) mongoFilter['version.protocol'] = protocol;
     if (hasImage != null) mongoFilter['hasFavicon'] = hasImage;
@@ -376,10 +383,10 @@ module.exports = {
     if (org != null) mongoFilter['org'] = { '$regex': org, '$options': 'i' };
     if (cracked != null) mongoFilter['cracked'] = cracked;
 
-    server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+    server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json())[0];
     if (server != null) {
       var totalResults;
-      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}`)).json()))).then(response => totalResults = response)
+      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json()))).then(response => totalResults = response)
 
       hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
       var buttons = createButtons(0);
@@ -421,7 +428,7 @@ module.exports = {
               new ButtonBuilder()
               .setLabel('API')
               .setStyle(ButtonStyle.Link)
-              .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}`)
+              .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayer=${player}`}`)
             );
           await interactReplyMessage.edit({ components: [buttons] });
         }
