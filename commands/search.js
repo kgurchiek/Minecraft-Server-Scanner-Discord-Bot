@@ -43,6 +43,7 @@ function createEmbed(server, currentEmbed, totalResults) {
     playersString += '\n```\n';
     var oldString;
     for (var i = 0; i < server.players.sample.length; i++) {
+      if (server.players.sample[i].lastSeen != server.lastSeen) continue;
       oldString = playersString;
       playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
       if (i + 1 < server.players.sample.length) playersString += '\n';
@@ -94,7 +95,11 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName('player')
-        .setDescription('The name of the player to search for'))
+        .setDescription('A player that is currently playing on the server'))
+    .addStringOption(option =>
+      option
+        .setName('playerhistory')
+        .setDescription('The name of a player that has been on the server in the past'))
     .addStringOption(option =>
       option
         .setName('version')
@@ -233,7 +238,7 @@ module.exports = {
           currentEmbed++;
           if (currentEmbed == totalResults) currentEmbed = 0;
           server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json())[0];
-          hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+          hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen == server.lastSeen).length > 0;
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons] });
@@ -248,7 +253,7 @@ module.exports = {
           currentEmbed--;
           if (currentEmbed == -1) currentEmbed = totalResults - 1;
           server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json())[0];
-          hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+          hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen == server.lastSeen).length > 0;
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons] });
@@ -262,7 +267,7 @@ module.exports = {
           newEmbed = createEmbed(server, currentEmbed, totalResults);
           if (showingOldPlayers) {
             var playersString = `${server.players.online}/${server.players.max}`;
-            for (const player in server.players.history) playersString += `\n\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
+            for (const player of server.players.sample) playersString += `\n\`${player.name}\` <t:${player.lastSeen}:${(new Date().getTime() / 1000) - player.lastSeen > 86400 ? 'D' : 'R'}>`;
             newEmbed.data.fields[4].value = playersString;
           }
           await interaction.update({ embeds: [newEmbed], components: [buttons] });
@@ -291,7 +296,7 @@ module.exports = {
       if ((minOnline != null && isNaN(minOnline)) || (maxOnline != null && isNaN(maxOnline))) {
         const newEmbed = new EmbedBuilder()
           .setColor('#ff0000')
-          .setTitle('Error')
+          .setTitle('User Error')
           .setDescription('Invalid online player range')
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed] });
         return;
@@ -300,6 +305,7 @@ module.exports = {
     var playerCap = interaction.options.getInteger('playercap');
     var isFull = interaction.options.getBoolean('isfull');
     var player = interaction.options.getString('player');
+    var playerHistory = interaction.options.getString('playerhistory');
     var version = interaction.options.getString('version');
     var protocol = interaction.options.getInteger('protocol');
     var hasImage = interaction.options.getBoolean('hasimage');
@@ -317,6 +323,7 @@ module.exports = {
     if (playerCap != null) argumentList += `\n**playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
     if (player != null) argumentList += `\n**player:** ${player}`;
+    if (playerHistory != null) argumentList += `\n**playerhistory:** ${playerHistory}`;
     if (version != null) argumentList += `\n**version:** ${version}`;
     if (protocol != null) argumentList += `\n**protocol:** ${protocol}`;
     if (hasImage != null) argumentList += `\n**hasimage:** ${hasImage ? 'Has' : 'Doesn\'t Have'} Image`;
@@ -349,6 +356,7 @@ module.exports = {
       else mongoFilter['$expr'] = { '$ne': ['$players.online', '$players.max'] };
     }
     if (player != null) mongoFilter['players.sample.name'] = player;
+    if (playerHistory != null) mongoFilter['players.sample.name'] = playerHistory;
     if (version != null) mongoFilter['version.name'] = { '$regex': version, '$options': 'i' };
     if (protocol != null) mongoFilter['version.protocol'] = protocol;
     if (hasImage != null) mongoFilter['hasFavicon'] = hasImage;
@@ -388,7 +396,7 @@ module.exports = {
       var totalResults;
       (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json()))).then(response => totalResults = response)
 
-      hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+      hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen == server.lastSeen).length > 0;
       var buttons = createButtons(0);
       var newEmbed = createEmbed(server, currentEmbed, 0);
       newEmbed.data.title = 'Counting...';

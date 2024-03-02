@@ -61,7 +61,7 @@ module.exports = {
       await interaction.reply(`Pinging \`${ip}:${port}\`, please wait...`);
 
       const text = await (await fetch(`https://ping.cornbread2100.com/ping/?ip=${ip}&port=${port}`)).text();
-      if (text == 'timeout') {
+      if (text == 'Error: timeout') {
         var errorEmbed = new EmbedBuilder()
           .setColor('#ff0000')
           .addFields({ name: 'Timeout', value: 'If you know this server is online, ping @cornbread2100 in the official support server (https://discord.gg/3u2fNRAMAN)' })
