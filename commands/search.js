@@ -396,7 +396,7 @@ module.exports = {
       var totalResults;
       (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json()))).then(response => totalResults = response)
 
-      hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen == server.lastSeen).length > 0;
+      hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
       var buttons = createButtons(0);
       var newEmbed = createEmbed(server, currentEmbed, 0);
       newEmbed.data.title = 'Counting...';

@@ -97,7 +97,7 @@ module.exports = {
       return;
     }
 
-    const hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+    const hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
     var showingOldPlayers = false;
 
     var buttons = new ActionRowBuilder()
@@ -109,7 +109,7 @@ module.exports = {
       );
     
     var embed = createEmbed(server, index, totalServers);
-    await interaction.editReply({ content:'', embeds: [embed], components: hasOldPlayers ? [buttons] : [] });
+    await interaction.editReply({ content: '', embeds: [embed], components: hasOldPlayers ? [buttons] : [] });
 
     oldPlayersCollector.on('collect', async interaction => {
       if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
@@ -118,7 +118,7 @@ module.exports = {
       buttons.components[0].data.label = showingOldPlayers ? 'Online Players' : 'Player History';
       if (showingOldPlayers) {
         var playersString = `${server.players.online}/${server.players.max}`;
-        for (const player in server.players.history) playersString += `\n\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
+        for (const player of server.players.sample) playersString += `\n\`${player.replace(':', ' ')}\` <t:${player.lastSeen}:${(new Date().getTime() / 1000) - player.lastSeen > 86400 ? 'D' : 'R'}>`;
         embed.data.fields[5].value = playersString;
       }
       await interaction.update({ content: '', embeds: [embed], components: [buttons] });
