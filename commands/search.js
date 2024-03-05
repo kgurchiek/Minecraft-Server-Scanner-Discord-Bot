@@ -238,7 +238,7 @@ module.exports = {
           currentEmbed++;
           if (currentEmbed == totalResults) currentEmbed = 0;
           server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json())[0];
-          hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen == server.lastSeen).length > 0;
+          hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons] });
@@ -253,7 +253,7 @@ module.exports = {
           currentEmbed--;
           if (currentEmbed == -1) currentEmbed = totalResults - 1;
           server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json())[0];
-          hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen == server.lastSeen).length > 0;
+          hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons] });
