@@ -30,15 +30,11 @@ client.once(Events.ClientReady, async () => {
   console.log(`[Bot]: ${client.user.tag}`)
   console.log("[Servers]: " + client.guilds.cache.size);
   var totalServers = await (await fetch('https://api.cornbread2100.com/countServers')).json();
-  var totalPlayers = await (await fetch('https://api.cornbread2100.com/countPlayers')).json();
   module.exports.totalServers = totalServers;
-  module.exports.totalPlayers = totalPlayers;
   client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
   setInterval(async () => {
     totalServers = await (await fetch('https://api.cornbread2100.com/countServers')).json();
-    totalPlayers = await (await fetch('https://api.cornbread2100.com/countPlayers')).json();
     module.exports.totalServers = totalServers;
-    module.exports.totalPlayers = totalPlayers;
     client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
   }, 60000)
 });
