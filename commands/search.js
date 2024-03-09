@@ -4,13 +4,6 @@ const { getDescription, getVersion } = require('../commonFunctions.js');
 const countryCodes = require('../countryCodes.json');
 const orgs = require('../orgs.json');
 const buttonTimeout = 60; // In seconds
-const maxmind = require('maxmind');
-var cityLookup;
-var asnLookup;
-(async () => {
-  cityLookup = await maxmind.open('./GeoLite2-City.mmdb');
-  asnLookup = await maxmind.open('./GeoLite2-ASN.mmdb');
-})();
 
 // Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {

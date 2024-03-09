@@ -1,6 +1,5 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { POST } = require('../commonFunctions.js');
 
 module.exports = {
   // Sets up the command

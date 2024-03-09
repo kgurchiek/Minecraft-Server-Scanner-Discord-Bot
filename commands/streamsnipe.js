@@ -4,11 +4,8 @@ const { getDescription, getVersion } = require('../commonFunctions.js');
 const config = require('../config.json');
 const languages = require('../languages.json');
 const buttonTimeout = 60; // In seconds
-const maxmind = require('maxmind');
 var twitchAccessToken;
 var accessTokenTimeout = 0;
-var cityLookup;
-var asnLookup;
 
 async function getAccessToken() {
   if (Math.floor((new Date()).getTime() / 1000) >= accessTokenTimeout - 21600) {
@@ -20,12 +17,6 @@ async function getAccessToken() {
   }
   setTimeout(getAccessToken, 7200);
 }
-
-(async () => {
-  getAccessToken();
-  cityLookup = await maxmind.open('./GeoLite2-City.mmdb');
-  asnLookup = await maxmind.open('./GeoLite2-ASN.mmdb');
-})();
 
 // Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {

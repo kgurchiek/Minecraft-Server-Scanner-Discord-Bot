@@ -1,14 +1,7 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion, POST } = require('../commonFunctions.js')
+const { getDescription, getVersion } = require('../commonFunctions.js')
 const buttonTimeout = 60;
-const maxmind = require('maxmind');
-var cityLookup;
-var asnLookup;
-(async () => {
-  cityLookup = await maxmind.open('./GeoLite2-City.mmdb');
-  asnLookup = await maxmind.open('./GeoLite2-ASN.mmdb');
-})();
 
 function timeSinceDate(date1) {
   if (date1 == null) {
