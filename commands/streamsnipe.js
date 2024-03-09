@@ -303,7 +303,7 @@ module.exports = {
 
     await (new Promise(resolve => setInterval(() => { if (twitchDone && kickDone) resolve(); }, 100)))
 
-    if (twitchStreams.length == 0 && kickStreams.length == 0) return interactReplyMessage.edit('No streams found. This is likely a bug, please ping @cornbread2100 in the official support server (https://discord.gg/3u2fNRAMAN)');
+    if (twitchStreams.length == 0 && kickStreams.length == 0) return interactReplyMessage.edit(interaction.options.getString('language') == null ? 'No streams found. This is likely a bug, please ping @cornbread2100 in the official support server (https://discord.gg/3u2fNRAMAN)' : 'No streams found in that language');
 
     await interactReplyMessage.edit(`Found ${twitchStreams.length} Twitch streams and ${kickStreams.length} Kick streams. Searching servers...`);
 
