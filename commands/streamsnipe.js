@@ -7,7 +7,7 @@ const buttonTimeout = 60; // In seconds
 var twitchAccessToken;
 var accessTokenTimeout = 0;
 
-async function getAccessToken() {
+setInterval(async () => {
   if (Math.floor((new Date()).getTime() / 1000) >= accessTokenTimeout - 21600) {
     console.log('Refreshing access token');
     const twitchResponse = await (await fetch(`https://id.twitch.tv/oauth2/token?client_id=${config.twitchClientId}&client_secret=${config.twitchClientSecret}&grant_type=client_credentials`, { method: 'POST' })).json();
@@ -15,8 +15,7 @@ async function getAccessToken() {
     accessTokenTimeout = (new Date()).getTime() / 1000 + twitchResponse.expires_in;
     console.log('Access token refreshed')
   }
-  setTimeout(getAccessToken, 7200);
-}
+}, 7200);
 
 // Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {
