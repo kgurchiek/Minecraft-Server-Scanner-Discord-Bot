@@ -252,7 +252,7 @@ module.exports = {
         response = await (await fetch(`https://api.twitch.tv/helix/streams?game_id=27471&first=100&after=${response.pagination.cursor}`, options)).json();
         twitchStreams = twitchStreams.concat(response.data);
       } while (response.pagination.cursor)
-      if (interaction.options.getString('language')) streams = streams.filter(item => item.language == interaction.options.getString('language'));
+      if (interaction.options.getString('language')) twitchStreams = twitchStreams.filter(item => item.language == interaction.options.getString('language'));
       twitchDone = true;
     })();
 
@@ -303,6 +303,8 @@ module.exports = {
 
     await (new Promise(resolve => setInterval(() => { if (twitchDone && kickDone) resolve(); }, 100)))
 
+    if (twitchStreams.length == 0 && kickStreams.length == 0) return interactReplyMessage.edit('No streams found. This is likely a bug, please ping @cornbread2100 in the official support server (https://discord.gg/3u2fNRAMAN)');
+
     await interactReplyMessage.edit(`Found ${twitchStreams.length} Twitch streams and ${kickStreams.length} Kick streams. Searching servers...`);
 
     const twitchStreamers = [];
@@ -336,7 +338,7 @@ module.exports = {
       const newEmbed = createEmbed(server, currentEmbed, totalResults, twitchStreamers, kickStreamers, twitchStreams, kickStreams);
 
       await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
-    } else await interactReplyMessage.edit("no matches could be found");
+    } else await interactReplyMessage.edit('No matches could be found');
 
     // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
     lastButtonPress = new Date();
