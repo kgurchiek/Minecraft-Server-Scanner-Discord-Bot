@@ -223,7 +223,7 @@ module.exports = {
           new ButtonBuilder()
           .setLabel('API')
           .setStyle(ButtonStyle.Link)
-          .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayer=${player}`}`)
+          .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
         )
       }
       updateButtons();
@@ -237,7 +237,7 @@ module.exports = {
           showingOldPlayers = false;
           currentEmbed++;
           if (currentEmbed == totalResults) currentEmbed = 0;
-          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json())[0];
+          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json())[0];
           hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
@@ -252,7 +252,7 @@ module.exports = {
           showingOldPlayers = false;
           currentEmbed--;
           if (currentEmbed == -1) currentEmbed = totalResults - 1;
-          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json())[0];
+          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json())[0];
           hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
@@ -391,10 +391,10 @@ module.exports = {
     if (org != null) mongoFilter['org'] = { '$regex': org, '$options': 'i' };
     if (cracked != null) mongoFilter['cracked'] = cracked;
 
-    server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json())[0];
+    server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json())[0];
     if (server != null) {
       var totalResults;
-      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayer=${player}`}`)).json()))).then(response => totalResults = response)
+      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json()))).then(response => totalResults = response)
 
       hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
       var buttons = createButtons(0);
@@ -436,7 +436,7 @@ module.exports = {
               new ButtonBuilder()
               .setLabel('API')
               .setStyle(ButtonStyle.Link)
-              .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayer=${player}`}`)
+              .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
             );
           await interactReplyMessage.edit({ components: [buttons] });
         }
