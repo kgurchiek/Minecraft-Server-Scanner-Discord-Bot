@@ -131,6 +131,5 @@ function getVersion(rawVersion) {
 module.exports = {
   minecraftToAnsi,
   getDescription,
-  getVersion,
-  POST
+  getVersion
 }
