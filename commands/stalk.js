@@ -109,12 +109,8 @@ async function stalkCheck() {
   const pingList = getPingList();
   for (const user in pingList) {
     for (const player of pingList[user]) {
-      if (players[player] == 'inactive') continue;
       const resultCount = await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify({ 'players.sample.name': player, lastSeen: { $gte: Math.floor(new Date().getTime() / 1000) - 600}})}&onlineplayers=["${player}"]`)).json();
-      if (resultCount == 0) {
-        players[player] = 'inactive';
-        continue;
-      }
+      if (resultCount == 0) continue;
       const result = (await (await fetch(`https://api.cornbread2100.com/servers?query=${JSON.stringify({ 'players.sample.name': player, lastSeen: { $gte: Math.floor(new Date().getTime() / 1000) - 300}})}&onlineplayers=["${player}"]`)).json())[0];
       if (players[player] == null || (result.ip != players[player].ip && result.port != players[player].port && result.lastSeen < players[player].lastSeen)) {
         players[player] = result;
@@ -124,7 +120,6 @@ async function stalkCheck() {
       }
     }
   }
-  if (Object.keys(players).length > 0) for (const player in players) if (players[player] == 'inactive') players[player] = null;
 }
 stalkCheck();
 setInterval(stalkCheck, 300000); // every 5 minutes
