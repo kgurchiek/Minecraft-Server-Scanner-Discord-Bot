@@ -349,11 +349,7 @@ module.exports = {
               .setCustomId(nextResultID)
               .setLabel('▶')
               .setStyle(ButtonStyle.Secondary)
-              .setDisabled(true),
-            new ButtonBuilder()
-            .setLabel('API')
-            .setStyle(ButtonStyle.Link)
-            .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
+              .setDisabled(true)
           );
         await interactReplyMessage.edit({ components: [buttons] });
       }
