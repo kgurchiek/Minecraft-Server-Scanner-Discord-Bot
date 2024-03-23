@@ -59,6 +59,11 @@ module.exports = {
           .setColor('#ff0000')
           .addFields({ name: 'Timeout', value: 'If you know this server is online, ping @cornbread2100 in the official support server (https://discord.gg/3u2fNRAMAN)' })
         interaction.editReply({ content: '', embeds: [errorEmbed] })
+      } else if (text.startsWith('Error: ')) {
+        var errorEmbed = new EmbedBuilder()
+          .setColor('#ff0000')
+          .addFields({ name: 'Error', value: text.substring(7) })
+        interaction.editReply({ content: '', embeds: [errorEmbed] })
       } else {
         response = JSON.parse(text);
         var newEmbed = createEmbed(response, ip, port);
