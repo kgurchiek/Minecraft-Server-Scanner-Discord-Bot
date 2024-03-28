@@ -212,12 +212,14 @@ module.exports = {
             .setLabel(showingOldPlayers ? 'Online Players' : 'Player History')
             .setStyle(ButtonStyle.Primary))
         }
-        buttons.addComponents(
-          new ButtonBuilder()
-          .setLabel('API')
-          .setStyle(ButtonStyle.Link)
-          .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
-        )
+        if (`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`.length <= 512) {
+          buttons.addComponents(
+            new ButtonBuilder()
+            .setLabel('API')
+            .setStyle(ButtonStyle.Link)
+            .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
+          )
+        }
       }
       updateButtons();
     
