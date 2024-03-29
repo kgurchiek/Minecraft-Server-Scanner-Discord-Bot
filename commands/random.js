@@ -81,12 +81,16 @@ module.exports = {
     const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${index}`, { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }})).json())[0];
     
     if (server == null) {
+      var messageContent = "";
       const embed = new EmbedBuilder()
         .setColor('#ff0000')
         .setTitle('No recent servers found')
         .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
         .setDescription('This is a bug, please ping @cornbread2100 in the official support server (https://discord.gg/3u2fNRAMAN)')
-        await interaction.editReply({ content: '', embeds: [embed] });
+	if (interaction.guildId === 1005132317297221785) { // If the guild is the official server
+	  messageContent = "<@720658048611516559>"; // Make the message ping @cornbread2100
+	}
+        await interaction.editReply({ content: messageContent, embeds: [embed] });
       return;
     }
 
