@@ -49,8 +49,8 @@ module.exports = {
 	    .setDescription('The port of the server to ping')),
     async execute(interaction) {
       // Fetch IP and Port from the command
-      const ip = interaction.options.getString('ip');
-      const port = interaction.options.getInteger('port') || 25565;
+      const ip = interaction.options.getInteger('port') == null ? interaction.options.getString('ip').split(':')[0] : interaction.options.getString('ip');
+      const port = interaction.options.getInteger('port') == null ? interaction.options.getString('ip').split(':')[1] || 25565 : interaction.options.getInteger('port');
       await interaction.reply(`Pinging \`${ip}:${port}\`, please wait...`);
 
       const text = await (await fetch(`https://ping.cornbread2100.com/ping/?ip=${ip}&port=${port}`)).text();
