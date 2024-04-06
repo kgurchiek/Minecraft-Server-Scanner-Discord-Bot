@@ -262,7 +262,10 @@ module.exports = {
           newEmbed = createEmbed(server, currentEmbed, totalResults);
           if (showingOldPlayers) {
             var playersString = `${server.players.online}/${server.players.max}`;
-            for (const player of server.players.sample) playersString += `\n\`${player.name}\` <t:${player.lastSeen}:${(new Date().getTime() / 1000) - player.lastSeen > 86400 ? 'D' : 'R'}>`;
+            let i = 0;
+            server.players.sample.sort((a, b) => b.lastSeen - a.lastSeen);
+            for (; i < server.players.sample.length && (playersString + `\n\`${server.players.sample[i].name}\` <t:${server.players.sample[i].lastSeen}:${(new Date().getTime() / 1000) - server.players.sample[i].lastSeen > 86400 ? 'D' : 'R'}>`).length <= 1020; i++) playersString += `\n\`${server.players.sample[i].name}\` <t:${server.players.sample[i].lastSeen}:${(new Date().getTime() / 1000) - server.players.sample[i].lastSeen > 86400 ? 'D' : 'R'}>`;
+            if (i < server.players.sample.length) playersString += '\n...';
             newEmbed.data.fields[4].value = playersString;
           }
           await interaction.update({ embeds: [newEmbed], components: [buttons] });
@@ -359,6 +362,7 @@ module.exports = {
     if (hasPlayerList != null) {
       if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = {};
       mongoFilter['players.sample']['$exists'] = hasPlayerList;
+      if (hasPlayerList) mongoFilter['players.sample']['$type'] = 'array';
       if (hasPlayerList) mongoFilter['players.sample']['$not'] = { '$size': 0 };
     }
     if (seenAfter != null) mongoFilter['lastSeen'] = { '$gte': seenAfter };
