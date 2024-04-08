@@ -4,6 +4,9 @@ const path = require('node:path');
 const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder, ActivityType } = require('discord.js');
 const { POST } = require('./commonFunctions.js');
 
+// Catch all errors
+process.on('uncaughtException', console.error);
+
 // Initialize Discord.js (Along with the commands)
 const client = new Client({ partials: [Partials.Channel], intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
 client.commands = new Collection();
@@ -27,15 +30,11 @@ client.once(Events.ClientReady, async () => {
   console.log(`[Bot]: ${client.user.tag}`)
   console.log("[Servers]: " + client.guilds.cache.size);
   var totalServers = await (await fetch('https://api.cornbread2100.com/countServers')).json();
-  var totalPlayers = await (await fetch('https://api.cornbread2100.com/countPlayers')).json();
   module.exports.totalServers = totalServers;
-  module.exports.totalPlayers = totalPlayers;
   client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
   setInterval(async () => {
     totalServers = await (await fetch('https://api.cornbread2100.com/countServers')).json();
-    totalPlayers = await (await fetch('https://api.cornbread2100.com/countPlayers')).json();
     module.exports.totalServers = totalServers;
-    module.exports.totalPlayers = totalPlayers;
     client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
   }, 60000)
 });

@@ -1,6 +1,5 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { POST } = require('../commonFunctions.js');
 
 module.exports = {
   // Sets up the command
@@ -8,7 +7,7 @@ module.exports = {
     .setName('stats')
     .setDescription('Sends helpful info about the bot'),
   async execute(interaction) {
-    const { client, totalServers, totalPlayers } = require('../index.js');
+    const { client, totalServers } = require('../index.js');
 
     // Status message
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
@@ -25,7 +24,6 @@ module.exports = {
       .addFields(
         { name: 'Author:', value: userTag.username },
         { name: 'Total Servers:', value: String(totalServers), inline: true },
-        { name: 'Total Players:', value: String(totalPlayers), inline: true },
         { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. ${users} users. Last restart: <t:${Math.floor((new Date().getTime() - client.uptime) / 1000)}:R>`}
       )
     await interaction.editReply({ content: '', embeds: [newEmbed], ephemeral:true });

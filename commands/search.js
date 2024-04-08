@@ -4,13 +4,6 @@ const { getDescription, getVersion } = require('../commonFunctions.js');
 const countryCodes = require('../countryCodes.json');
 const orgs = require('../orgs.json');
 const buttonTimeout = 60; // In seconds
-const maxmind = require('maxmind');
-var cityLookup;
-var asnLookup;
-(async () => {
-  cityLookup = await maxmind.open('./GeoLite2-City.mmdb');
-  asnLookup = await maxmind.open('./GeoLite2-ASN.mmdb');
-})();
 
 // Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {
@@ -26,7 +19,7 @@ function timeSinceDate(date1) {
 
 function createEmbed(server, currentEmbed, totalResults) {
   const newEmbed = new EmbedBuilder()
-    .setColor("#02a337")
+    .setColor('#02a337')
     .setTitle(`Result ${currentEmbed + 1}/${totalResults}`)
     .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
     .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
@@ -43,6 +36,7 @@ function createEmbed(server, currentEmbed, totalResults) {
     playersString += '\n```\n';
     var oldString;
     for (var i = 0; i < server.players.sample.length; i++) {
+      if (server.players.sample[i].lastSeen != server.lastSeen) continue;
       oldString = playersString;
       playersString += `\n${server.players.sample[i].name}\n${server.players.sample[i].id}`;
       if (i + 1 < server.players.sample.length) playersString += '\n';
@@ -53,8 +47,10 @@ function createEmbed(server, currentEmbed, totalResults) {
     }
     playersString += '```';
   }
+  newEmbed.addFields({ name: 'Players', value: playersString });
+  const discoverDate = parseInt(server._id.slice(0,8), 16);
   newEmbed.addFields(
-    { name: 'Players', value: playersString },
+    { name: 'Discovered', value: `<t:${discoverDate}:${(new Date().getTime() / 1000) - discoverDate > 86400 ? 'D' : 'R'}>`},
     { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` }
   )
 
@@ -89,6 +85,14 @@ module.exports = {
       option
         .setName('isfull')
         .setDescription('whether or not the server is full'))
+    .addStringOption(option =>
+      option
+        .setName('player')
+        .setDescription('A player that is currently playing on the server'))
+    .addStringOption(option =>
+      option
+        .setName('playerhistory')
+        .setDescription('The name of a player that has been on the server in the past'))
     .addStringOption(option =>
       option
         .setName('version')
@@ -208,6 +212,14 @@ module.exports = {
             .setLabel(showingOldPlayers ? 'Online Players' : 'Player History')
             .setStyle(ButtonStyle.Primary))
         }
+        if (`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`.length <= 512) {
+          buttons.addComponents(
+            new ButtonBuilder()
+            .setLabel('API')
+            .setStyle(ButtonStyle.Link)
+            .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
+          )
+        }
       }
       updateButtons();
     
@@ -220,8 +232,8 @@ module.exports = {
           showingOldPlayers = false;
           currentEmbed++;
           if (currentEmbed == totalResults) currentEmbed = 0;
-          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}`)).json())[0];
-          hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json())[0];
+          hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons] });
@@ -235,8 +247,8 @@ module.exports = {
           showingOldPlayers = false;
           currentEmbed--;
           if (currentEmbed == -1) currentEmbed = totalResults - 1;
-          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}`)).json())[0];
-          hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json())[0];
+          hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons] });
@@ -250,7 +262,10 @@ module.exports = {
           newEmbed = createEmbed(server, currentEmbed, totalResults);
           if (showingOldPlayers) {
             var playersString = `${server.players.online}/${server.players.max}`;
-            for (const player in server.players.history) playersString += `\n\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
+            let i = 0;
+            server.players.sample.sort((a, b) => b.lastSeen - a.lastSeen);
+            for (; i < server.players.sample.length && (playersString + `\n\`${server.players.sample[i].name}\` <t:${server.players.sample[i].lastSeen}:${(new Date().getTime() / 1000) - server.players.sample[i].lastSeen > 86400 ? 'D' : 'R'}>`).length <= 1020; i++) playersString += `\n\`${server.players.sample[i].name}\` <t:${server.players.sample[i].lastSeen}:${(new Date().getTime() / 1000) - server.players.sample[i].lastSeen > 86400 ? 'D' : 'R'}>`;
+            if (i < server.players.sample.length) playersString += '\n...';
             newEmbed.data.fields[4].value = playersString;
           }
           await interaction.update({ embeds: [newEmbed], components: [buttons] });
@@ -279,7 +294,7 @@ module.exports = {
       if ((minOnline != null && isNaN(minOnline)) || (maxOnline != null && isNaN(maxOnline))) {
         const newEmbed = new EmbedBuilder()
           .setColor('#ff0000')
-          .setTitle('Error')
+          .setTitle('User Error')
           .setDescription('Invalid online player range')
         await interactReplyMessage.edit({ content: '', embeds: [newEmbed] });
         return;
@@ -287,6 +302,8 @@ module.exports = {
     }
     var playerCap = interaction.options.getInteger('playercap');
     var isFull = interaction.options.getBoolean('isfull');
+    var player = interaction.options.getString('player');
+    var playerHistory = interaction.options.getString('playerhistory');
     var version = interaction.options.getString('version');
     var protocol = interaction.options.getInteger('protocol');
     var hasImage = interaction.options.getBoolean('hasimage');
@@ -303,6 +320,8 @@ module.exports = {
     if (playerCount != null) argumentList += `\n**playercount:** ${playerCount}`;
     if (playerCap != null) argumentList += `\n**playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
+    if (player != null) argumentList += `\n**player:** ${player}`;
+    if (playerHistory != null) argumentList += `\n**playerhistory:** ${playerHistory}`;
     if (version != null) argumentList += `\n**version:** ${version}`;
     if (protocol != null) argumentList += `\n**protocol:** ${protocol}`;
     if (hasImage != null) argumentList += `\n**hasimage:** ${hasImage ? 'Has' : 'Doesn\'t Have'} Image`;
@@ -334,6 +353,8 @@ module.exports = {
       if (isFull) mongoFilter['$expr'] = { '$eq': ['$players.online', '$players.max'] };
       else mongoFilter['$expr'] = { '$ne': ['$players.online', '$players.max'] };
     }
+    if (player != null) mongoFilter['players.sample.name'] = player;
+    if (playerHistory != null) mongoFilter['players.sample.name'] = playerHistory;
     if (version != null) mongoFilter['version.name'] = { '$regex': version, '$options': 'i' };
     if (protocol != null) mongoFilter['version.protocol'] = protocol;
     if (hasImage != null) mongoFilter['hasFavicon'] = hasImage;
@@ -341,6 +362,7 @@ module.exports = {
     if (hasPlayerList != null) {
       if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = {};
       mongoFilter['players.sample']['$exists'] = hasPlayerList;
+      if (hasPlayerList) mongoFilter['players.sample']['$type'] = 'array';
       if (hasPlayerList) mongoFilter['players.sample']['$not'] = { '$size': 0 };
     }
     if (seenAfter != null) mongoFilter['lastSeen'] = { '$gte': seenAfter };
@@ -368,12 +390,12 @@ module.exports = {
     if (org != null) mongoFilter['org'] = { '$regex': org, '$options': 'i' };
     if (cracked != null) mongoFilter['cracked'] = cracked;
 
-    server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}`)).json())[0];
+    server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json())[0];
     if (server != null) {
       var totalResults;
-      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}`)).json()))).then(response => totalResults = response)
+      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json()))).then(response => totalResults = response)
 
-      hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+      hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
       var buttons = createButtons(0);
       var newEmbed = createEmbed(server, currentEmbed, 0);
       newEmbed.data.title = 'Counting...';
@@ -409,7 +431,11 @@ module.exports = {
                 .setCustomId(nextResultID)
                 .setLabel('▶')
                 .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true)
+                .setDisabled(true),
+              new ButtonBuilder()
+              .setLabel('API')
+              .setStyle(ButtonStyle.Link)
+              .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
             );
           await interactReplyMessage.edit({ components: [buttons] });
         }

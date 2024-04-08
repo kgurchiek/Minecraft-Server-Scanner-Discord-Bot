@@ -19,6 +19,8 @@ module.exports = {
 					{ name: 'playercount (range)', value: 'A range of how many players on on the server (e.g. 4, >10, <=5, 11-20)', inline: true },
 					{ name: 'playercap (integer)', value: 'The maximum player capacity of the server', inline: true },
 					{ name: 'isfull (true/false)', value: 'Whether or not the server is full', inline: true },
+					{ name: 'player (player name)', value: 'A player that is currently playing on the server', inline: true },
+					{ name: 'playerhistory (player name)', value: 'The name of a player that has been on the server in the past', inline: true },
 					{ name: 'version (regex)', value: 'The version of the server', inline: true },
 					{ name: 'hasimage (true/false)', value: 'Whether or not the server has a custom favicon', inline: true },
 					{ name: 'description (regex)', value: 'The description of the server', inline: true },
@@ -29,10 +31,6 @@ module.exports = {
 					{ name: 'country (country name)', value: 'The country the server is hosted in', inline: true },
 					{ name: 'org (organization name, uses regex)', value: 'The organization the ip belongs to', inline: true },
 					{ name: 'cracked (true/false)', value: 'Whether or not the server is cracked (offline mode)\n' + '​', inline: true },
-				{ name: '/player', value: 'Gets servers that live Twitch streamers are playing on' + '​', inline: true },
-					{ name: 'skip (integer)', value: 'Skips to a page of results', inline: true },
-					{ name: 'username', value: 'The username of the player', inline: true },
-					{ name: 'uuid (uuid v4)', value: 'The uuid of the player\n' + '​', inline: true },
 				{ name: '/streamsnipe', value: 'Gets servers that live Twitch streamers are playing on' + '​', inline: true },
 					{ name: 'language (language name)', value: 'The language of the Twitch stream (you must use the autocomplete for it to work)\n' + '​', inline: true }
 		)

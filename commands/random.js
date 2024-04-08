@@ -1,14 +1,7 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion, POST } = require('../commonFunctions.js')
+const { getDescription, getVersion } = require('../commonFunctions.js')
 const buttonTimeout = 60;
-const maxmind = require('maxmind');
-var cityLookup;
-var asnLookup;
-(async () => {
-  cityLookup = await maxmind.open('./GeoLite2-City.mmdb');
-  asnLookup = await maxmind.open('./GeoLite2-ASN.mmdb');
-})();
 
 function timeSinceDate(date1) {
   if (date1 == null) {
@@ -51,8 +44,10 @@ function createEmbed(server, currentEmbed, totalResults) {
     }
     playersString += '```';
   }
+  newEmbed.addFields({ name: 'Players', value: playersString });
+  const discoverDate = parseInt(server._id.slice(0,8), 16);
   newEmbed.addFields(
-    { name: 'Players', value: playersString },
+    { name: 'Discovered', value: `<t:${discoverDate}:${(new Date().getTime() / 1000) - discoverDate > 86400 ? 'D' : 'R'}>`},
     { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` }
   )
 
@@ -81,9 +76,9 @@ module.exports = {
     const interactionReplyMessage = await interaction.reply('Getting a server, please wait...');
     
     // Get a random server from the database
-    const totalServers = parseInt(await POST('https://api.cornbread2100.com/countServers', { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}));
+    const totalServers = await (await fetch(`https://api.cornbread2100.com/countServers?skip=${index}&query={"lastSeen":{"$gte":${Math.round(new Date().getTime() / 1000) - 3600}}}`)).json();
     var index = Math.floor((Math.random() * totalServers));
-    const server = (await POST(`https://api.cornbread2100.com/servers?limit=1&skip=${index}`, { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }}))[0];
+    const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${index}`, { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }})).json())[0];
     
     if (server == null) {
       const embed = new EmbedBuilder()
@@ -95,7 +90,7 @@ module.exports = {
       return;
     }
 
-    const hasOldPlayers = server.players.history != null && typeof server.players.history == 'object';
+    const hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
     var showingOldPlayers = false;
 
     var buttons = new ActionRowBuilder()
@@ -107,7 +102,7 @@ module.exports = {
       );
     
     var embed = createEmbed(server, index, totalServers);
-    await interaction.editReply({ content:'', embeds: [embed], components: hasOldPlayers ? [buttons] : [] });
+    await interaction.editReply({ content: '', embeds: [embed], components: hasOldPlayers ? [buttons] : [] });
 
     oldPlayersCollector.on('collect', async interaction => {
       if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
@@ -116,7 +111,7 @@ module.exports = {
       buttons.components[0].data.label = showingOldPlayers ? 'Online Players' : 'Player History';
       if (showingOldPlayers) {
         var playersString = `${server.players.online}/${server.players.max}`;
-        for (const player in server.players.history) playersString += `\n\`${player.replace(':', ' ')}\` <t:${server.players.history[player]}:${(new Date().getTime() / 1000) - server.players.history[player] > 86400 ? 'D' : 'R'}>`;
+        for (const player of server.players.sample) playersString += `\n\`${player.replace(':', ' ')}\` <t:${player.lastSeen}:${(new Date().getTime() / 1000) - player.lastSeen > 86400 ? 'D' : 'R'}>`;
         embed.data.fields[5].value = playersString;
       }
       await interaction.update({ content: '', embeds: [embed], components: [buttons] });

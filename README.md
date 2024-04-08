@@ -27,7 +27,7 @@ You can contact me via Discord: [cornbread2100](https://discord.com/users/720658
 
 Put the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers) into config.json, as well as a client id and secret from the [Twitch Developer Console](https://dev.twitch.tv/console/apps) for streamsniping.
 
-You'll need Node.js version v18 or later to run the bot. Run `node deploy-commands.js` in your terminal before running the bot to register the slash commands, otherwise they won't show up in Discord. You'll also need to install the maxmind, discord.js v14 packages and axios to run the bot with the command: `npm i maxmind discord.js axios`. Once everything is set up, run `node index.js` to start the bot. Each command will be loaded, and "\[Bot\]" will be logged when it's ready.
+You'll need Node.js version v18 or later to run the bot. Then install discord.js with `npm i discord.js` and run `node deploy-commands.js` in your terminal before to register the slash commands, otherwise they won't show up in Discord. Once everything is set up, run `node index.js` to start the bot. Each command will be loaded, and "\[Bot\]" will be logged when it's ready.
 
 > [!WARNING]
 > Don't forget to give the Discord bot the `bot` and `applications.commands` permissions in the URL generator.
@@ -40,6 +40,5 @@ You'll need Node.js version v18 or later to run the bot. Run `node deploy-comman
 | /stats | Sends some stats about the bot | None |
 | /random | Fetches a random online Minecraft server | None |
 | /ping | Fetches info from a given Minecraft server | ip (required), port (optional, defaults to 25565) |
-| /search | Searches the database for a server with specific properties | skip (integer), playercount (range), playerCap (integer), isfull (true/false), version (regex), hasimage (true/false), description (regex), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (country name), org (organization name, uses regex), cracked (true/false) |
-| /player | Searches for servers a player has played on | skip (integer), username, uuid (uuid v4) |
+| /search | Searches the database for a server with specific properties | skip (integer), playercount (range), playerCap (integer), isfull (true/false), player (player name), playerhistory (player name) version (regex), hasimage (true/false), description (regex), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (country name), org (organization name, uses regex), cracked (true/false) |
 | /streamsnipe | Searches the database for live Twitch streamers | language (language name) |
