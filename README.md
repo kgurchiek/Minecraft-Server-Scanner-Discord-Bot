@@ -14,7 +14,7 @@
 
 ## 📝 About
 
-This is the complete code for a Node.js Dicord bot. This bot doesn't do the scanning itself, it just displays the scanned servers from my database, which is actively collected by a separate scanning program. You can access it yourself at <https://api.cornbread2100.com/servers> by sending a MongoDB find query in the url arg "query" (eg. [https://api.cornbread2100.com/servers?query={"players.online":1}](https://api.cornbread2100.com/servers?query=%7B%22players.online%22%3A1%7D)).
+This is the complete code for a Node.js Discord bot. This bot doesn't do the scanning itself, it just displays the scanned servers from my database, which is actively collected by a separate scanning program. You can access it yourself at <https://api.cornbread2100.com/servers> by sending a MongoDB find query in a POST request.
 
 If you find any bugs, please report them in the [official Discord server](https://discord.gg/TSWcF2m67m).
 
