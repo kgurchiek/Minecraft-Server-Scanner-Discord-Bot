@@ -78,7 +78,7 @@ module.exports = {
     // Get a random server from the database
     const totalServers = await (await fetch(`https://api.cornbread2100.com/countServers?skip=${index}&query={"lastSeen":{"$gte":${Math.round(new Date().getTime() / 1000) - 3600}}}`)).json();
     var index = Math.floor((Math.random() * totalServers));
-    const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${index}`, { 'lastSeen': { '$gte': Math.round(new Date().getTime() / 1000) - 3600 }})).json())[0];
+    const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${index}&query={"lastSeen":{"$gte":${Math.round(new Date().getTime() / 1000) - 3600}}}`)).json())[0];
     
     if (server == null) {
       const embed = new EmbedBuilder()
