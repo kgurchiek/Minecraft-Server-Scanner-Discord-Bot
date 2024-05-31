@@ -66,14 +66,23 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('random')
 	  .setDescription('Gets a random online Minecraft server'),
-  async execute(interaction) {
+  async execute(interaction, randomizeCollector, oldPlayersCollector) {
+    if (interaction.isChatInputCommand()) await interaction.deferReply();
+    else await interaction.deferUpdate();
     const user = interaction.user;
     var lastButtonPress = new Date();
+    const randomizeID = `randomize${interaction.user.id}`;
+    if (randomizeCollector == null) {
+      const randomizeFilter = interaction => interaction.customId == randomizeID;
+      randomizeCollector = interaction.channel.createMessageComponentCollector({ filter: randomizeFilter });
+    }
     const oldPlayersID = `oldPlayers${interaction.user.id}`;
-    const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
-    const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
+    if (oldPlayersCollector == null) {
+      const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
+      oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
+    }
     // Status message
-    const interactionReplyMessage = await interaction.reply('Getting a server, please wait...');
+    const interactionReplyMessage = await interaction.editReply({ content: 'Getting a server, please wait...', embeds: [], components: [] });
     
     // Get a random server from the database
     const totalServers = await (await fetch(`https://api.cornbread2100.com/countServers?skip=${index}&query={"lastSeen":{"$gte":${Math.round(new Date().getTime() / 1000) - 3600}}}`)).json();
@@ -96,13 +105,23 @@ module.exports = {
     var buttons = new ActionRowBuilder()
       .addComponents(
         new ButtonBuilder()
+          .setCustomId(randomizeID)
+          .setLabel('↻')
+          .setStyle(ButtonStyle.Primary)
+      )
+    if (hasOldPlayers) {
+      buttons.addComponents(
+        new ButtonBuilder()
           .setCustomId(oldPlayersID)
           .setLabel('Show Old Players')
           .setStyle(ButtonStyle.Primary)
-      );
+      )
+    }
     
     var embed = createEmbed(server, index, totalServers);
-    await interaction.editReply({ content: '', embeds: [embed], components: hasOldPlayers ? [buttons] : [] });
+    await interaction.editReply({ content: '', embeds: [embed], components: [buttons] });
+
+    randomizeCollector.on('collect', async interaction => module.exports.execute(interaction, randomizeCollector, oldPlayersCollector));
 
     oldPlayersCollector.on('collect', async interaction => {
       if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
@@ -122,13 +141,20 @@ module.exports = {
     async function buttonTimeoutCheck() {
       if (timeSinceDate(lastButtonPress) >= buttonTimeout) {
         var buttons = new ActionRowBuilder()
-        .addComponents(
-          new ButtonBuilder()
-            .setCustomId(oldPlayersID)
-            .setLabel('Show Old Players')
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(true)
-          );
+          .addComponents(
+            new ButtonBuilder()
+              .setLabel('↻')
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true)
+            )
+        if (hasOldPlayers) {
+          buttons.addComponents(
+            new ButtonBuilder()
+              .setLabel(showingOldPlayers ? 'Online Players' : 'Player History')
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true)
+            )
+        }
         await interactionReplyMessage.edit({ components: [buttons] });
         
         oldPlayersCollector.stop();
