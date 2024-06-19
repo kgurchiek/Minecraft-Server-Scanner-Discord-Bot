@@ -12,7 +12,7 @@ module.exports = {
     	.addFields(
 			{ name: 'Author', value: 'Cornbread2100' + '​' },
 			{ name: 'Source Code', value: 'https://github.com/kgurchiek/Minecraft-Server-Scanner\nhttps://github.com/kgurchiek/Minecraft-Server-Rescanner/\nhttps://github.com/kgurchiek/Minecraft-Server-Scanner-Discord-Bot\nhttps://github.com/kgurchiek/Minecraft-Ping-API/' + '​' },
-			{ name: 'Sponsors', value: 'UltraKill Hosting' },
+			{ name: 'Sponsors', value: 'No current sponsorships' },
 		)
     interaction.reply({ embeds: [newEmbed], ephemeral: true });
 	}
