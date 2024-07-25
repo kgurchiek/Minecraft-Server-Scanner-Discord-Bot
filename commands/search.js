@@ -154,21 +154,19 @@ module.exports = {
         break;
     }
   },
-  async execute(interaction) {
+  async execute(interaction, buttonCallbacks) {
     const user = interaction.user;
     // Status message
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
+    async function updateMessage(content) {
+      if (interaction.channel) return await interactReplyMessage.edit(content);
+      else return await interaction.editReply(content);
+    }
 
     // Create unique IDs for each button
     const lastResultID = 'lastResult' + interaction.id;
     const nextResultID = 'nextResult' + interaction.id;
     const oldPlayersID = 'oldPlayers' + interaction.id;
-    const searchNextResultFilter = interaction => interaction.customId == nextResultID;
-    const searchLastResultFilter = interaction => interaction.customId == lastResultID;
-    const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
-    const searchNextResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchNextResultFilter });
-    const searchLastResultCollector = interaction.channel.createMessageComponentCollector({ filter: searchLastResultFilter });
-    const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
     var lastButtonPress = null;
 
     // Creates interactable buttons
@@ -225,7 +223,7 @@ module.exports = {
     
       if (totalResults > 0) {
         // Event listener for 'Next Page' button
-        searchNextResultCollector.on('collect', async interaction => {
+        buttonCallbacks[nextResultID] = async (interaction) => {
           if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
           await interaction.deferUpdate();
           lastButtonPress = new Date();
@@ -236,11 +234,11 @@ module.exports = {
           hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
-          await interaction.editReply({ embeds: [newEmbed], components: [buttons] });
-        });
+          await updateMessage({ embeds: [newEmbed], components: [buttons] });
+        }
       
         // Event listener for 'Last Page' button
-        searchLastResultCollector.on('collect', async interaction => {
+        buttonCallbacks[lastResultID] = async (interaction) => {  
           if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
           await interaction.deferUpdate();
           lastButtonPress = new Date();
@@ -251,10 +249,10 @@ module.exports = {
           hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
           updateButtons();
           newEmbed = createEmbed(server, currentEmbed, totalResults);
-          await interaction.editReply({ embeds: [newEmbed], components: [buttons] });
-        });
+          await updateMessage({ embeds: [newEmbed], components: [buttons] });
+        }
 
-        oldPlayersCollector.on('collect', async interaction => {
+        buttonCallbacks[oldPlayersID] = async (interaction) => {
           if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
           lastButtonPress = new Date();
           showingOldPlayers = !showingOldPlayers;
@@ -269,7 +267,7 @@ module.exports = {
             newEmbed.data.fields[4].value = playersString;
           }
           await interaction.update({ embeds: [newEmbed], components: [buttons] });
-        });
+        }
       }
     
       return buttons;
@@ -296,7 +294,7 @@ module.exports = {
           .setColor('#ff0000')
           .setTitle('User Error')
           .setDescription('Invalid online player range')
-        await interactReplyMessage.edit({ content: '', embeds: [newEmbed] });
+        await updateMessage({ content: '', embeds: [newEmbed] });
         return;
       }
     }
@@ -334,7 +332,7 @@ module.exports = {
     if (org != null) argumentList += `\n**org: **${org}`;
     if (cracked != null) argumentList += `\n**auth: **${cracked ? 'Cracked' : 'Premium' }`;
 
-    await interactReplyMessage.edit(argumentList);
+    await updateMessage(argumentList);
 
     const mongoFilter = {};
     if (minOnline == maxOnline) { if (minOnline != null) mongoFilter['players.online'] = minOnline; }
@@ -399,7 +397,7 @@ module.exports = {
       var buttons = createButtons(0);
       var newEmbed = createEmbed(server, currentEmbed, 0);
       newEmbed.data.title = 'Counting...';
-      await interactReplyMessage.edit({ content: '', embeds: [newEmbed], components: [buttons] });
+      await updateMessage({ content: '', embeds: [newEmbed], components: [buttons] });
       await (new Promise(resolve => {
         const waitForCount = setInterval(() => {
           if (totalResults != null) {
@@ -411,15 +409,15 @@ module.exports = {
       
       buttons = createButtons(totalResults);
       newEmbed = createEmbed(server, currentEmbed, totalResults);
-      await interactReplyMessage.edit({ embeds: [newEmbed], components: [buttons] })
+      await updateMessage({ embeds: [newEmbed], components: [buttons] })
       // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
       lastButtonPress = new Date();
       const buttonTimeoutCheck = setInterval(async () => {
         if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
           clearInterval(buttonTimeoutCheck);
-          searchNextResultCollector.stop();
-          searchLastResultCollector.stop();
-          oldPlayersCollector.stop();
+          delete buttonCallbacks[nextResultID];
+          delete buttonCallbacks[lastResultID];
+          delete buttonCallbacks[oldPlayersID];
           buttons = new ActionRowBuilder()
             .addComponents(
               new ButtonBuilder()
@@ -437,9 +435,9 @@ module.exports = {
               .setStyle(ButtonStyle.Link)
               .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
             );
-          await interactReplyMessage.edit({ components: [buttons] });
+          await updateMessage({ components: [buttons] });
         }
       }, 500);
-    } else await interactReplyMessage.edit({ content: 'No matches could be found', embeds: [], components: [] }); 
+    } else await updateMessage({ content: 'No matches could be found', embeds: [], components: [] }); 
   }
 }

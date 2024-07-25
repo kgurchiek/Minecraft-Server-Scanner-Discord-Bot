@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Partials, Collection, Events, GatewayIntentBits, EmbedBuilder, ActivityType } = require('discord.js');
 const { POST } = require('./commonFunctions.js');
+const buttonCallbacks = {};
 
 // Catch all errors
 process.on('uncaughtException', console.error);
@@ -46,7 +47,7 @@ client.on(Events.InteractionCreate, async interaction => {
     if (!command) return;
 
     try {
-      await command.execute(interaction);
+      await command.execute(interaction, buttonCallbacks);
     } catch (error) {
       console.log('[Error]:');
       console.log(error);
@@ -66,6 +67,8 @@ client.on(Events.InteractionCreate, async interaction => {
     try {
       await command.autocomplete(interaction);
     } catch (error) {}
+  } else if (interaction.isButton()) {
+    if (buttonCallbacks[interaction.customId]) buttonCallbacks[interaction.customId](interaction);
   }
 });
 
