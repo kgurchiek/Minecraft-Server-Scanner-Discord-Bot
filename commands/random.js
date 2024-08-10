@@ -66,21 +66,13 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('random')
 	  .setDescription('Gets a random online Minecraft server'),
-  async execute(interaction, randomizeCollector, oldPlayersCollector) {
+  async execute(interaction, buttonCallbacks) {
     if (interaction.isChatInputCommand()) await interaction.deferReply();
     else await interaction.deferUpdate();
     const user = interaction.user;
     var lastButtonPress = new Date();
     const randomizeID = `randomize${interaction.user.id}`;
-    if (randomizeCollector == null) {
-      const randomizeFilter = interaction => interaction.customId == randomizeID;
-      randomizeCollector = interaction.channel.createMessageComponentCollector({ filter: randomizeFilter });
-    }
     const oldPlayersID = `oldPlayers${interaction.user.id}`;
-    if (oldPlayersCollector == null) {
-      const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
-      oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
-    }
     // Status message
     const interactionReplyMessage = await interaction.editReply({ content: 'Getting a server, please wait...', embeds: [], components: [] });
     
@@ -121,9 +113,9 @@ module.exports = {
     var embed = createEmbed(server, index, totalServers);
     await interaction.editReply({ content: '', embeds: [embed], components: [buttons] });
 
-    randomizeCollector.on('collect', async interaction => module.exports.execute(interaction, randomizeCollector, oldPlayersCollector));
+    buttonCallbacks[randomizeID] = async interaction => module.exports.execute(interaction, buttonCallbacks);
 
-    oldPlayersCollector.on('collect', async interaction => {
+    buttonCallbacks[oldPlayersID] = async interaction => {
       if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
       lastButtonPress = new Date();
       showingOldPlayers = !showingOldPlayers;
@@ -134,7 +126,7 @@ module.exports = {
         embed.data.fields[5].value = playersString;
       }
       await interaction.update({ content: '', embeds: [embed], components: [buttons] });
-    });
+    };
     
     
     // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
@@ -143,6 +135,7 @@ module.exports = {
         var buttons = new ActionRowBuilder()
           .addComponents(
             new ButtonBuilder()
+              .setCustomId(randomizeID)
               .setLabel('↻')
               .setStyle(ButtonStyle.Secondary)
               .setDisabled(true)
@@ -150,6 +143,7 @@ module.exports = {
         if (hasOldPlayers) {
           buttons.addComponents(
             new ButtonBuilder()
+              .setCustomId(oldPlayersID)
               .setLabel(showingOldPlayers ? 'Online Players' : 'Player History')
               .setStyle(ButtonStyle.Secondary)
               .setDisabled(true)
@@ -162,6 +156,6 @@ module.exports = {
         setTimeout(function() { buttonTimeoutCheck() }, 500);
       }
     }
-    if (hasOldPlayers) buttonTimeoutCheck();
+    buttonTimeoutCheck();
   }
 }
