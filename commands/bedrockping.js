@@ -15,9 +15,6 @@ module.exports = {
       option.setName('port')
 	    .setDescription('The port of the server to ping')),
     async execute(interaction) {
-      const oldPlayersID = `oldPlayers${interaction.user.id}`;
-      const oldPlayersFilter = interaction => interaction.customId == oldPlayersID;
-      const oldPlayersCollector = interaction.channel.createMessageComponentCollector({ filter: oldPlayersFilter });
       // Ping status
       await interaction.reply('Pinging, please wait...');
       // Fetch IP and Port from the command
@@ -49,12 +46,6 @@ module.exports = {
             )
             .setTimestamp()
           await interaction.editReply({ content: '', embeds: [newEmbed] });
-
-          var location = await cityLookup.get(ip);
-          newEmbed.addFields({ name: 'Country: ', value: location == null ? 'Unknown' : location.country == null ? `:flag_${location.registered_country.iso_code.toLowerCase()}: ${location.registered_country.names.en}` : `:flag_${location.country.iso_code.toLowerCase()}: ${location.country.names.en}` })
-          var org = await asnLookup.get(ip);
-          newEmbed.addFields({ name: 'Organization: ', value: org == null ? 'Unknown' : org.autonomous_system_organization });
-          await interaction.editReply({ embeds: [newEmbed] });
         }
       } catch (error) {
         console.log(error);
