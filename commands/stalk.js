@@ -105,7 +105,7 @@ function getPingList() {
 
 const players = {};
 async function stalkCheck() {
-  const { client } = require('../index.js');
+  const { client } = require('../bot.js');
   const pingList = getPingList();
   for (const user in pingList) {
     for (const player of pingList[user]) {
