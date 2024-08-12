@@ -22,7 +22,7 @@ module.exports = {
       const port = interaction.options.getInteger('port') || 19132;
 
       try {
-        const text = await (await fetch(`https://ping.cornbread2100.com/bedrockping/?ip=${ip}&port=${port}`)).text();
+        const text = await (await fetch(`https://ping.cornbread2100.com/bedrockping?ip=${ip}&port=${port}`)).text();
         if (text == 'timeout') {
           var errorEmbed = new EmbedBuilder()
             .setColor('#ff0000')
