@@ -106,6 +106,14 @@ module.exports = {
     );
   },
   async execute(interaction) {
+
+    if (interaction.guild.id === "1005132317297221785" && interaction.channel.id !== "1097756128345063504") { // if it's the official MC server scanner discord server, but not the right channel (#commands)
+      var errorEmbed = new EmbedBuilder()
+        .setColor('#ff0000')
+        .addFields({ name: 'Error', value: 'Please use <#1097756128345063504> for commands.' })
+	    interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+    } else {
+    
     const user = interaction.user;
 
     // Status message
@@ -354,5 +362,6 @@ module.exports = {
         await interactReplyMessage.edit({ components: [buttons] });
       }
     }, 500);
+    }
   }
 }
