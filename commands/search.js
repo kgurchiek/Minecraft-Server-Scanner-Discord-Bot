@@ -155,7 +155,14 @@ module.exports = {
     }
   },
   async execute(interaction, buttonCallbacks) {
+    if (interaction.guild.id === "1005132317297221785" && interaction.channel.id !== "1097756128345063504") { // if it's the official MC server scanner discord server, but not the right channel (#commands)
+      var errorEmbed = new EmbedBuilder()
+        .setColor('#ff0000')
+        .addFields({ name: 'Error', value: 'Please use <#1097756128345063504> for commands.' })
+	    interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+    } else {
     const user = interaction.user;
+    
     // Status message
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
     async function updateMessage(content) {
@@ -438,6 +445,7 @@ module.exports = {
           await updateMessage({ components: [buttons] });
         }
       }, 500);
-    } else await updateMessage({ content: 'No matches could be found', embeds: [], components: [] }); 
+    } else await updateMessage({ content: 'No matches could be found', embeds: [], components: [] });
+    }
   }
 }
