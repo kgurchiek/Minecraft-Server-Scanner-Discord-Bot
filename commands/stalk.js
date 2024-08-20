@@ -70,28 +70,36 @@ module.exports = {
     // Status message
     await interaction.deferReply({ ephemeral: true });
 
-    const pingList = getPingList();
-    if (pingList[interaction.user.id] == null) pingList[interaction.user.id] = [];
-    var newEmbed;
-    if (interaction.options.getBoolean('stalk') == null ? true : interaction.options.getBoolean('stalk')) {
-      pingList[interaction.user.id].push(interaction.options.getString('username'));
-
-      newEmbed = new EmbedBuilder()
-        .setColor('#02a337')
-        .setTitle(`Stalking ${interaction.options.getString('username')}`)
-        .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-        .setDescription(`You will be notified when ${interaction.options.getString('username')} is playing on a server in the database.` )
+    if (interaction.guild.id === "1005132317297221785" && interaction.channel.id !== "1097756128345063504") { // if it's the official MC server scanner discord server, but not the right channel (#commands)
+      var errorEmbed = new EmbedBuilder()
+        .setColor('#ff0000')
+        .addFields({ name: 'Error', value: 'Please use <#1097756128345063504> for commands.' })
+	    interaction.reply({ embeds: [errorEmbed], ephemeral: true });
     } else {
-      pingList[interaction.user.id] = pingList[interaction.user.id].filter(username => username != interaction.options.getString('username'));
 
-      newEmbed = new EmbedBuilder()
-        .setColor('#02a337')
-        .setTitle(`Stopped Stalking`)
-        .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-        .setDescription(`You've stopped stalking ${interaction.options.getString('username')}.`)
+      const pingList = getPingList();
+      if (pingList[interaction.user.id] == null) pingList[interaction.user.id] = [];
+      var newEmbed;
+      if (interaction.options.getBoolean('stalk') == null ? true : interaction.options.getBoolean('stalk')) {
+       pingList[interaction.user.id].push(interaction.options.getString('username'));
+
+        newEmbed = new EmbedBuilder()
+          .setColor('#02a337')
+          .setTitle(`Stalking ${interaction.options.getString('username')}`)
+          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+          .setDescription(`You will be notified when ${interaction.options.getString('username')} is playing on a server in the database.` )
+      } else {
+        pingList[interaction.user.id] = pingList[interaction.user.id].filter(username => username != interaction.options.getString('username'));
+
+        newEmbed = new EmbedBuilder()
+          .setColor('#02a337')
+          .setTitle(`Stopped Stalking`)
+          .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+          .setDescription(`You've stopped stalking ${interaction.options.getString('username')}.`)
+      }
+      fs.writeFileSync('./data/stalk.json', JSON.stringify(pingList));
+      await interaction.editReply({ embeds: [newEmbed] });
     }
-    fs.writeFileSync('./data/stalk.json', JSON.stringify(pingList));
-    await interaction.editReply({ embeds: [newEmbed] });
   }
 }
 
