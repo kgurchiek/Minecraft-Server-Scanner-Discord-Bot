@@ -33,7 +33,7 @@ module.exports = {
 					{ name: 'cracked (true/false)', value: 'Whether or not the server is cracked (offline mode)\n' + '​', inline: true },
 				{ name: '/streamsnipe', value: 'Gets servers that live Twitch streamers are playing on' + '​', inline: true },
 					{ name: 'language (language name)', value: 'The language of the Twitch stream (you must use the autocomplete for it to work)\n' + '​', inline: true }
-		);
+		)
       interaction.reply({ embeds: [exampleEmbed], ephemeral: true });
    }
 }
