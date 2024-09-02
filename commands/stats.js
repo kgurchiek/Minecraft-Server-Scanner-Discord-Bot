@@ -19,7 +19,7 @@ module.exports = {
       .addFields(
         { name: 'Author:', value: '<@720658048611516559> (@cornbread2100)' },
         { name: 'Total Servers:', value: String(totalServers), inline: true },
-        { name: 'Bot Stats:', value: `In ${client.guilds.cache.size} Discord servers. Last restart: <t:${Math.floor((new Date().getTime() - client.uptime) / 1000)}:R>`}
+        { name: 'Bot Stats:', value: `In ${(await client.shard.fetchClientValues('guilds.cache.size')).reduce((a, b) => acc + guildCount, 0)} Discord servers. Last restart: <t:${Math.floor((new Date().getTime() - client.uptime) / 1000)}:R>`}
       )
     await interaction.editReply({ content: '', embeds: [newEmbed], ephemeral:true });
   } 

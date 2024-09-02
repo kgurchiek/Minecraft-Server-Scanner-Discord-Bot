@@ -29,7 +29,7 @@ for (const file of commandFiles) {
 client.once(Events.ClientReady, async () => {
   // Logs how many servers the bot is logged in to
   console.log(`[Bot]: ${client.user.tag}`)
-  console.log("[Servers]: " + client.guilds.cache.size);
+  console.log("[Servers]: " + (await client.shard.fetchClientValues('guilds.cache.size')).reduce((a, b) => acc + guildCount, 0));
   var totalServers = await (await fetch('https://api.cornbread2100.com/countServers')).json();
   module.exports.totalServers = totalServers;
   client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
