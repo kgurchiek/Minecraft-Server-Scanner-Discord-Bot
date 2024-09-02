@@ -150,8 +150,6 @@ module.exports = {
             )
         }
         await interactionReplyMessage.edit({ components: [buttons] });
-        
-        oldPlayersCollector.stop();
       } else {
         setTimeout(function() { buttonTimeoutCheck() }, 500);
       }
