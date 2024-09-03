@@ -61,6 +61,7 @@ function createEmbed(server, currentEmbed, totalResults) {
   else newEmbed.addFields({ name: 'Organization: ', value: server.org });
 
   newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
+  newEmbed.addFields({ name: 'Whitelist', value: server.whitelist == true ? 'Enabled' : server.whitelist == false ? 'Disabled' : 'Unknown' })
   return newEmbed;
 }
 
@@ -139,7 +140,11 @@ module.exports = {
     .addBooleanOption(option =>
       option
         .setName('cracked')
-        .setDescription('Whether or not the server is cracked (offline mode)')),
+        .setDescription('Whether or not the server is cracked (offline mode)'))
+    .addBooleanOption(option =>
+      option
+        .setName('whitelist')
+        .setDescription('Whether or not the server has a whitelist')),
   async autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused(true);
     switch (focusedValue.name) {
@@ -313,6 +318,7 @@ module.exports = {
     var country = interaction.options.getString('country');
     var org = interaction.options.getString('org');
     var cracked = interaction.options.getBoolean('cracked');
+    var whitelist = interaction.options.getBoolean('whitelist');
 
     var argumentList = '**Searching with these arguments:**';
     if (playerCount != null) argumentList += `\n**playercount:** ${playerCount}`;
@@ -331,6 +337,7 @@ module.exports = {
     if (country != null) argumentList += `\n**country: **:flag_${country.toLowerCase()}: ${country}`;
     if (org != null) argumentList += `\n**org: **${org}`;
     if (cracked != null) argumentList += `\n**auth: **${cracked ? 'Cracked' : 'Premium' }`;
+    if (whitelist != null) argumentList += `\n**Whitelist ${whitelist ? 'Enabled' : 'Disabled'}**`;
 
     await updateMessage(argumentList);
 
@@ -387,6 +394,7 @@ module.exports = {
     if (country != null) mongoFilter['geo.country'] = country;
     if (org != null) mongoFilter['org'] = { '$regex': org, '$options': 'i' };
     if (cracked != null) mongoFilter['cracked'] = cracked;
+    if (whitelist != null) mongoFilter['whitelist'] = whitelist;
 
     server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json())[0];
     if (server != null) {
