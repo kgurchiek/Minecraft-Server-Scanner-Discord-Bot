@@ -6,11 +6,15 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('stats')
     .setDescription('Sends helpful info about the bot'),
-  async execute(interaction, buttonCallbacks, client, totalServers) {
-
+  async execute(interaction, buttonCallbacks, client, totalServers, setTotalServers) {
     // Status message
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
- 
+
+    if (!totalServers) {
+      totalServers = await (await fetch('https://api.cornbread2100.com/count')).json();
+      setTotalServers(totalServers);
+    }
+
     const newEmbed = new EmbedBuilder()
       .setColor("#02a337")
       .setTitle('Statistics')
