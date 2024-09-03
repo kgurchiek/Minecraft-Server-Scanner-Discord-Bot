@@ -6,8 +6,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('stats')
     .setDescription('Sends helpful info about the bot'),
-  async execute(interaction) {
-    const { client, totalServers } = require('../bot.js');
+  async execute(interaction, buttonCallbacks, client, totalServers) {
 
     // Status message
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });

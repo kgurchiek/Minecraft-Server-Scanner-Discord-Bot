@@ -11,7 +11,6 @@ process.on('uncaughtException', console.error);
 // Initialize Discord.js (Along with the commands)
 const client = new Client({ partials: [Partials.Channel], intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
 client.commands = new Collection();
-module.exports.client = client;
 
 // Reads the files in the commands directory
 const commandsPath = path.join(__dirname, 'commands');
@@ -25,17 +24,16 @@ for (const file of commandFiles) {
   console.log("[Loaded]: " + file);
 }
 
-// When the client is ready, log a message to the console (NOT in the Discord server)
+// When the client is ready, log a message to the console
+let totalServers;
 client.once(Events.ClientReady, async () => {
   // Logs how many servers the bot is logged in to
   console.log(`[Bot]: ${client.user.tag}`)
   console.log("[Servers]: " + (await client.shard.fetchClientValues('guilds.cache.size')).reduce((a, b) => a + b, 0));
-  var totalServers = await (await fetch('https://api.cornbread2100.com/countServers')).json();
-  module.exports.totalServers = totalServers;
+  totalServers = await (await fetch('https://api.cornbread2100.com/countServers')).json();
   client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
   setInterval(async () => {
     totalServers = await (await fetch('https://api.cornbread2100.com/countServers')).json();
-    module.exports.totalServers = totalServers;
     client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
   }, 60000)
 });
@@ -47,7 +45,7 @@ client.on(Events.InteractionCreate, async interaction => {
     if (!command) return;
 
     try {
-      await command.execute(interaction, buttonCallbacks);
+      await command.execute(interaction, buttonCallbacks, client, totalServers);
     } catch (error) {
       console.log('[Error]:');
       console.log(error);
