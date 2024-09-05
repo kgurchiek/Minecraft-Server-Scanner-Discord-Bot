@@ -21,7 +21,7 @@ module.exports = {
       .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
       .addFields(
         { name: 'Author:', value: '<@720658048611516559> (@cornbread2100)' },
-        { name: 'Total Servers:', value: String(totalServers), inline: true },
+        { name: 'Total Servers:', value: totalServers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), inline: true },
         { name: 'Bot Stats:', value: `In ${(await client.shard.fetchClientValues('guilds.cache.size')).reduce((a, b) => a + b, 0)} Discord servers. Last restart: <t:${Math.floor((new Date().getTime() - client.uptime) / 1000)}:R>`}
       )
     await interaction.editReply({ content: '', embeds: [newEmbed], ephemeral:true });

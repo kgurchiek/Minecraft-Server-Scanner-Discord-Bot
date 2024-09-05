@@ -31,10 +31,10 @@ client.once(Events.ClientReady, async () => {
   console.log(`[Bot]: ${client.user.tag}`)
   console.log("[Servers]: " + (await client.shard.fetchClientValues('guilds.cache.size')).reduce((a, b) => a + b, 0));
   totalServers = await (await fetch('https://api.cornbread2100.com/count')).json();
-  client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
+  client.user.setPresence({ activities: [{ name: `${totalServers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} MC Servers`, type: ActivityType.Watching }]});
   setInterval(async () => {
     totalServers = await (await fetch('https://api.cornbread2100.com/count')).json();
-    client.user.setPresence({ activities: [{ name: `${totalServers} MC Servers`, type: ActivityType.Watching }]});
+    client.user.setPresence({ activities: [{ name: `${totalServers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} MC Servers`, type: ActivityType.Watching }]});
   }, 60000)
 });
 
