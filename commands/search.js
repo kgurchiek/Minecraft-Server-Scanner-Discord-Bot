@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 const { getDescription, getVersion } = require('../commonFunctions.js');
 const countryCodes = require('../countryCodes.json');
 const orgs = require('../orgs.json');
-const buttonTimeout = 60; // In seconds
+const buttonTimeout = 300; // In seconds
 
 // Times out the buttons; fetches how long it has been since last input date
 function timeSinceDate(date1) {
