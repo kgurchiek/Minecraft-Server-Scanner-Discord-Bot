@@ -40,5 +40,5 @@ You'll need Node.js version v18 or later to run the bot. Then install discord.js
 | /stats | Sends some stats about the bot | None |
 | /random | Fetches a random online Minecraft server | None |
 | /ping | Fetches info from a given Minecraft server | ip (required), port (optional, defaults to 25565) |
-| /search | Searches the database for a server with specific properties | skip (integer), playercount (range), playerCap (integer), isfull (true/false), player (player name), playerhistory (player name) version (regex), hasimage (true/false), description (regex), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (country name), org (organization name, uses regex), cracked (true/false) |
+| /search | Searches the database for a server with specific properties | minimal (true/false), skip (integer), playercount (range), playerCap (integer), isfull (true/false), player (player name), playerhistory (player name) version (regex), hasimage (true/false), description (regex), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (country name), org (organization name, uses regex), cracked (true/false), whitelist (true/false) |
 | /streamsnipe | Searches the database for live Twitch streamers | language (language name) |

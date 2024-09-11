@@ -1,6 +1,6 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion } = require('../commonFunctions.js')
+const { getDescription, getVersion, thousandsSeparators } = require('../commonFunctions.js')
 const buttonTimeout = 60;
 
 function timeSinceDate(date1) {
@@ -19,9 +19,9 @@ function createEmbed(server, currentEmbed, totalResults) {
     .setColor("#02a337")
     .setTitle('Search Results')
     .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-    .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
+    .setThumbnail(`https://ping.cornbread2100.com/favicon?ip=${server.ip}&port=${server.port}`)
     .addFields(
-      { name: 'Result ' + (currentEmbed + 1) + '/' + totalResults, value: '​' },
+      { name: 'Result ' + thousandsSeparators(currentEmbed + 1) + '/' + thousandsSeparators(totalResults), value: '​' },
       { name: 'IP', value: server.ip },
       { name: 'Port', value: (server.port + '') },
       { name: 'Version', value: `${getVersion(server.version)} (${server.version.protocol})` },

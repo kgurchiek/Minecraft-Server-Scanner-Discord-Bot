@@ -8,7 +8,7 @@ module.exports = {
     const exampleEmbed = new EmbedBuilder()
       .setColor("#02a337")
     	.setTitle('Help Menu')
-    	.setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'/*, url: 'https://discord.js.org' */})
+    	.setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
     	.addFields(
 				{ name: '/stats', value: 'Sends stats about the bot\n' + '​' },
 				{ name: '/random', value: 'Gets a random online Minecraft server\n' + '​' },
@@ -16,6 +16,8 @@ module.exports = {
 					{ name: 'ip', value: 'The ip address of the server', inline: true },
 			    { name: 'port', value: 'The port of the server (defaults to 25565)\n' + '​', inline: true },
 		    { name: '/search', value: 'searches for a server with specific properties'},
+					{ name: 'minimal', value: 'Only shows ip and port in preview (recommended for mobile users)', inline: true },
+					{ name: 'skip', value: 'Skips to a page of results', inline: true },
 					{ name: 'playercount (range)', value: 'A range of how many players on on the server (e.g. 4, >10, <=5, 11-20)', inline: true },
 					{ name: 'playercap (integer)', value: 'The maximum player capacity of the server', inline: true },
 					{ name: 'isfull (true/false)', value: 'Whether or not the server is full', inline: true },
@@ -30,7 +32,8 @@ module.exports = {
 					{ name: 'port (integer)', value: 'The port the server is hosted on', inline: true },
 					{ name: 'country (country name)', value: 'The country the server is hosted in', inline: true },
 					{ name: 'org (organization name, uses regex)', value: 'The organization the ip belongs to', inline: true },
-					{ name: 'cracked (true/false)', value: 'Whether or not the server is cracked (offline mode)\n' + '​', inline: true },
+					{ name: 'cracked (true/false)', value: 'Whether or not the server is cracked (offline mode)\n', inline: true },
+					{ name: 'whitelist (true/false)', value: 'Whether or not the server has a whitelist\n' + '​', inline: true },
 				{ name: '/streamsnipe', value: 'Gets servers that live Twitch streamers are playing on' + '​', inline: true },
 					{ name: 'language (language name)', value: 'The language of the Twitch stream (you must use the autocomplete for it to work)\n' + '​', inline: true }
 		)

@@ -1,6 +1,6 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion } = require('../commonFunctions.js');
+const { getDescription, getVersion, thousandsSeparators } = require('../commonFunctions.js');
 const countryCodes = require('../countryCodes.json');
 const orgs = require('../orgs.json');
 const buttonTimeout = 300; // In seconds
@@ -17,15 +17,15 @@ function timeSinceDate(date1) {
   return date2Total - date1Total;
 }
 
-function createEmbed(server, currentEmbed, totalResults) {
+const shortenString = (string, length) => (string.length > length ? `${string.slice(0, length - 3)}...` : string);
+
+function createEmbed(server) {
   const newEmbed = new EmbedBuilder()
     .setColor('#02a337')
-    .setTitle(`Result ${currentEmbed + 1}/${totalResults}`)
+    .setTitle(`${server.ip}${server.port == 25565 ? '' : `:${server.port}`}`)
     .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-    .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${server.ip}&port=${server.port}`)
+    .setThumbnail(`https://ping.cornbread2100.com/favicon?ip=${server.ip}&port=${server.port}`)
     .addFields(
-      { name: 'IP', value: server.ip },
-      { name: 'Port', value: (server.port + '') },
       { name: 'Version', value: `${getVersion(server.version)} (${server.version.protocol})` },
       { name: 'Description', value: getDescription(server.description) }
     )
@@ -65,15 +65,42 @@ function createEmbed(server, currentEmbed, totalResults) {
   return newEmbed;
 }
 
+function createList(servers, currentEmbed, totalResults, minimal) {
+  const embed = new EmbedBuilder()
+    .setColor('#02a337')
+    .setTitle(`Results ${thousandsSeparators(currentEmbed + 1)}-${thousandsSeparators(currentEmbed + servers.length)}/${thousandsSeparators(totalResults)}`)
+    .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
+    .setTimestamp();
+  
+  let description = '';
+  let longest = {
+    server: `${servers[0].ip}${servers[0].port == 25565 ? '' : `:${servers[0].port}`}`.length,
+    version: `${shortenString(String(servers[0].version?.name), 19)} (${servers[0].version?.protocol})`.length,
+  }
+  for (let i = 1; i < servers.length; i++) {
+    if (`${servers[i].ip}${servers[i].port == 25565 ? '' : `:${servers[i].port}`}`.length > longest.server) longest.server = `${servers[i].ip}${servers[i].port == 25565 ? '' : `:${servers[i].port}`}`.length;
+    if (`${shortenString(String(servers[i].version?.name), 19)} (${servers[i].version?.protocol})`.length > longest.version) longest.version = `${shortenString(String(servers[i].version?.name), 19)} (${servers[i].version?.protocol})`.length;
+  }
+  
+  for (let i = 0; i < servers.length; i++) description += `${i == 0 ? '' : '\n'}${i + 1}. ${minimal ? '' : (servers[i].geo?.country == null ? '❔ ' : `:flag_${servers[i].geo.country.toLowerCase()}: `)}\`${servers[i].ip}${servers[i].port == 25565 ? '' : `:${servers[i].port}`}${' '.repeat(longest.server - `${servers[i].ip}${servers[i].port == 25565 ? '' : `:${servers[i].port}`}`.length)}\`${minimal ? '' : ` \`${shortenString(String(servers[i].version?.name), 19)} (${servers[i].version?.protocol})${' '.repeat(longest.version - `${shortenString(String(servers[i].version?.name), 19)} (${servers[i].version?.protocol})`.length)}\` <t:${servers[i].lastSeen}:R>`}`;
+  
+  embed.setDescription(description);
+  return embed;
+}
+
 // Exports an object with the parameters for the target server
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('search')
     .setDescription('Searches the current database for a server with specific properties')
+    .addBooleanOption(option =>
+      option
+        .setName('minimal')
+        .setDescription('Only shows ip and port in preview (recommended for mobile users)'))
     .addIntegerOption(option =>
       option
         .setName('skip')
-        .setDescription('skips to a page of results'))
+        .setDescription('Skips to a page of results'))
     .addStringOption(option =>
       option
         .setName('playercount')
@@ -163,119 +190,116 @@ module.exports = {
     const user = interaction.user;
     // Status message
     const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
-    async function updateMessage(content) {
-      if (interaction.channel) return await interactReplyMessage.edit(content);
-      else return await interaction.editReply(content);
-    }
 
     // Create unique IDs for each button
-    const lastResultID = 'lastResult' + interaction.id;
-    const nextResultID = 'nextResult' + interaction.id;
-    const oldPlayersID = 'oldPlayers' + interaction.id;
+    const lastResultID = `lastResult${interaction.id}`;
+    const nextResultID = `nextResult${interaction.id}`;
+    const oldPlayersID = `oldPlayers${interaction.id}`;
+    const serverInfoID = `serverInfo${interaction.id}`;
     var lastButtonPress = null;
 
     // Creates interactable buttons
     var currentEmbed = 0;
-    var hasOldPlayers = false;
     var showingOldPlayers = false;
-    var server;
-    function createButtons(totalResults) {
-      var buttons;
+    var servers;
+    function createListButtons(totalResults) {
+      let buttons;
+      let infoButtons;
+      let infoButtons2;
       
       function updateButtons() {
-        if (totalResults > 1) {
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('◀')
-                .setStyle(ButtonStyle.Primary),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('▶')
-                .setStyle(ButtonStyle.Primary))
-        } else {
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('◀')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('▶')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true))
-        }
-        if (hasOldPlayers) {
+        buttons = new ActionRowBuilder();
+        if (totalResults > 10) {
           buttons.addComponents(
             new ButtonBuilder()
-            .setCustomId(oldPlayersID)
-            .setLabel(showingOldPlayers ? 'Online Players' : 'Player History')
-            .setStyle(ButtonStyle.Primary))
+              .setCustomId(lastResultID)
+              .setLabel('◀')
+              .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+              .setCustomId(nextResultID)
+              .setLabel('▶')
+              .setStyle(ButtonStyle.Success))
+        } else {
+          buttons.addComponents(
+            new ButtonBuilder()
+              .setCustomId(lastResultID)
+              .setLabel('◀')
+              .setStyle(ButtonStyle.Success)
+              .setDisabled(true),
+            new ButtonBuilder()
+              .setCustomId(nextResultID)
+              .setLabel('▶')
+              .setStyle(ButtonStyle.Success)
+              .setDisabled(true))
         }
-        if (`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`.length <= 512) {
+        if (`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`.length <= 512) {
           buttons.addComponents(
             new ButtonBuilder()
             .setLabel('API')
             .setStyle(ButtonStyle.Link)
-            .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
+            .setURL(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
           )
+        }
+
+        for (let i = 0; i < 10; i++) if (buttonCallbacks[`serverInfoID-${i}`]) delete buttonCallbacks[`serverInfoID-${i}`];
+        infoButtons = new ActionRowBuilder();
+        for (let i = 0; i < (totalResults - currentEmbed < 5 ? totalResults - currentEmbed : 5); i++) {
+          infoButtons.addComponents(
+            new ButtonBuilder()
+              .setCustomId(`serverInfoID-${i}`)
+              .setLabel(String(i + 1))
+              .setStyle(ButtonStyle.Primary)
+              .setDisabled(showingOldPlayers)
+          )
+          buttonCallbacks[`serverInfoID-${i}`] = async (interaction) => {
+            await interaction.reply({ embeds: [createEmbed(servers[i])] });
+          }
+        }
+        infoButtons2 = new ActionRowBuilder();
+        for (let i = 5; i < (totalResults - currentEmbed < 10 ? totalResults - currentEmbed : 10); i++) {
+          infoButtons2.addComponents(
+            new ButtonBuilder()
+              .setCustomId(`serverInfoID-${i}`)
+              .setLabel(String(i + 1))
+              .setStyle(ButtonStyle.Primary)
+              .setDisabled(showingOldPlayers)
+          )
+          buttonCallbacks[`serverInfoID-${i}`] = async (interaction) => {
+            await interaction.reply({ embeds: [createEmbed(servers[i])] });
+          }
         }
       }
       updateButtons();
     
-      if (totalResults > 0) {
-        // Event listener for 'Next Page' button
-        buttonCallbacks[nextResultID] = async (interaction) => {
-          if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
-          await interaction.deferUpdate();
-          lastButtonPress = new Date();
-          showingOldPlayers = false;
-          currentEmbed++;
-          if (currentEmbed == totalResults) currentEmbed = 0;
-          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json())[0];
-          hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
-          updateButtons();
-          newEmbed = createEmbed(server, currentEmbed, totalResults);
-          await updateMessage({ embeds: [newEmbed], components: [buttons] });
-        }
-      
+      if (totalResults > 10) {
         // Event listener for 'Last Page' button
         buttonCallbacks[lastResultID] = async (interaction) => {  
           if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
           await interaction.deferUpdate();
           lastButtonPress = new Date();
-          showingOldPlayers = false;
-          currentEmbed--;
-          if (currentEmbed == -1) currentEmbed = totalResults - 1;
-          server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json())[0];
-          hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
+          currentEmbed -= 10;
+          if (currentEmbed < 0) currentEmbed = totalResults < 10 ? 0 : totalResults - 10;
+          servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
           updateButtons();
-          newEmbed = createEmbed(server, currentEmbed, totalResults);
-          await updateMessage({ embeds: [newEmbed], components: [buttons] });
+          newEmbed = createList(servers, currentEmbed, totalResults, minimal);
+          await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2] });
         }
 
-        buttonCallbacks[oldPlayersID] = async (interaction) => {
+        // Event listener for 'Next Page' button
+        buttonCallbacks[nextResultID] = async (interaction) => {
           if (interaction.user.id != user.id) return interaction.reply({ content: 'That\'s another user\'s command, use /search to create your own', ephemeral: true });
+          await interaction.deferUpdate();
           lastButtonPress = new Date();
-          showingOldPlayers = !showingOldPlayers;
+          currentEmbed += 10;
+          if (currentEmbed >= totalResults) currentEmbed = 0;
+          servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
           updateButtons();
-          newEmbed = createEmbed(server, currentEmbed, totalResults);
-          if (showingOldPlayers) {
-            var playersString = `${server.players.online}/${server.players.max}`;
-            let i = 0;
-            server.players.sample.sort((a, b) => b.lastSeen - a.lastSeen);
-            for (; i < server.players.sample.length && (playersString + `\n\`${server.players.sample[i].name}\` <t:${server.players.sample[i].lastSeen}:${(new Date().getTime() / 1000) - server.players.sample[i].lastSeen > 86400 ? 'D' : 'R'}>`).length <= 1020; i++) playersString += `\n\`${server.players.sample[i].name}\` <t:${server.players.sample[i].lastSeen}:${(new Date().getTime() / 1000) - server.players.sample[i].lastSeen > 86400 ? 'D' : 'R'}>`;
-            if (i < server.players.sample.length) playersString += '\n...';
-            newEmbed.data.fields[4].value = playersString;
-          }
-          await interaction.update({ embeds: [newEmbed], components: [buttons] });
+          newEmbed = createList(servers, currentEmbed, totalResults, minimal);
+          await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2] });
         }
       }
     
-      return buttons;
+      return [buttons, infoButtons, infoButtons2];
     }
     
     // Get arguments
@@ -299,10 +323,11 @@ module.exports = {
           .setColor('#ff0000')
           .setTitle('User Error')
           .setDescription('Invalid online player range')
-        await updateMessage({ content: '', embeds: [newEmbed] });
+        await interaction.editReply({ content: '', embeds: [newEmbed] });
         return;
       }
     }
+    var minimal = interaction.options.getBoolean('minimal');
     var playerCap = interaction.options.getInteger('playercap');
     var isFull = interaction.options.getBoolean('isfull');
     var player = interaction.options.getString('player');
@@ -339,7 +364,7 @@ module.exports = {
     if (cracked != null) argumentList += `\n**auth: **${cracked ? 'Cracked' : 'Premium' }`;
     if (whitelist != null) argumentList += `\n**Whitelist ${whitelist ? 'Enabled' : 'Disabled'}**`;
 
-    await updateMessage(argumentList);
+    await interaction.editReply(argumentList);
 
     const mongoFilter = {};
     if (minOnline == maxOnline) { if (minOnline != null) mongoFilter['players.online'] = minOnline; }
@@ -396,16 +421,15 @@ module.exports = {
     if (cracked != null) mongoFilter['cracked'] = cracked;
     if (whitelist != null) mongoFilter['whitelist'] = whitelist;
 
-    server = (await (await fetch(`https://api.cornbread2100.com/servers?skip=${currentEmbed}&limit=1&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json())[0];
-    if (server != null) {
+    servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
+    if (servers.length > 0) {
       var totalResults;
-      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/countServers?query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json()))).then(response => totalResults = response)
+      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/count?query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json()))).then(response => totalResults = response)
 
-      hasOldPlayers = server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0;
-      var buttons = createButtons(0);
-      var newEmbed = createEmbed(server, currentEmbed, 0);
+      var components = createListButtons(servers.length);
+      var newEmbed = createList(servers, currentEmbed, 0, minimal);
       newEmbed.data.title = 'Counting...';
-      await updateMessage({ content: '', embeds: [newEmbed], components: [buttons] });
+      await interaction.editReply({ content: '', embeds: [newEmbed], components });
       await (new Promise(resolve => {
         const waitForCount = setInterval(() => {
           if (totalResults != null) {
@@ -415,9 +439,9 @@ module.exports = {
         }, 100)
       }));
       
-      buttons = createButtons(totalResults);
-      newEmbed = createEmbed(server, currentEmbed, totalResults);
-      await updateMessage({ embeds: [newEmbed], components: [buttons] })
+      components = createListButtons(totalResults);
+      newEmbed = createList(servers, currentEmbed, totalResults, minimal);
+      await interaction.editReply({ embeds: [newEmbed], components })
       // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
       lastButtonPress = new Date();
       const buttonTimeoutCheck = setInterval(async () => {
@@ -441,11 +465,11 @@ module.exports = {
               new ButtonBuilder()
               .setLabel('API')
               .setStyle(ButtonStyle.Link)
-              .setURL(`https://api.cornbread2100.com/servers?limit=1&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
+              .setURL(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
             );
-          await updateMessage({ components: [buttons] });
+          await interaction.editReply({ components: [buttons] });
         }
       }, 500);
-    } else await updateMessage({ content: 'No matches could be found', embeds: [], components: [] }); 
+    } else await interaction.editReply({ content: 'No matches could be found', embeds: [], components: [] }); 
   }
 }
