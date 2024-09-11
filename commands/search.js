@@ -282,7 +282,7 @@ module.exports = {
           servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
-          await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2] });
+          await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a => a.components.length > 1) });
         }
 
         // Event listener for 'Next Page' button
@@ -295,11 +295,11 @@ module.exports = {
           servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
-          await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2] });
+          await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a => a.components.length > 1) });
         }
       }
     
-      return [buttons, infoButtons, infoButtons2];
+      return [buttons, infoButtons, infoButtons2].filter(a => a.components.length > 1);
     }
     
     // Get arguments
