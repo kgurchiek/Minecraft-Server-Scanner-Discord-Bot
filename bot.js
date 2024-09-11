@@ -64,6 +64,10 @@ client.on(Events.InteractionCreate, async interaction => {
     } catch (error) {}
   } else if (interaction.isButton()) {
     if (buttonCallbacks[interaction.customId]) buttonCallbacks[interaction.customId](interaction);
+    else {
+      const command = client.commands.get(interaction.customId.split('-')[0]);
+      if (command?.buttonHandler) command.buttonHandler(interaction);
+    }
   }
 });
 
