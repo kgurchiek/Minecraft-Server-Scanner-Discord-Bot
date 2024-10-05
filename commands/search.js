@@ -194,19 +194,26 @@ module.exports = {
     }
   },
   async buttonHandler(interaction) {
-    await interaction.deferUpdate();
     const [command, id, content] = interaction.customId.split('-');
     switch (id) {
-      case 'history': {
+      case 'serverInfoID': {
         const [ip, port] = content.split(':');
-        const server = await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query={"ip":"${ip}","port":${port}}`)).json();
-        await interaction.editReply({ embeds: [createEmbed(server[0], true)], components: [createButtons(server[0], true)] });
+        const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query={"ip":"${ip}","port":${port}}`)).json())[0];
+        await interaction.reply({ embeds: [createEmbed(server)], components: [createButtons(server)] });
+        break;
+      }
+      case 'history': {
+        await interaction.deferUpdate();
+        const [ip, port] = content.split(':');
+        const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query={"ip":"${ip}","port":${port}}`)).json())[0];
+        await interaction.editReply({ embeds: [createEmbed(server, true)], components: [createButtons(server, true)] });
         break;
       }
       case 'online' : {
+        await interaction.deferUpdate();
         const [ip, port] = content.split(':');
-        const server = await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query={"ip":"${ip}","port":${port}}`)).json();
-        await interaction.editReply({ embeds: [createEmbed(server[0], false)], components: [createButtons(server[0], false)] });
+        const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query={"ip":"${ip}","port":${port}}`)).json())[0];
+        await interaction.editReply({ embeds: [createEmbed(server, false)], components: [createButtons(server, false)] });
         break;
       }
     }
@@ -264,30 +271,23 @@ module.exports = {
           )
         }
 
-        for (let i = 0; i < 10; i++) if (buttonCallbacks[`serverInfoID-${i}`]) delete buttonCallbacks[`serverInfoID-${i}`];
         infoButtons = new ActionRowBuilder();
         for (let i = 0; i < (totalResults - currentEmbed < 5 ? totalResults - currentEmbed : 5); i++) {
           infoButtons.addComponents(
             new ButtonBuilder()
-              .setCustomId(`serverInfoID-${i}`)
+              .setCustomId(`search-serverInfoID-${servers[i].ip}:${servers[i].port}`)
               .setLabel(String(i + 1))
               .setStyle(ButtonStyle.Primary)
           )
-          buttonCallbacks[`serverInfoID-${i}`] = async (interaction) => {
-            await interaction.reply({ embeds: [createEmbed(servers[i])], components: [createButtons(servers[i])] });
-          }
         }
         infoButtons2 = new ActionRowBuilder();
         for (let i = 5; i < (totalResults - currentEmbed < 10 ? totalResults - currentEmbed : 10); i++) {
           infoButtons2.addComponents(
             new ButtonBuilder()
-              .setCustomId(`serverInfoID-${i}`)
+              .setCustomId(`search-serverInfoID-${servers[i].ip}:${servers[i].port}`)
               .setLabel(String(i + 1))
               .setStyle(ButtonStyle.Primary)
           )
-          buttonCallbacks[`serverInfoID-${i}`] = async (interaction) => {
-            await interaction.reply({ embeds: [createEmbed(servers[i])], components: [createButtons(servers[i])] });
-          }
         }
       }
       updateButtons();
@@ -466,29 +466,13 @@ module.exports = {
       // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
       lastButtonPress = new Date();
       const buttonTimeoutCheck = setInterval(async () => {
-        if (lastButtonPress != null && timeSinceDate(lastButtonPress) >= buttonTimeout) {
+        if (timeSinceDate(lastButtonPress) >= buttonTimeout) {
           clearInterval(buttonTimeoutCheck);
           delete buttonCallbacks[nextResultID];
           delete buttonCallbacks[lastResultID];
-          for (let i = 0; i < 10; i++) if (buttonCallbacks[`serverInfoID-${i}`]) delete buttonCallbacks[`serverInfoID-${i}`];
-          buttons = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId(lastResultID)
-                .setLabel('◀')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setCustomId(nextResultID)
-                .setLabel('▶')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(true),
-              new ButtonBuilder()
-              .setLabel('API')
-              .setStyle(ButtonStyle.Link)
-              .setURL(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
-            );
-          await interaction.editReply({ components: [buttons] });
+          components[0].components[0].setDisabled(true);
+          components[0].components[1].setDisabled(true);
+          await interaction.editReply({ components });
         }
       }, 500);
     } else await interaction.editReply({ content: 'No matches could be found', embeds: [], components: [] }); 
