@@ -351,7 +351,7 @@ module.exports = {
               .setStyle(ButtonStyle.Secondary)
               .setDisabled(true)
           );
-        await interactReplyMessage.edit({ components: [buttons] });
+        await interactReplyMessage.edit(totalResults > 0 ? { components: [buttons] } : {});
       }
     }, 500);
   }
