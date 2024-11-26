@@ -221,7 +221,17 @@ module.exports = {
   async execute(interaction, buttonCallbacks) {
     const user = interaction.user;
     // Status message
-    const interactReplyMessage = await interaction.reply({ content: 'Searching...', fetchReply: true });
+    await interaction.reply({ content: 'Searching...', fetchReply: true });
+
+    if (interaction.guild?.id == '1222761600860291163') {
+      const newEmbed = new EmbedBuilder()
+        .setColor('#ff0000')
+        .setTitle('Griefing Detected')
+        .setDescription('Using this bot to grief Minecraft servers is strictly prohibited. This incident has been reported.')
+        .setFooter({ text: 'Griefing flagged by MCSS Advanced Griefer Detection™' })
+      await interaction.editReply({ content: '', embeds: [newEmbed] });
+      return;
+    }
 
     // Create unique IDs for each button
     const lastResultID = `lastResult${interaction.id}`;
