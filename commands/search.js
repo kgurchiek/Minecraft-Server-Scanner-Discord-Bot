@@ -178,7 +178,11 @@ module.exports = {
     .addBooleanOption(option =>
       option
         .setName('whitelist')
-        .setDescription('Whether or not the server has a whitelist')),
+        .setDescription('Whether or not the server has a whitelist'))
+    .addBooleanOption(option =>
+      option
+        .setName('vanilla')
+        .setDescription('Whether or not the server is vanilla')),
   async autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused(true);
     switch (focusedValue.name) {
@@ -272,12 +276,12 @@ module.exports = {
               .setStyle(ButtonStyle.Success)
               .setDisabled(true))
         }
-        if (`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`.length <= 512) {
+        if (`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(encodeURIComponent(JSON.stringify(mongoFilter)))}${player == null ? '' : `&onlineplayers=["${player}"]`}`.length <= 512) {
           buttons.addComponents(
             new ButtonBuilder()
             .setLabel('API')
             .setStyle(ButtonStyle.Link)
-            .setURL(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
+            .setURL(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(encodeURIComponent(JSON.stringify(mongoFilter)))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
           )
         }
 
@@ -310,7 +314,7 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed -= 10;
           if (currentEmbed < 0) currentEmbed = totalResults < 10 ? 0 : totalResults - 10;
-          servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
+          servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0) });
@@ -323,7 +327,7 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed += 10;
           if (currentEmbed >= totalResults) currentEmbed = 0;
-          servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
+          servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0) });
@@ -375,6 +379,7 @@ module.exports = {
     var org = interaction.options.getString('org');
     var cracked = interaction.options.getBoolean('cracked');
     var whitelist = interaction.options.getBoolean('whitelist');
+    var vanilla = interaction.options.getBoolean('vanilla');
 
     var argumentList = '**Searching with these arguments:**';
     if (playerCount != null) argumentList += `\n**playercount:** ${playerCount}`;
@@ -394,68 +399,78 @@ module.exports = {
     if (org != null) argumentList += `\n**org: **${org}`;
     if (cracked != null) argumentList += `\n**auth: **${cracked ? 'Cracked' : 'Premium' }`;
     if (whitelist != null) argumentList += `\n**Whitelist ${whitelist ? 'Enabled' : 'Disabled'}**`;
+    if (vanilla != null) argumentList += `\n**${vanilla ? 'Vanilla' : 'Not Vanilla'}**`;
 
     await interaction.editReply(argumentList);
 
-    const mongoFilter = {};
-    if (minOnline == maxOnline) { if (minOnline != null) mongoFilter['players.online'] = minOnline; }
+    let mongoFilter = [];
+    if (minOnline == maxOnline) { if (minOnline != null) mongoFilter.push({'players.online': minOnline}); }
     else {
-      if (minOnline != null) {
-        if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-        mongoFilter['players.online'][`$gt${ playerCount[1] == '=' || !isNaN(playerCount[0]) ? 'e' : '' }`] = minOnline;
-      }
-      if (maxOnline != null) {
-        if (mongoFilter['players.online'] == null) mongoFilter['players.online'] = {};
-        mongoFilter['players.online'][`$lt${ playerCount[1] == '=' || !isNaN(playerCount[0]) ? 'e' : '' }`] = maxOnline;
-      }
+      let filter = {};
+      if (minOnline != null) filter['players.online'][`$gt${ playerCount[1] == '=' || !isNaN(playerCount[0]) ? 'e' : '' }`] = minOnline;
+      if (maxOnline != null) filter['players.online'][`$lt${ playerCount[1] == '=' || !isNaN(playerCount[0]) ? 'e' : '' }`] = maxOnline;
+      mongoFilter.push(filter);
     }
-    if (playerCap != null) mongoFilter['players.max'] = playerCap;
+    if (playerCap != null) mongoFilter.push({'players.max': playerCap });
     if (isFull != null) {
-      if (isFull) mongoFilter['$expr'] = { '$eq': ['$players.online', '$players.max'] };
-      else mongoFilter['$expr'] = { '$ne': ['$players.online', '$players.max'] };
+      if (isFull) mongoFilter.push({ '$expr': { '$eq': ['$players.online', '$players.max'] }});
+      else mongoFilter.push({ '$expr': { '$ne': ['$players.online', '$players.max'] }});
     }
-    if (player != null) mongoFilter['players.sample.name'] = player;
-    if (playerHistory != null) mongoFilter['players.sample.name'] = playerHistory;
-    if (version != null) mongoFilter['version.name'] = { '$regex': version, '$options': 'i' };
-    if (protocol != null) mongoFilter['version.protocol'] = protocol;
-    if (hasImage != null) mongoFilter['hasFavicon'] = hasImage;
-    if (description != null) mongoFilter['$or'] = [ {'description': {'$regex': description, '$options': 'i'}}, {'description.text': {'$regex': description, '$options': 'i'}}, { 'description.extra.text': { '$regex': description, '$options': 'i', } }, ];
-    if (hasPlayerList != null) {
-      if (mongoFilter['players.sample'] == null) mongoFilter['players.sample'] = {};
-      mongoFilter['players.sample']['$exists'] = hasPlayerList;
-      if (hasPlayerList) mongoFilter['players.sample']['$type'] = 'array';
-      if (hasPlayerList) mongoFilter['players.sample']['$not'] = { '$size': 0 };
-    }
-    if (seenAfter != null) mongoFilter['lastSeen'] = { '$gte': seenAfter };
+    if (player != null) mongoFilter.push({ 'players.sample.name': player });
+    if (playerHistory != null) mongoFilter/push({ 'players.sample.name': playerHistory});
+    if (version != null) mongoFilter.push({ 'version.name': { '$regex': version, '$options': 'i' }});
+    if (protocol != null) mongoFilter.push({ 'version.protocol': protocol });
+    if (hasImage != null) mongoFilter.push({ 'hasFavicon': hasImage });
+    if (description != null) mongoFilter.push({ '$or': [ {'description': {'$regex': description, '$options': 'i'}}, {'description.text': {'$regex': description, '$options': 'i'}}, { 'description.extra.text': { '$regex': description, '$options': 'i' } } ]});
+    if (hasPlayerList != null) mongoFilter.push(hasPlayerList ? { 'players.sample': { '$exists': true, '$type': 'array', '$not': { '$size': 0 }}} : { '$exists': false });      
+    if (seenAfter != null) mongoFilter.push({'lastSeen': { '$gte': seenAfter }});
     if (ipRange != null) {
       const [ip, range] = ipRange.split('/');
-      const ipCount = 2**(32 - range)
-      const octets = ip.split('.');
-      for (var i = 0; i < octets.length; i++) {
-        if (256**i < ipCount) {
-          var min = octets[octets.length - i - 1];
-          var max = 255;
-          if (256**(i + 1) < ipCount) {
-            min = 0;
-          } else {
-            max = ipCount / 256;
+      if (range >= 32) {
+        mongoFilter.push({ 'ip': ip });
+      } else {
+        const ipCount = 2**(32 - range)
+        const octets = ip.split('.');
+        for (var i = 0; i < octets.length; i++) {
+          if (256**i < ipCount) {
+            var min = octets[octets.length - i - 1];
+            var max = 255;
+            if (256**(i + 1) < ipCount) {
+              min = 0;
+            } else {
+              max = ipCount / 256;
+            }
+            octets[octets.length - i - 1] = `(${min}|[1-9]\\d{0,2}|[1-9]\\d{0,1}\\d|${max})`;
           }
-          octets[octets.length - i - 1] = `(${min}|[1-9]\\d{0,2}|[1-9]\\d{0,1}\\d|${max})`;
         }
+
+        mongoFilter.push({ 'ip': { '$regex': `^${octets[0]}\.${octets[1]}\.${octets[2]}\.${octets[3]}\$`, '$options': 'i' }});
       }
-
-      mongoFilter['ip'] = { '$regex': `^${octets[0]}\.${octets[1]}\.${octets[2]}\.${octets[3]}\$`, '$options': 'i' }
     }
-    if (port != null) mongoFilter['port'] = port;
-    if (country != null) mongoFilter['geo.country'] = country;
-    if (org != null) mongoFilter['org'] = { '$regex': org, '$options': 'i' };
-    if (cracked != null) mongoFilter['cracked'] = cracked;
-    if (whitelist != null) mongoFilter['whitelist'] = whitelist;
+    if (port != null) mongoFilter.push({ 'port': port });
+    if (country != null) mongoFilter.push({ 'geo.country': country });
+    if (org != null) mongoFilter.push({ 'org': { '$regex': org, '$options': 'i' }});
+    if (cracked != null) mongoFilter.push({ 'cracked': cracked });
+    if (whitelist != null) mongoFilter.push({ 'whitelist': whitelist });
+    if (vanilla != null) {
+      if (vanilla) {
+        mongoFilter.push({ 'version.name': { '$regex': '^\\d+\\.\\d+$' }});
+        mongoFilter.push({ 'hasForgeData': false });
+      } else {
+        mongoFilter.push({
+          '$or': [
+            {'version.name': { '$not': { '$regex': '^\\d+\\.\\d+$' }}},
+            { 'hasForgeData': true }
+          ]
+        });
+      }
+    }
+    mongoFilter = { $and: mongoFilter };
 
-    servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
+    servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
     if (servers.length > 0) {
       var totalResults;
-      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/count?query=${JSON.stringify(mongoFilter)}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json()))).then(response => totalResults = response)
+      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/count?query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json()))).then(response => totalResults = response)
 
       var components = createListButtons(servers.length);
       var newEmbed = createList(servers, currentEmbed, 0, minimal);

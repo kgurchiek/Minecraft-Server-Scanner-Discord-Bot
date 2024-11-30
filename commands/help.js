@@ -51,8 +51,9 @@ module.exports = {
 					{ name: 'port (integer)', value: 'The port the server is hosted on', inline: true },
 					{ name: 'country (country name)', value: 'The country the server is hosted in (use the autocomplete options)', inline: true },
 					{ name: 'org (organization name, uses regex)', value: 'The organization the ip belongs to', inline: true },
-					{ name: 'cracked (true/false)', value: 'Whether or not the server is cracked (offline mode)\n', inline: true },
+					{ name: 'cracked (true/false)', value: 'Whether or not the server is cracked (offline mode)', inline: true },
 					{ name: 'whitelist (true/false)', value: 'Whether or not the server has a whitelist', inline: true },
+					{ name: 'vanilla (true/false)', value: 'Whether or not the server is vanilla', inline: true },
 				),
 			new EmbedBuilder()
 				.setColor("#02a337")
