@@ -9,9 +9,6 @@
     <img src="https://raw.githubusercontent.com/kgurchiek/Minecraft-Server-Scanner-Discord-Bot/main/Icon.PNG" alt="Minecraft Server Scanner Logo" width="20%"/>
 </div>
 
-> [!NOTE]
-> This product includes GeoLite2 data created by [MaxMind](https://www.maxmind.com).
-
 ## 📝 About
 
 This is the complete code for a Node.js Discord bot. This bot doesn't do the scanning itself, it just displays the scanned servers from my database, which is actively collected by a separate scanning program. You can access it yourself at <https://api.cornbread2100.com/servers> by sending a MongoDB find query in a POST request.
@@ -27,7 +24,7 @@ You can contact me via Discord: [cornbread2100](https://discord.com/users/720658
 
 Put the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers) into config.json, as well as a client id and secret from the [Twitch Developer Console](https://dev.twitch.tv/console/apps) for streamsniping.
 
-You'll need Node.js version v18 or later to run the bot. Then install discord.js with `npm i discord.js` and run `node deploy-commands.js` in your terminal before to register the slash commands, otherwise they won't show up in Discord. Once everything is set up, run `node index.js` to start the bot. Each command will be loaded, and "\[Bot\]" will be logged when it's ready.
+You'll need to install Node.js version v18 or later to run the bot. Then install all required dependencies with `npm i` and run `node deploy-commands` in your terminal to register the slash commands, otherwise they won't show up in Discord. Once everything is set up, run `node index` to start the bot. Each command should load, and "\[Bot\]" will be logged when it's ready.
 
 > [!WARNING]
 > Don't forget to give the Discord bot the `bot` and `applications.commands` permissions in the URL generator.
@@ -41,5 +38,5 @@ You'll need Node.js version v18 or later to run the bot. Then install discord.js
 | /random | Fetches a random online Minecraft server | None |
 | /ping | Fetches info from a given Minecraft Java server | ip (required), port (optional, defaults to 25565) |
 | /ping | Fetches info from a given Minecraft Bedrock server | ip (required), port (optional, defaults to 19132) |
-| /search | Searches the database for a server with specific properties | minimal (true/false), skip (integer), playercount (range), playerCap (integer), isfull (true/false), player (player name), playerhistory (player name) version (regex), hasimage (true/false), description (regex), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (country name), org (organization name, uses regex), cracked (true/false), whitelist (true/false) |
+| /search | Searches the database for a server with specific properties | minimal (true/false), skip (integer), playercount (range), playerCap (integer), isfull (true/false), player (player name), playerhistory (player name) version (regex), hasimage (true/false), description (regex), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (country name), org (organization name, uses regex), cracked (true/false), whitelist (true/false), vanilla (true/false) |
 | /streamsnipe | Searches the database for live Twitch streamers | language (language name) |
