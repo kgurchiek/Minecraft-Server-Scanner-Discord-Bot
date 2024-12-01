@@ -417,7 +417,7 @@ module.exports = {
       else mongoFilter.push({ '$expr': { '$ne': ['$players.online', '$players.max'] }});
     }
     if (player != null) mongoFilter.push({ 'players.sample.name': player });
-    if (playerHistory != null) mongoFilter/push({ 'players.sample.name': playerHistory});
+    if (playerHistory != null) mongoFilter.push({ 'players.sample.name': playerHistory});
     if (version != null) mongoFilter.push({ 'version.name': { '$regex': version, '$options': 'i' }});
     if (protocol != null) mongoFilter.push({ 'version.protocol': protocol });
     if (hasImage != null) mongoFilter.push({ 'hasFavicon': hasImage });
