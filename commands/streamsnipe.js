@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 const { getDescription, getVersion } = require('../commonFunctions.js');
 const config = require('../config.json');
 const languages = require('../languages.json');
-const buttonTimeout = 60; // In seconds
+const buttonTimeout = 180; // In seconds
 var twitchAccessToken;
 var accessTokenTimeout = 0;
 

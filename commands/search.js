@@ -465,7 +465,7 @@ module.exports = {
         });
       }
     }
-    mongoFilter = { $and: mongoFilter };
+    mongoFilter = Object.keys(mongoFilter).length ? { $and: mongoFilter } : {};
 
     servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
     if (servers.length > 0) {
