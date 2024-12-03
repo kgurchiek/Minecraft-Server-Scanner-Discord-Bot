@@ -406,7 +406,7 @@ module.exports = {
     let mongoFilter = [];
     if (minOnline == maxOnline) { if (minOnline != null) mongoFilter.push({'players.online': minOnline}); }
     else {
-      let filter = {};
+      let filter = { 'players.online': {} };
       if (minOnline != null) filter['players.online'][`$gt${ playerCount[1] == '=' || !isNaN(playerCount[0]) ? 'e' : '' }`] = minOnline;
       if (maxOnline != null) filter['players.online'][`$lt${ playerCount[1] == '=' || !isNaN(playerCount[0]) ? 'e' : '' }`] = maxOnline;
       mongoFilter.push(filter);
