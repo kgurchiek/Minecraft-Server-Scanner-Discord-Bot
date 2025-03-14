@@ -36,7 +36,7 @@ module.exports = {
 				.setDescription('Searches for a server with specific properties')
 				.addFields(
 					{ name: 'minimal', value: 'Only shows ip and port in preview (recommended for mobile users)', inline: true },
-					{ name: 'skip', value: 'Skips to a page of results', inline: true },
+					{ name: 'page', value: 'Skips to a page of results', inline: true },
 					{ name: 'playercount (range)', value: 'A range of how many players on on the server (e.g. 4, >10, <=5, 11-20)', inline: true },
 					{ name: 'playercap (integer)', value: 'The maximum player capacity of the server', inline: true },
 					{ name: 'isfull (true/false)', value: 'Whether or not the server is full', inline: true },

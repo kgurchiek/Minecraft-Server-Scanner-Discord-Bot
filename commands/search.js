@@ -106,7 +106,7 @@ module.exports = {
         .setDescription('Only shows ip and port in preview (recommended for mobile users)'))
     .addIntegerOption(option =>
       option
-        .setName('skip')
+        .setName('page')
         .setDescription('Skips to a page of results'))
     .addStringOption(option =>
       option
@@ -338,7 +338,7 @@ module.exports = {
     }
     
     // Get arguments
-    if (interaction.options.getInteger('skip') != null) currentEmbed = interaction.options.getInteger('skip') - 1;
+    if (interaction.options.getInteger('page') != null) currentEmbed = interaction.options.getInteger('page') - 1;
     var playerCount;
     var minOnline;
     var maxOnline;
