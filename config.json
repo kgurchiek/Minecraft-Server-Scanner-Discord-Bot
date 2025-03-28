@@ -1,6 +1,7 @@
 {
-	"clientId": "YOUR CLIENT ID",
-	"token": "YOUR BOT TOKEN",
-	"twitchClientId": "TWITCH CLIENT ID",
-	"twitchClientSecret": "TWITCH CLIENT SECRET"
+	"clientId": "",
+	"token": "",
+	"twitchClientId": "",
+	"twitchClientSecret": "",
+	"api": "https://api.cornbread2100.com"
 }

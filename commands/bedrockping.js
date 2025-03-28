@@ -39,7 +39,7 @@ module.exports = {
               { name: 'IP', value: ip },
               { name: 'Port', value: port.toString() },
               { name: 'Education Edition', value: response[0] == 'MCEE' ? 'true' : 'false' },
-              { name: 'Description', value: `${getDescription(response[1])}\n${getDescription(response[7])}` },
+              { name: 'Description', value: `${getDescription(response[1].description)}\n${getDescription(response[7].description)}` },
               { name: 'Version', value: getVersion(response[3]) + ` (${response[2]})` },
               { name: 'Players', value: `${response[4]}/${response[5]}` },
               { name: 'Game Mode', value: `${response[8]} (${response[9]})` }

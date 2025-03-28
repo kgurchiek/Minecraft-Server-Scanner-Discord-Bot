@@ -1,76 +1,64 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion, thousandsSeparators } = require('../commonFunctions.js');
+const { getDescription, thousandsSeparators, cleanIp, displayPlayers } = require('../commonFunctions.js');
 const countryCodes = require('../countryCodes.json');
 const orgs = require('../orgs.json');
+const config = require('../config.json');
 const buttonTimeout = 300; // In seconds
-
-// Times out the buttons; fetches how long it has been since last input date
-function timeSinceDate(date1) {
-  if (date1 == null) {
-    date1 = new Date();
-  }
-  var date2 = new Date();
-  var date1Total = date1.getSeconds() + date1.getMinutes() * 60 + date1.getHours() * 3600 + date1.getDay() * 86400;
-  var date2Total = date2.getSeconds() + date2.getMinutes() * 60 + date2.getHours() * 3600 + date2.getDay() * 86400;
-
-  return date2Total - date1Total;
-}
 
 const shortenString = (string, length) => (string.length > length ? `${string.slice(0, length - 3)}...` : string);
 
-function createEmbed(server, showingOldPlayers = false) {
+function createEmbed(server, showingOldPlayers = false, loadingPlayers = false) {
+  let description;
+  try {
+    description = JSON.parse(server.rawDescription);
+  } catch (err) {
+    description = server.description;
+  }
   const newEmbed = new EmbedBuilder()
     .setColor('#02a337')
-    .setTitle(`${server.ip}${server.port == 25565 ? '' : `:${server.port}`}`)
+    .setTitle(`${cleanIp(server.ip)}${server.port == 25565 ? '' : `:${server.port}`}`)
     .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-    .setThumbnail(`https://ping.cornbread2100.com/favicon?ip=${server.ip}&port=${server.port}`)
     .addFields(
-      { name: 'Version', value: `${getVersion(server.version)} (${server.version.protocol})` },
-      { name: 'Description', value: getDescription(server.description) }
+      { name: 'IP', value: cleanIp(parseInt(server.ip)) },
+      { name: 'Port', value: String(server.port) },
+      { name: 'Version', value: `${server.version.name} (${server.version.protocol})` },
+      { name: 'Description', value: getDescription(description) },
+      { name: 'Players', value: displayPlayers(server) },
+      { name: 'Discovered', value: `<t:${server.discovered}:${(new Date().getTime() / 1000) - server.discovered > 86400 ? 'D' : 'R'}>`},
+      { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` },
+      { name: 'Country: ', value: `${server.geo.country == null ? 'Unknown' : `:flag_${server.geo.country.toLowerCase()}: ${server.geo.country}`}` },
+      { name: 'Organization: ', value: server.org == null ? 'Unknown' : server.org },
+      { name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' },
+      { name: 'Whitelist', value: server.whitelisted == true ? 'Enabled' : server.whitelisted == false ? 'Disabled' : 'Unknown' }
     )
     .setTimestamp();
-  
-  var playersString = `${server.players.online}/${server.players.max}`;
-  if (server.players.sample != null &&  server.players.sample.length > 0 && (server.players.sample.filter(a => a.lastSeen == server.lastSeen).length > 0 || showingOldPlayers)) {
-    playersString += `${showingOldPlayers ? '' : '\n```'}`;
-    var oldString;
-    server.players.sample.sort((a, b) => b.lastSeen - a.lastSeen);
-    for (var i = 0; i < server.players.sample.length; i++) {
-      oldString = playersString;
-      if (!showingOldPlayers && server.players.sample[i].lastSeen != server.lastSeen) continue;
-      playersString += showingOldPlayers ? `\n${playersString.endsWith('```') || showingOldPlayers ? '' : '\n'}\`${server.players.sample[i].name}\` <t:${server.players.sample[i].lastSeen}:${(new Date().getTime() / 1000) - server.players.sample[i].lastSeen > 86400 ? 'D' : 'R'}>` : `\n${playersString.endsWith('\`\`\`') ? '' : '\n'}${server.players.sample[i].name}\n${server.players.sample[i].id}`;
-      if (playersString.length > 1024) {
-        playersString = oldString;
-        break;
-      }
-    }
-    if (!showingOldPlayers) playersString += '```';
-  }
-  newEmbed.addFields({ name: 'Players', value: playersString });
-  const discoverDate = parseInt(server._id.slice(0,8), 16);
-  newEmbed.addFields(
-    { name: 'Discovered', value: `<t:${discoverDate}:${(new Date().getTime() / 1000) - discoverDate > 86400 ? 'D' : 'R'}>`},
-    { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` }
-  )
 
-  if (server.geo?.country == null) newEmbed.addFields({ name: 'Country: ', value: 'Unknown' })
-  else newEmbed.addFields({ name: 'Country: ', value: `:flag_${server.geo.country.toLowerCase()}: ${server.geo.country}` })
-  
-  if (server.org == null) newEmbed.addFields({ name: 'Organization: ', value: 'Unknown' });
-  else newEmbed.addFields({ name: 'Organization: ', value: server.org });
-
-  newEmbed.addFields({ name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' })
-  newEmbed.addFields({ name: 'Whitelist', value: server.whitelist == true ? 'Enabled' : server.whitelist == false ? 'Disabled' : 'Unknown' })
   return newEmbed;
 }
 
-function createButtons(server, showingOldPlayers = false) {
+function createButtons(server, showingOldPlayers = false, loading = false) {
   const buttons = new ActionRowBuilder()
-  if (server.players.sample != null && server.players.sample.filter(a => a.lastSeen != server.lastSeen).length > 0) buttons.addComponents(new ButtonBuilder().setLabel(showingOldPlayers ? 'Online Players' : 'Player History').setStyle(ButtonStyle.Primary).setCustomId(`search-${showingOldPlayers ? 'online' : 'history'}-${server.ip}:${server.port}`))
-  buttons.addComponents(new ButtonBuilder().setLabel('API').setStyle(ButtonStyle.Link).setURL(`https://api.cornbread2100.com/servers?query={"ip":"${server.ip}","port":${server.port}}`))
+  if (showingOldPlayers != null || server.players.hasPlayerSample) {
+    buttons.addComponents(
+      new ButtonBuilder()
+        .setLabel(loading ? 'Loading...' : showingOldPlayers == null ? 'Show Players' : showingOldPlayers ? 'Online Players' : 'Player History')
+        .setStyle(ButtonStyle.Primary)
+        .setCustomId(`search-${showingOldPlayers ? 'online' : 'history'}-${server.ip}:${server.port}`)
+        .setDisabled(loading)
+    )
+  }
+  buttons.addComponents(
+    new ButtonBuilder()
+      .setLabel('API')
+      .setStyle(ButtonStyle.Link)
+      .setURL(`${config.api}/servers?ip=${server.ip}&port=${server.port}`)
+  )
   return buttons;
 }
+
+const displayIp = (server) => `${cleanIp(parseInt(server.ip))}${server.port == 25565 ? '' : `:${server.port}`}`;
+const displayVersion = (version) => `${shortenString(String(version?.name), 19)} (${version?.protocol})`;
 
 function createList(servers, currentEmbed, totalResults, minimal) {
   const embed = new EmbedBuilder()
@@ -81,16 +69,21 @@ function createList(servers, currentEmbed, totalResults, minimal) {
   
   let description = '';
   let longest = {
-    server: `${servers[0].ip}${servers[0].port == 25565 ? '' : `:${servers[0].port}`}`.length,
-    version: `${shortenString(String(servers[0].version?.name), 19)} (${servers[0].version?.protocol})`.length,
+    server: displayIp(servers[0]).length,
+    version: displayVersion(servers[0]).length
   }
   for (let i = 1; i < servers.length; i++) {
-    if (`${servers[i].ip}${servers[i].port == 25565 ? '' : `:${servers[i].port}`}`.length > longest.server) longest.server = `${servers[i].ip}${servers[i].port == 25565 ? '' : `:${servers[i].port}`}`.length;
-    if (`${shortenString(String(servers[i].version?.name), 19)} (${servers[i].version?.protocol})`.length > longest.version) longest.version = `${shortenString(String(servers[i].version?.name), 19)} (${servers[i].version?.protocol})`.length;
+    if (displayIp(servers[i]).length > longest.server) longest.server = displayIp(servers[i]).length;
+    if (displayVersion(servers[i].version).length > longest.version) longest.version = displayVersion(servers[i].version).length;
   }
   
-  for (let i = 0; i < servers.length; i++) description += `${i == 0 ? '' : '\n'}${i + 1}. ${minimal ? '' : (servers[i].geo?.country == null ? '❔ ' : `:flag_${servers[i].geo.country.toLowerCase()}: `)}\`${servers[i].ip}${servers[i].port == 25565 ? '' : `:${servers[i].port}`}${' '.repeat(longest.server - `${servers[i].ip}${servers[i].port == 25565 ? '' : `:${servers[i].port}`}`.length)}\`${minimal ? '' : ` \`${shortenString(String(servers[i].version?.name), 19)} (${servers[i].version?.protocol})${' '.repeat(longest.version - `${shortenString(String(servers[i].version?.name), 19)} (${servers[i].version?.protocol})`.length)}\` <t:${servers[i].lastSeen}:R>`}`;
-  
+  for (let i = 0; i < servers.length; i++) {
+    description += `${i == 0 ? '' : '\n'}${i + 1}. ${minimal ? '' : (servers[i].geo?.country == null ? '❔ ' : `:flag_${servers[i].geo.country.toLowerCase()}: `)}`;
+    description += `\`${displayIp(servers[i])}`;
+    description += `${' '.repeat(longest.server - displayIp(servers[i]).length)}`;
+    if (!minimal) description += `\` \`${displayVersion(servers[i].version)}${' '.repeat(longest.version - displayVersion(servers[i].version).length)}\` <t:${servers[i].lastSeen}:R>`;
+  }
+
   embed.setDescription(description);
   return embed;
 }
@@ -131,7 +124,7 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName('version')
-        .setDescription('The version of the server (uses regex)'))
+        .setDescription('The version of the server'))
     .addIntegerOption(option =>
       option
         .setName('protocol')
@@ -143,7 +136,7 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName('description')
-        .setDescription('The description of the server (uses regex)'))
+        .setDescription('The description of the server'))
     .addBooleanOption(option =>
       option
         .setName('hasplayerlist')
@@ -177,8 +170,8 @@ module.exports = {
         .setDescription('Whether or not the server is cracked (offline mode)'))
     .addBooleanOption(option =>
       option
-        .setName('whitelist')
-        .setDescription('Whether or not the server has a whitelist'))
+        .setName('whitelisted')
+        .setDescription('Whether or not the server has a whitelisted'))
     .addBooleanOption(option =>
       option
         .setName('vanilla')
@@ -200,32 +193,40 @@ module.exports = {
   async buttonHandler(interaction) {
     const [command, id, content] = interaction.customId.split('-');
     switch (id) {
-      case 'serverInfoID': {
+      case 'info': {
         const [ip, port] = content.split(':');
-        const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query={"ip":"${ip}","port":${port}}`)).json())[0];
+        const server = (await (await fetch(`${config.api}/servers?ip=${ip}&port=${port}`)).json())[0];
         await interaction.reply({ embeds: [createEmbed(server)], components: [createButtons(server)] });
         break;
       }
       case 'history': {
-        await interaction.deferUpdate();
         const [ip, port] = content.split(':');
-        const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query={"ip":"${ip}","port":${port}}`)).json())[0];
-        await interaction.editReply({ embeds: [createEmbed(server, true)], components: [createButtons(server, true)] });
+        const embed = interaction.message.embeds[0];
+        embed.data.fields[4].value = `${embed.data.fields[4].value.split('\n')[0]}\nLoading Players...`;
+        await interaction.update({ embeds: [embed], components: [createButtons({ ip, port }, true, true)] });
+        const playerList = (await (await fetch(`${config.api}/playerHistory?ip=${ip}&port=${port}`)).json());
+        playerList.sort((a, b) => b.lastSession - a.lastSession);
+        let playerCounts = embed.data.fields[4].value.split('\n')[0];
+        embed.data.fields[4].value = displayPlayers({ players: { online: playerCounts.split('/')[0], max: playerCounts.split('/')[1] }, lastSeen: embed.data.fields[6].value.split(':')[1] }, playerList, true);
+        await interaction.editReply({ embeds: [embed], components: [createButtons({ ip, port }, true)] });
         break;
       }
       case 'online' : {
-        await interaction.deferUpdate();
         const [ip, port] = content.split(':');
-        const server = (await (await fetch(`https://api.cornbread2100.com/servers?limit=1&query={"ip":"${ip}","port":${port}}`)).json())[0];
-        await interaction.editReply({ embeds: [createEmbed(server, false)], components: [createButtons(server, false)] });
+        const embed = interaction.message.embeds[0];
+        embed.data.fields[4].value = `${embed.data.fields[4].value.split('\n')[0]}\nLoading Players...`;
+        await interaction.update({ embeds: [embed], components: [createButtons({ ip, port }, false, true)] });
+        const playerList = (await (await fetch(`${config.api}/playerHistory?ip=${ip}&port=${port}`)).json());
+        playerList.sort((a, b) => b.lastSession - a.lastSession);
+        let playerCounts = embed.data.fields[4].value.split('\n')[0];
+        embed.data.fields[4].value = displayPlayers({ players: { online: playerCounts.split('/')[0], max: playerCounts.split('/')[1] }}, playerList, false);
+        await interaction.editReply({ embeds: [embed], components: [createButtons({ ip, port }, false)] });
         break;
       }
     }
   },
   async execute(interaction, buttonCallbacks) {
     const user = interaction.user;
-    // Status message
-    await interaction.reply({ content: 'Searching...', fetchReply: true });
 
     if (interaction.guild?.id == '1222761600860291163') {
       const newEmbed = new EmbedBuilder()
@@ -276,12 +277,12 @@ module.exports = {
               .setStyle(ButtonStyle.Success)
               .setDisabled(true))
         }
-        if (`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(encodeURIComponent(JSON.stringify(mongoFilter)))}${player == null ? '' : `&onlineplayers=["${player}"]`}`.length <= 512) {
+        if (`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`.length <= 512) {
           buttons.addComponents(
             new ButtonBuilder()
             .setLabel('API')
             .setStyle(ButtonStyle.Link)
-            .setURL(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(encodeURIComponent(JSON.stringify(mongoFilter)))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)
+            .setURL(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)
           )
         }
 
@@ -289,7 +290,7 @@ module.exports = {
         for (let i = 0; i < (totalResults - currentEmbed < 5 ? totalResults - currentEmbed : 5); i++) {
           infoButtons.addComponents(
             new ButtonBuilder()
-              .setCustomId(`search-serverInfoID-${servers[i].ip}:${servers[i].port}`)
+              .setCustomId(`search-info-${servers[i].ip}:${servers[i].port}`)
               .setLabel(String(i + 1))
               .setStyle(ButtonStyle.Primary)
           )
@@ -298,7 +299,7 @@ module.exports = {
         for (let i = 5; i < (totalResults - currentEmbed < 10 ? totalResults - currentEmbed : 10); i++) {
           infoButtons2.addComponents(
             new ButtonBuilder()
-              .setCustomId(`search-serverInfoID-${servers[i].ip}:${servers[i].port}`)
+              .setCustomId(`search-info-${servers[i].ip}:${servers[i].port}`)
               .setLabel(String(i + 1))
               .setStyle(ButtonStyle.Primary)
           )
@@ -314,7 +315,7 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed -= 10;
           if (currentEmbed < 0) currentEmbed = totalResults < 10 ? 0 : totalResults - 10;
-          servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
+          servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0) });
@@ -327,7 +328,7 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed += 10;
           if (currentEmbed >= totalResults) currentEmbed = 0;
-          servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
+          servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0) });
@@ -346,8 +347,8 @@ module.exports = {
       playerCount = interaction.options.getString('playercount');
       if (playerCount.startsWith('>=')) minOnline = parseInt(playerCount.substring(2));
       else if (playerCount.startsWith('<=')) maxOnline = parseInt(playerCount.substring(2));
-      else if (playerCount.startsWith('>')) minOnline = parseInt(playerCount.substring(1));
-      else if (playerCount.startsWith('<')) maxOnline = parseInt(playerCount.substring(1));
+      else if (playerCount.startsWith('>')) minOnline = parseInt(playerCount.substring(1)) + 1;
+      else if (playerCount.startsWith('<')) maxOnline = parseInt(playerCount.substring(1)) - 1;
       else if (playerCount.includes('-')) {
         const [min, max] = playerCount.split('-');
         minOnline = parseInt(min);
@@ -378,10 +379,10 @@ module.exports = {
     var country = interaction.options.getString('country');
     var org = interaction.options.getString('org');
     var cracked = interaction.options.getBoolean('cracked');
-    var whitelist = interaction.options.getBoolean('whitelist');
+    var whitelisted = interaction.options.getBoolean('whitelisted');
     var vanilla = interaction.options.getBoolean('vanilla');
 
-    var argumentList = '**Searching with these arguments:**';
+    var argumentList = 'Searching...';
     if (playerCount != null) argumentList += `\n**playercount:** ${playerCount}`;
     if (playerCap != null) argumentList += `\n**playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
@@ -398,79 +399,69 @@ module.exports = {
     if (country != null) argumentList += `\n**country: **:flag_${country.toLowerCase()}: ${country}`;
     if (org != null) argumentList += `\n**org: **${org}`;
     if (cracked != null) argumentList += `\n**auth: **${cracked ? 'Cracked' : 'Premium' }`;
-    if (whitelist != null) argumentList += `\n**Whitelist ${whitelist ? 'Enabled' : 'Disabled'}**`;
+    if (whitelisted != null) argumentList += `\n**Whitelisted ${whitelisted ? 'Enabled' : 'Disabled'}**`;
     if (vanilla != null) argumentList += `\n**${vanilla ? 'Vanilla' : 'Not Vanilla'}**`;
 
-    await interaction.editReply(argumentList);
+    await interaction.reply(argumentList);
 
-    let mongoFilter = [];
-    if (minOnline == maxOnline) { if (minOnline != null) mongoFilter.push({'players.online': minOnline}); }
+    let args = new URLSearchParams();
+    if (minOnline == maxOnline) { if (minOnline != null) args.set('playerCount', minOnline); }
     else {
-      let filter = { 'players.online': {} };
-      if (minOnline != null) filter['players.online'][`$gt${ playerCount[1] == '=' || !isNaN(playerCount[0]) ? 'e' : '' }`] = minOnline;
-      if (maxOnline != null) filter['players.online'][`$lt${ playerCount[1] == '=' || !isNaN(playerCount[0]) ? 'e' : '' }`] = maxOnline;
-      mongoFilter.push(filter);
+      if (minOnline != null) args.set('minPlayers', minOnline);
+      if (maxOnline != null) args.set('maxPlayers', maxOnline);
     }
-    if (playerCap != null) mongoFilter.push({'players.max': playerCap });
-    if (isFull != null) {
-      if (isFull) mongoFilter.push({ '$expr': { '$eq': ['$players.online', '$players.max'] }});
-      else mongoFilter.push({ '$expr': { '$ne': ['$players.online', '$players.max'] }});
-    }
-    if (player != null) mongoFilter.push({ 'players.sample.name': player });
-    if (playerHistory != null) mongoFilter.push({ 'players.sample.name': playerHistory});
-    if (version != null) mongoFilter.push({ 'version.name': { '$regex': version, '$options': 'i' }});
-    if (protocol != null) mongoFilter.push({ 'version.protocol': protocol });
-    if (hasImage != null) mongoFilter.push({ 'hasFavicon': hasImage });
-    if (description != null) mongoFilter.push({ '$or': [ {'description': {'$regex': description, '$options': 'i'}}, {'description.text': {'$regex': description, '$options': 'i'}}, { 'description.extra.text': { '$regex': description, '$options': 'i' } } ]});
-    if (hasPlayerList != null) mongoFilter.push(hasPlayerList ? { 'players.sample': { '$exists': true, '$type': 'array', '$not': { '$size': 0 }}} : { '$exists': false });      
-    if (seenAfter != null) mongoFilter.push({'lastSeen': { '$gte': seenAfter }});
-    if (ipRange != null) {
-      const [ip, range] = ipRange.split('/');
-      if (range >= 32) {
-        mongoFilter.push({ 'ip': ip });
-      } else {
-        const ipCount = 2**(32 - range)
-        const octets = ip.split('.');
-        for (var i = 0; i < octets.length; i++) {
-          if (256**i < ipCount) {
-            var min = octets[octets.length - i - 1];
-            var max = 255;
-            if (256**(i + 1) < ipCount) {
-              min = 0;
-            } else {
-              max = ipCount / 256;
-            }
-            octets[octets.length - i - 1] = `(${min}|[1-9]\\d{0,2}|[1-9]\\d{0,1}\\d|${max})`;
+    if (playerCap != null) args.set('playerLimit', playerCap);
+    if (isFull != null) args.set('full', isFull);
+    if (player != null) args.set('onlinePlayer', player);
+    if (playerHistory != null) args.set('playerHistory', playerHistory);
+    if (version != null) args.set('version', version);
+    if (protocol != null) args.set('protocol', protocol);
+    if (hasImage != null) args.set('hasFavicon', hasImage);
+    if (description != null) {
+      let segments = [''];
+      let escaped = false;
+      for (let i = 0; i < description.length; i++) {
+        if (!escaped) {
+          if (description[i] == '\\') {
+            escaped = true;
+            continue;
+          }
+          if (description[i] == '"') {
+            segments.push('');
+            continue;
           }
         }
-
-        mongoFilter.push({ 'ip': { '$regex': `^${octets[0]}\.${octets[1]}\.${octets[2]}\.${octets[3]}\$`, '$options': 'i' }});
+        segments[segments.length - 1] += description[i];
+        escaped = false;
+      }
+      let quotes = segments.filter((a, i) => i % 2 == 1 && (i != segments.length - 1 || segments.length % 2 == 1));
+      if (quotes.length > 0) args.set('description', `%${quotes.join('%')}%`);
+      if (segments.filter((a, i) => i % 2 == 0 || !(i != segments.length - 1 || segments.length % 2 == 1)).join('').length > 0) args.set('descriptionVector', segments.join(''));
+    }
+    if (hasPlayerList != null) args.set('hasPlayerSample', hasPlayerList);      
+    if (seenAfter != null) args.set('seenAfter', seenAfter);
+    if (ipRange != null) {
+      const [ip, subnet] = ipRange.split('/');
+      if (subnet == null || subnet >= 32) args.set('ip', ip);
+      else {
+        ip = ip.split('.').reverse().map((a, i) => parseInt(a) * 256**i).reduce((a, b) => a + b, 0);
+        let minIp = (ip & ~((1 << (32 - subnet)) - 1)) >>> 0;
+        let maxIp = (ip | ((1 << (32 - subnet)) - 1)) >>> 0;
+        args.set('minIp', minIp);
+        args.set('maxIp', maxIp)
       }
     }
-    if (port != null) mongoFilter.push({ 'port': port });
-    if (country != null) mongoFilter.push({ 'geo.country': country });
-    if (org != null) mongoFilter.push({ 'org': { '$regex': org, '$options': 'i' }});
-    if (cracked != null) mongoFilter.push({ 'cracked': cracked });
-    if (whitelist != null) mongoFilter.push({ 'whitelist': whitelist });
-    if (vanilla != null) {
-      if (vanilla) {
-        mongoFilter.push({ 'version.name': { '$regex': '^\\d+\\.\\d+$' }});
-        mongoFilter.push({ 'hasForgeData': false });
-      } else {
-        mongoFilter.push({
-          '$or': [
-            {'version.name': { '$not': { '$regex': '^\\d+\\.\\d+$' }}},
-            { 'hasForgeData': true }
-          ]
-        });
-      }
-    }
-    mongoFilter = Object.keys(mongoFilter).length ? { $and: mongoFilter } : {};
-
-    servers = (await (await fetch(`https://api.cornbread2100.com/servers?limit=10&skip=${currentEmbed}&query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json());
+    if (port != null) args.set('port', port);
+    if (country != null) args.set('country', country);
+    if (org != null) args.set('org', org);
+    if (cracked != null) args.set('cracked', cracked);
+    if (whitelisted != null) args.set('whitelisted', whitelisted);
+    if (vanilla != null) args.set('vanilla', vanilla);
+    
+    servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
     if (servers.length > 0) {
       var totalResults;
-      (new Promise(async resolve => resolve(await (await fetch(`https://api.cornbread2100.com/count?query=${encodeURIComponent(JSON.stringify(mongoFilter))}${player == null ? '' : `&onlineplayers=["${player}"]`}`)).json()))).then(response => totalResults = response)
+      (new Promise(async resolve => resolve(await (await fetch(`${config.api}/count?${args}`)).json()))).then(response => totalResults = response)
 
       var components = createListButtons(servers.length);
       var newEmbed = createList(servers, currentEmbed, 0, minimal);
@@ -489,9 +480,9 @@ module.exports = {
       newEmbed = createList(servers, currentEmbed, totalResults, minimal);
       await interaction.editReply({ embeds: [newEmbed], components })
       // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
-      lastButtonPress = new Date();
+      lastButtonPress = Date.now();
       const buttonTimeoutCheck = setInterval(async () => {
-        if (timeSinceDate(lastButtonPress) >= buttonTimeout) {
+        if (Date.now() / 1000 - lastButtonPress / 1000 >= buttonTimeout) {
           clearInterval(buttonTimeoutCheck);
           delete buttonCallbacks[nextResultID];
           delete buttonCallbacks[lastResultID];

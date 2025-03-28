@@ -30,10 +30,10 @@ client.once(Events.ClientReady, async () => {
   // Logs how many servers the bot is logged in to
   console.log(`[Bot]: ${client.user.tag}`)
   console.log("[Servers]: " + (await client.shard.fetchClientValues('guilds.cache.size')).reduce((a, b) => a + b, 0));
-  totalServers = await (await fetch('https://api.cornbread2100.com/count')).json();
+  totalServers = await (await fetch(`${config.api}/count`)).json();
   client.user.setPresence({ activities: [{ name: `${thousandsSeparators(totalServers)} MC Servers`, type: ActivityType.Watching }]});
   setInterval(async () => {
-    totalServers = await (await fetch('https://api.cornbread2100.com/count')).json();
+    totalServers = await (await fetch(`${config.api}/count`)).json();
     client.user.setPresence({ activities: [{ name: `${thousandsSeparators(totalServers)} MC Servers`, type: ActivityType.Watching }]});
   }, 60000)
 });

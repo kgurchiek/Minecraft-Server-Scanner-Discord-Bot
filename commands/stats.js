@@ -1,6 +1,7 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { thousandsSeparators } = require('../commonFunctions.js');
+const config = require('../config.json');
 
 module.exports = {
   // Sets up the command
@@ -12,7 +13,7 @@ module.exports = {
     await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
 
     if (!totalServers) {
-      totalServers = await (await fetch('https://api.cornbread2100.com/count')).json();
+      totalServers = await (await fetch(`${config.api}/count`)).json();
       setTotalServers(totalServers);
     }
 

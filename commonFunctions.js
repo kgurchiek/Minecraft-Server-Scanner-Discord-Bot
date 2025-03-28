@@ -59,46 +59,18 @@ module.exports = {
     result += '```';
     return result;
   },
-  getDescription: (response) => {
-    var description = '';
-    if (response == null) {
-      description = '​'; // zero width space
-    } else if (response.extra != null && response.extra.length > 0) {
-      if (response.extra[0].extra == null) {
-        for (var i = 0; i < response.extra.length; i++) {
-          description += response.extra[i].text;
-        }
-      } else {
-        for (var i = 0; i < response.extra[0].extra.length; i++) {
-          description += response.extra[0].extra[i].text;
-        }
-      }
-    } else if (response.text != null) {
-      description = response.text;
-    } else if (response.translate != null) {
-      description = response.translate;
-    } else if (Array.isArray(response)) {
-      for (var i = 0; i < response.length; i++) {
-        description += response[i].text;
-      }
-    } else if (response != null) {
-      description = response;
-    } else {
-      description = 'Couldn\'t get description.';
+  getDescription: (description) => {
+    if (description == null) return null;
+    if (typeof description == 'string') return description;
+    if (typeof description != 'object') return String(description);
+    if (Array.isArray(description)) return description.reduce((a, b) => a + module.exports.getDescription(b), '');
+    let newDescription = String(description.text == null ? '' : description.text) + String(description.translate == null ? '' : description.translate) + (description.extra || []).reduce((a, b) => a + module.exports.getDescription(b), '');
+    description = '';
+    for (let i = 0; i < newDescription.length; i++) {
+      if (newDescription[i] == '§') i++;
+      else description += newDescription[i];
     }
-
-    if (description.length > 150) {
-      description = description.substring(0, 150) + '...';
-    }
-
-    // Convert Minecraft color and formatting codes to ANSI format
-    description = module.exports.minecraftToAnsi(description);
-
-    if (description == '') {
-      description = '​'; // zero width space
-    }
-
-    return String(description);
+    return description;
   },
   getVersion: (rawVersion) => {
     version = '';
@@ -126,5 +98,26 @@ module.exports = {
 
     return version;
   },
-  thousandsSeparators: (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  thousandsSeparators: (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+  cleanIp: (ip) => ('0'.repeat(8 - ip.toString(16).length) + ip.toString(16)).match(/.{1,2}/g).map(a => parseInt(a, 16)).join('.'),
+  displayPlayers: (server, playerList, showingOldPlayers) => {
+    var result = `${server.players.online}/${server.players.max}`;
+    if (playerList == null) return result;
+    if (playerList != null && playerList.length > 0 && (showingOldPlayers || playerList.filter(a => a.lastSession == server.lastSeen).length > 0)) {
+      result += `${showingOldPlayers ? '' : '\n```'}`;
+      var oldString;
+      playerList.sort((a, b) => b.lastSeen - a.lastSeen);
+      for (var i = 0; i < playerList.length; i++) {
+        oldString = result;
+        if (!showingOldPlayers && playerList[i].lastSession != server.lastSeen) continue;
+        result += showingOldPlayers ? `\n${result.endsWith('```') || showingOldPlayers ? '' : '\n'}\`${playerList[i].name.replaceAll('`', `'`) || ' '}\` <t:${playerList[i].lastSession}:${(new Date().getTime() / 1000) - playerList[i].lastSession > 86400 ? 'D' : 'R'}>` : `\n${result.endsWith('\`\`\`') ? '' : '\n'}${playerList[i].name.replaceAll('`', `'`) || ' '}\n${playerList[i].id.replaceAll('`', `'`) || ' '}`;
+        if (result.length > 1024) {
+          result = oldString;
+          break;
+        }
+      }
+      if (!showingOldPlayers) result += '```';
+    }
+    return result;
+  }
 }
