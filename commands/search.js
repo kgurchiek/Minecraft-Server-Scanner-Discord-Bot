@@ -359,7 +359,7 @@ module.exports = {
           .setColor('#ff0000')
           .setTitle('User Error')
           .setDescription('Invalid online player range')
-        await interaction.editReply({ content: '', embeds: [newEmbed] });
+        await interaction.reply({ content: '', embeds: [newEmbed] });
         return;
       }
     }
