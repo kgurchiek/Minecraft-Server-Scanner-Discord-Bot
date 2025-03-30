@@ -70,7 +70,7 @@ function createList(servers, currentEmbed, totalResults, minimal) {
   let description = '';
   let longest = {
     server: displayIp(servers[0]).length,
-    version: displayVersion(servers[0]).length
+    version: displayVersion(servers[0].version).length
   }
   for (let i = 1; i < servers.length; i++) {
     if (displayIp(servers[i]).length > longest.server) longest.server = displayIp(servers[i]).length;
