@@ -441,7 +441,7 @@ module.exports = {
     if (hasPlayerList != null) args.set('hasPlayerSample', hasPlayerList);      
     if (seenAfter != null) args.set('seenAfter', seenAfter);
     if (ipRange != null) {
-      const [ip, subnet] = ipRange.split('/');
+      let [ip, subnet] = ipRange.split('/');
       if (subnet == null || subnet >= 32) args.set('ip', ip);
       else {
         ip = ip.split('.').reverse().map((a, i) => parseInt(a) * 256**i).reduce((a, b) => a + b, 0);
