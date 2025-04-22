@@ -8,7 +8,7 @@ const buttonTimeout = 300; // In seconds
 
 const shortenString = (string, length) => (string.length > length ? `${string.slice(0, length - 3)}...` : string);
 
-function createEmbed(server, showingOldPlayers = false, loadingPlayers = false) {
+function createEmbed(server) {
   let description;
   try {
     description = JSON.parse(server.rawDescription);
@@ -37,9 +37,9 @@ function createEmbed(server, showingOldPlayers = false, loadingPlayers = false) 
   return newEmbed;
 }
 
-function createButtons(server, showingOldPlayers = false, loading = false) {
+function createButtons(server, showingOldPlayers, loading = false) {
   const buttons = new ActionRowBuilder()
-  if (showingOldPlayers != null || server.players.hasPlayerSample) {
+  if (showingOldPlayers != null || server.players?.hasPlayerSample) {
     buttons.addComponents(
       new ButtonBuilder()
         .setLabel(loading ? 'Loading...' : showingOldPlayers == null ? 'Show Players' : showingOldPlayers ? 'Online Players' : 'Player History')
@@ -150,6 +150,10 @@ module.exports = {
       option
         .setName('iprange')
         .setDescription('The ip subnet a server\'s ip has to be within'))
+    .addStringOption(option =>
+      option
+        .setName('excluderange')
+        .setDescription('The ip subnet a server\'s ip cannot be within'))
     .addIntegerOption(option =>
       option
         .setName('port')
@@ -241,11 +245,11 @@ module.exports = {
     // Create unique IDs for each button
     const lastResultID = `lastResult${interaction.id}`;
     const nextResultID = `nextResult${interaction.id}`;
-    var lastButtonPress = null;
+    let lastButtonPress = null;
 
     // Creates interactable buttons
-    var currentEmbed = 0;
-    var servers;
+    let currentEmbed = 0;
+    let servers;
 
     function createListButtons(totalResults) {
       let buttons;
@@ -340,9 +344,9 @@ module.exports = {
     
     // Get arguments
     if (interaction.options.getInteger('page') != null) currentEmbed = interaction.options.getInteger('page') - 1;
-    var playerCount;
-    var minOnline;
-    var maxOnline;
+    let playerCount;
+    let minOnline;
+    let maxOnline;
     if (interaction.options.getString('playercount') != null) {
       playerCount = interaction.options.getString('playercount');
       if (playerCount.startsWith('>=')) minOnline = parseInt(playerCount.substring(2));
@@ -363,26 +367,27 @@ module.exports = {
         return;
       }
     }
-    var minimal = interaction.options.getBoolean('minimal');
-    var playerCap = interaction.options.getInteger('playercap');
-    var isFull = interaction.options.getBoolean('isfull');
-    var player = interaction.options.getString('player');
-    var playerHistory = interaction.options.getString('playerhistory');
-    var version = interaction.options.getString('version');
-    var protocol = interaction.options.getInteger('protocol');
-    var hasImage = interaction.options.getBoolean('hasimage');
-    var description = interaction.options.getString('description');
-    var hasPlayerList = interaction.options.getBoolean('hasplayerlist');
-    var seenAfter = interaction.options.getInteger('seenafter');
-    var ipRange = interaction.options.getString('iprange');
-    var port = interaction.options.getInteger('port');
-    var country = interaction.options.getString('country');
-    var org = interaction.options.getString('org');
-    var cracked = interaction.options.getBoolean('cracked');
-    var whitelisted = interaction.options.getBoolean('whitelisted');
-    var vanilla = interaction.options.getBoolean('vanilla');
+    let minimal = interaction.options.getBoolean('minimal');
+    let playerCap = interaction.options.getInteger('playercap');
+    let isFull = interaction.options.getBoolean('isfull');
+    let player = interaction.options.getString('player');
+    let playerHistory = interaction.options.getString('playerhistory');
+    let version = interaction.options.getString('version');
+    let protocol = interaction.options.getInteger('protocol');
+    let hasImage = interaction.options.getBoolean('hasimage');
+    let description = interaction.options.getString('description');
+    let hasPlayerList = interaction.options.getBoolean('hasplayerlist');
+    let seenAfter = interaction.options.getInteger('seenafter');
+    let ipRange = interaction.options.getString('iprange');
+    let excludeRange = interaction.options.getString('excluderange');
+    let port = interaction.options.getInteger('port');
+    let country = interaction.options.getString('country');
+    let org = interaction.options.getString('org');
+    let cracked = interaction.options.getBoolean('cracked');
+    let whitelisted = interaction.options.getBoolean('whitelisted');
+    let vanilla = interaction.options.getBoolean('vanilla');
 
-    var argumentList = 'Searching...';
+    let argumentList = 'Searching...';
     if (playerCount != null) argumentList += `\n**playercount:** ${playerCount}`;
     if (playerCap != null) argumentList += `\n**playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
@@ -395,6 +400,7 @@ module.exports = {
     if (hasPlayerList != null) argumentList += hasPlayerList ? '\n**Player List Enabled**' : '\n**Player List Disabled**';
     if (seenAfter != null) argumentList += `\n**seenafter: **<t:${seenAfter}:f>`;
     if (ipRange != null) argumentList += `\n**iprange: **${ipRange}`;
+    if (excludeRange != null) argumentList += `\n**excluderange: **${excludeRange}`;
     if (port != null) argumentList += `\n**port: **${port}`;
     if (country != null) argumentList += `\n**country: **:flag_${country.toLowerCase()}: ${country}`;
     if (org != null) argumentList += `\n**org: **${org}`;
@@ -440,17 +446,45 @@ module.exports = {
     }
     if (hasPlayerList != null) args.set('hasPlayerSample', hasPlayerList);      
     if (seenAfter != null) args.set('seenAfter', seenAfter);
+    let minIp = null;
+    let maxIp = null;
     if (ipRange != null) {
       let [ip, subnet] = ipRange.split('/');
+      ip = ip.split('.').reverse().map((a, i) => parseInt(a) * 256**i).reduce((a, b) => a + b, 0);
       if (subnet == null || subnet >= 32) args.set('ip', ip);
       else {
-        ip = ip.split('.').reverse().map((a, i) => parseInt(a) * 256**i).reduce((a, b) => a + b, 0);
-        let minIp = (ip & ~((1 << (32 - subnet)) - 1)) >>> 0;
-        let maxIp = (ip | ((1 << (32 - subnet)) - 1)) >>> 0;
-        args.set('minIp', minIp);
-        args.set('maxIp', maxIp)
+        minIp = (ip & ~((1 << (32 - subnet)) - 1)) >>> 0;
+        maxIp = (ip | ((1 << (32 - subnet)) - 1)) >>> 0;
       }
     }
+    if (excludeRange != null) {
+      let [ip, subnet] = excludeRange.split('/');
+      ip = ip.split('.').reverse().map((a, i) => parseInt(a) * 256**i).reduce((a, b) => a + b, 0);
+      if (subnet == null) subnet = 32;
+      let excludeMinIp = (ip & ~((1 << (32 - subnet)) - 1)) >>> 0;
+      let excludeMaxIp = (ip | ((1 << (32 - subnet)) - 1)) >>> 0;
+      if (minIp == null) {
+        minIp = [0, excludeMaxIp + 1];
+        maxIp = [excludeMinIp - 1];
+      } else if (!(minIp > excludeMaxIp || maxIp < excludeMinIp)) {
+        let oldMinIp = minIp;
+        let oldMaxIp = maxIp;
+        minIp = [];
+        maxIp = [];
+        if (oldMinIp < excludeMinIp) {
+          minIp.push(oldMinIp);
+          maxIp.push(Math.min(oldMaxIp, excludeMinIp));
+        }
+        if (oldMaxIp > excludeMaxIp) {
+          minIp.push(excludeMaxIp + 1);
+          maxIp.push(oldMaxIp);
+        }
+      }
+    }
+    if (minIp != null && typeof minIp != 'string') minIp = JSON.stringify(minIp);
+    if (maxIp != null && typeof maxIp != 'string') maxIp = JSON.stringify(maxIp);
+    if (minIp != null) args.set('minIp', minIp);
+    if (maxIp != null) args.set('maxIp', maxIp)
     if (port != null) args.set('port', port);
     if (country != null) args.set('country', country);
     if (org != null) args.set('org', org);
@@ -460,11 +494,11 @@ module.exports = {
     
     servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
     if (servers.length > 0) {
-      var totalResults;
+      let totalResults;
       (new Promise(async resolve => resolve(await (await fetch(`${config.api}/count?${args}`)).json()))).then(response => totalResults = response)
 
-      var components = createListButtons(servers.length);
-      var newEmbed = createList(servers, currentEmbed, 0, minimal);
+      let components = createListButtons(servers.length);
+      let newEmbed = createList(servers, currentEmbed, 0, minimal);
       newEmbed.data.title = 'Counting...';
       await interaction.editReply({ content: '', embeds: [newEmbed], components });
       await (new Promise(resolve => {
@@ -491,6 +525,6 @@ module.exports = {
           await interaction.editReply({ components });
         }
       }, 500);
-    } else await interaction.editReply({ content: 'No matches could be found', embeds: [], components: [] }); 
+    } else await interaction.editReply({ content: '', embeds: [new EmbedBuilder().setColor('#02a337').setTitle('No matches could be found')], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setLabel('API').setStyle(ButtonStyle.Link).setURL(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`))] }); 
   }
 }
