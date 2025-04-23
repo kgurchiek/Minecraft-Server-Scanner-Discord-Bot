@@ -33,7 +33,7 @@ client.once(Events.ClientReady, async () => {
   totalServers = await (await fetch(`${config.api}/count`)).json();
   client.user.setPresence({ activities: [{ name: `${thousandsSeparators(totalServers)} MC Servers`, type: ActivityType.Watching }]});
   setInterval(async () => {
-    totalServers = await (await fetch(`${config.api}/count`)).json();
+    totalServers = require('./index.js').totalServers;
     client.user.setPresence({ activities: [{ name: `${thousandsSeparators(totalServers)} MC Servers`, type: ActivityType.Watching }]});
   }, 60000)
 });
