@@ -24,18 +24,20 @@ for (const file of commandFiles) {
   console.log("[Loaded]: " + file);
 }
 
-// When the client is ready, log a message to the console
 let totalServers;
+function updateTotalServers(newTotalServers) {
+  if (typeof newTotalServers == 'number' && newTotalServers != totalServers) {
+    totalServers = newTotalServers;
+    client.user.setPresence({ activities: [{ name: `${thousandsSeparators(totalServers)} MC Servers`, type: ActivityType.Watching }]});
+  }
+}
+
+// When the client is ready, log a message to the console
 client.once(Events.ClientReady, async () => {
   // Logs how many servers the bot is logged in to
   console.log(`[Bot]: ${client.user.tag}`)
   console.log("[Servers]: " + (await client.shard.fetchClientValues('guilds.cache.size')).reduce((a, b) => a + b, 0));
-  totalServers = await (await fetch(`${config.api}/count`)).json();
-  client.user.setPresence({ activities: [{ name: `${thousandsSeparators(totalServers)} MC Servers`, type: ActivityType.Watching }]});
-  setInterval(async () => {
-    totalServers = require('./index.js').totalServers;
-    client.user.setPresence({ activities: [{ name: `${thousandsSeparators(totalServers)} MC Servers`, type: ActivityType.Watching }]});
-  }, 60000)
+  setInterval(() => updateTotalServers(require('./index.js').totalServers), 60000);
 });
 
 // When a chat input command is received, attempt to execute it
@@ -45,7 +47,7 @@ client.on(Events.InteractionCreate, async interaction => {
     if (!command) return;
 
     try {
-      await command.execute(interaction, buttonCallbacks, client, totalServers, (n) => totalServers = n);
+      await command.execute(interaction, buttonCallbacks, client, (totalServers ), updateTotalServers);
     } catch (error) {
       console.log('[Error]:');
       console.log(error);
