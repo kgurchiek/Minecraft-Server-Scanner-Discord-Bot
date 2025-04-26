@@ -23,7 +23,7 @@ function createEmbed(server) {
       { name: 'IP', value: cleanIp(parseInt(server.ip)) },
       { name: 'Port', value: String(server.port) },
       { name: 'Version', value: `${server.version.name} (${server.version.protocol})` },
-      { name: 'Description', value: String(getDescription(description)) | '​' },
+      { name: 'Description', value: String(getDescription(description)) || '​' },
       { name: 'Players', value: displayPlayers(server) },
       { name: 'Discovered', value: `<t:${server.discovered}:${(new Date().getTime() / 1000) - server.discovered > 86400 ? 'D' : 'R'}>`},
       { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` },

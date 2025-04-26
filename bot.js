@@ -37,7 +37,15 @@ client.once(Events.ClientReady, async () => {
   // Logs how many servers the bot is logged in to
   console.log(`[Bot]: ${client.user.tag}`)
   console.log("[Servers]: " + (await client.shard.fetchClientValues('guilds.cache.size')).reduce((a, b) => a + b, 0));
-  // setInterval(() => updateTotalServers(require('./index.js').totalServers), 60000);
+});
+
+process.on('message', (message) => {
+  switch (message.type) {
+    case 'updateCount': {
+      updateTotalServers(message.count);
+      break;
+    }
+  }
 });
 
 // When a chat input command is received, attempt to execute it
