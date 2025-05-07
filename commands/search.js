@@ -97,6 +97,10 @@ module.exports = {
       option
         .setName('minimal')
         .setDescription('Only shows ip and port in preview (recommended for mobile users)'))
+    .addBooleanOption(option =>
+      option
+        .setName('recent')
+        .setDescription('Sorts servers by recency'))
     .addIntegerOption(option =>
       option
         .setName('page')
@@ -368,6 +372,7 @@ module.exports = {
       }
     }
     let minimal = interaction.options.getBoolean('minimal');
+    let recent = interaction.options.getBoolean('recent');
     let playerCap = interaction.options.getInteger('playercap');
     let isFull = interaction.options.getBoolean('isfull');
     let player = interaction.options.getString('player');
@@ -388,29 +393,34 @@ module.exports = {
     let vanilla = interaction.options.getBoolean('vanilla');
 
     let argumentList = 'Searching...';
-    if (playerCount != null) argumentList += `\n**playercount:** ${playerCount}`;
-    if (playerCap != null) argumentList += `\n**playercap:** ${playerCap}`;
-    if (isFull != null) argumentList += `\n**${isFull ? 'Is' : 'Not'} Full**`;
-    if (player != null) argumentList += `\n**player:** ${player}`;
-    if (playerHistory != null) argumentList += `\n**playerhistory:** ${playerHistory}`;
-    if (version != null) argumentList += `\n**version:** ${version}`;
-    if (protocol != null) argumentList += `\n**protocol:** ${protocol}`;
-    if (hasImage != null) argumentList += `\n**hasimage:** ${hasImage ? 'Has' : 'Doesn\'t Have'} Image`;
-    if (description != null) argumentList += `\n**description:** ${description}`;
-    if (hasPlayerList != null) argumentList += hasPlayerList ? '\n**Player List Enabled**' : '\n**Player List Disabled**';
-    if (seenAfter != null) argumentList += `\n**seenafter: **<t:${seenAfter}:f>`;
-    if (ipRange != null) argumentList += `\n**iprange: **${ipRange}`;
-    if (excludeRange != null) argumentList += `\n**excluderange: **${excludeRange}`;
-    if (port != null) argumentList += `\n**port: **${port}`;
-    if (country != null) argumentList += `\n**country: **:flag_${country.toLowerCase()}: ${country}`;
-    if (org != null) argumentList += `\n**org: **${org}`;
-    if (cracked != null) argumentList += `\n**auth: **${cracked ? 'Cracked' : 'Premium' }`;
-    if (whitelisted != null) argumentList += `\n**Whitelisted ${whitelisted ? 'Enabled' : 'Disabled'}**`;
-    if (vanilla != null) argumentList += `\n**${vanilla ? 'Vanilla' : 'Not Vanilla'}**`;
+    if (recent != null) argumentList += `\n- **sorted by recency (${recent ? 'descending' : 'ascending'})**`;
+    if (playerCount != null) argumentList += `\n- **playercount:** ${playerCount}`;
+    if (playerCap != null) argumentList += `\n- **playercap:** ${playerCap}`;
+    if (isFull != null) argumentList += `\n- **${isFull ? 'is' : 'not'} full**`;
+    if (player != null) argumentList += `\n- **player:** ${player}`;
+    if (playerHistory != null) argumentList += `\n- **playerhistory:** ${playerHistory}`;
+    if (version != null) argumentList += `\n- **version:** ${version}`;
+    if (protocol != null) argumentList += `\n- **protocol:** ${protocol}`;
+    if (hasImage != null) argumentList += `\n- **${hasImage ? 'has' : 'doesn\'t have'} a custom favicon**`;
+    if (description != null) argumentList += `\n- **description:** ${description}`;
+    if (hasPlayerList != null) argumentList += `\n- **player list ${hasPlayerList ? 'enabled': 'disabled'}**`;
+    if (seenAfter != null) argumentList += `\n- **seenafter: **<t:${seenAfter}:f>`;
+    if (ipRange != null) argumentList += `\n- **iprange: **${ipRange}`;
+    if (excludeRange != null) argumentList += `\n- **excluderange: **${excludeRange}`;
+    if (port != null) argumentList += `\n- **port: **${port}`;
+    if (country != null) argumentList += `\n- **country: **:flag_${country.toLowerCase()}: ${country}`;
+    if (org != null) argumentList += `\n- **org: **${org}`;
+    if (cracked != null) argumentList += `\n- **auth: **${cracked ? 'cracked' : 'premium' }`;
+    if (whitelisted != null) argumentList += `\n- **whitelisted ${whitelisted ? 'enabled' : 'disabled'}**`;
+    if (vanilla != null) argumentList += `\n- **${vanilla ? 'vanilla' : 'not vanilla'}**`;
 
     await interaction.reply(argumentList);
 
     let args = new URLSearchParams();
+    if (recent != null) {
+      args.set('sort', 'lastSeen');
+      args.set('descending', recent); 
+    }
     if (minOnline == maxOnline) { if (minOnline != null) args.set('playerCount', minOnline); }
     else {
       if (minOnline != null) args.set('minPlayers', minOnline);
