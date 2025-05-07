@@ -3,5 +3,6 @@
 	"token": "",
 	"twitchClientId": "",
 	"twitchClientSecret": "",
-	"api": "https://api.cornbread2100.com"
+	"api": "https://api.cornbread2100.com",
+	"displayApi": null
 }

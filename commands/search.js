@@ -52,7 +52,7 @@ function createButtons(server, showingOldPlayers, loading = false) {
     new ButtonBuilder()
       .setLabel('API')
       .setStyle(ButtonStyle.Link)
-      .setURL(`${config.api}/servers?ip=${server.ip}&port=${server.port}`)
+      .setURL(`${config.displayApi || config.api}/servers?ip=${server.ip}&port=${server.port}`)
   )
   return buttons;
 }
@@ -80,8 +80,8 @@ function createList(servers, currentEmbed, totalResults, minimal) {
   for (let i = 0; i < servers.length; i++) {
     description += `${i == 0 ? '' : '\n'}${i + 1}. ${minimal ? '' : (servers[i].geo?.country == null ? '❔ ' : `:flag_${servers[i].geo.country.toLowerCase()}: `)}`;
     description += `\`${displayIp(servers[i])}`;
-    description += `${' '.repeat(longest.server - displayIp(servers[i]).length)}`;
-    if (!minimal) description += `\` \`${displayVersion(servers[i].version)}${' '.repeat(longest.version - displayVersion(servers[i].version).length)}\` <t:${servers[i].lastSeen}:R>`;
+    description += `${' '.repeat(longest.server - displayIp(servers[i]).length)}\``;
+    if (!minimal) description += ` \`${displayVersion(servers[i].version)}${' '.repeat(longest.version - displayVersion(servers[i].version).length)}\` <t:${servers[i].lastSeen}:R>`;
   }
 
   embed.setDescription(description);
@@ -286,7 +286,7 @@ module.exports = {
             new ButtonBuilder()
             .setLabel('API')
             .setStyle(ButtonStyle.Link)
-            .setURL(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)
+            .setURL(`${config.displayApi || config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)
           )
         }
 
@@ -525,6 +525,6 @@ module.exports = {
           await interaction.editReply({ components });
         }
       }, 500);
-    } else await interaction.editReply({ content: '', embeds: [new EmbedBuilder().setColor('#02a337').setTitle('No matches could be found')], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setLabel('API').setStyle(ButtonStyle.Link).setURL(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`))] }); 
+    } else await interaction.editReply({ content: '', embeds: [new EmbedBuilder().setColor('#02a337').setTitle('No matches could be found')], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setLabel('API').setStyle(ButtonStyle.Link).setURL(`${config.displayApi || config.api}/servers?limit=10&skip=${currentEmbed}&${args}`))] }); 
   }
 }
