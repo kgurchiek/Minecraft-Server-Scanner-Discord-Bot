@@ -418,21 +418,21 @@ module.exports = {
 
     let args = new URLSearchParams();
     if (recent != null) {
-      args.set('sort', 'lastSeen');
-      args.set('descending', recent); 
+      args.append('sort', 'lastSeen');
+      args.append('descending', recent); 
     }
-    if (minOnline == maxOnline) { if (minOnline != null) args.set('playerCount', minOnline); }
+    if (minOnline == maxOnline) { if (minOnline != null) args.append('playerCount', minOnline); }
     else {
-      if (minOnline != null) args.set('minPlayers', minOnline);
-      if (maxOnline != null) args.set('maxPlayers', maxOnline);
+      if (minOnline != null) args.append('minPlayers', minOnline);
+      if (maxOnline != null) args.append('maxPlayers', maxOnline);
     }
-    if (playerCap != null) args.set('playerLimit', playerCap);
-    if (isFull != null) args.set('full', isFull);
-    if (player != null) args.set('onlinePlayer', player);
-    if (playerHistory != null) args.set('playerHistory', playerHistory);
-    if (version != null) args.set('version', version);
-    if (protocol != null) args.set('protocol', protocol);
-    if (hasImage != null) args.set('hasFavicon', hasImage);
+    if (playerCap != null) args.append('playerLimit', playerCap);
+    if (isFull != null) args.append('full', isFull);
+    if (player != null) args.append('onlinePlayer', player);
+    if (playerHistory != null) args.append('playerHistory', playerHistory);
+    if (version != null) args.append('version', version);
+    if (protocol != null) args.append('protocol', protocol);
+    if (hasImage != null) args.append('hasFavicon', hasImage);
     if (description != null) {
       let segments = [''];
       let escaped = false;
@@ -451,56 +451,43 @@ module.exports = {
         escaped = false;
       }
       let quotes = segments.filter((a, i) => i % 2 == 1 && (i != segments.length - 1 || segments.length % 2 == 1));
-      if (quotes.length > 0) args.set('description', `%${quotes.join('%')}%`);
-      if (segments.filter((a, i) => i % 2 == 0 || !(i != segments.length - 1 || segments.length % 2 == 1)).join('').length > 0) args.set('descriptionVector', segments.join(''));
+      if (quotes.length > 0) args.append('description', `%${quotes.join('%')}%`);
+      if (segments.filter((a, i) => i % 2 == 0 || !(i != segments.length - 1 || segments.length % 2 == 1)).join('').length > 0) args.append('descriptionVector', segments.join(''));
     }
-    if (hasPlayerList != null) args.set('hasPlayerSample', hasPlayerList);      
-    if (seenAfter != null) args.set('seenAfter', seenAfter);
-    let minIp = null;
-    let maxIp = null;
+    if (hasPlayerList != null) args.append('hasPlayerSample', hasPlayerList);      
+    if (seenAfter != null) args.append('seenAfter', seenAfter);
     if (ipRange != null) {
-      let [ip, subnet] = ipRange.split('/');
-      ip = ip.split('.').reverse().map((a, i) => parseInt(a) * 256**i).reduce((a, b) => a + b, 0);
-      if (subnet == null || subnet >= 32) args.set('ip', ip);
-      else {
-        minIp = (ip & ~((1 << (32 - subnet)) - 1)) >>> 0;
-        maxIp = (ip | ((1 << (32 - subnet)) - 1)) >>> 0;
+      let minIp = [];
+      let maxIp = [];
+      for (let range of ipRange.split(',')) {
+        let [ip, subnet] = range.trim().split('/');
+        ip = ip.split('.').reverse().map((a, i) => parseInt(a) * 256**i).reduce((a, b) => a + b, 0);
+        if (subnet == null || subnet >= 32) args.append('ip', ip);
+        else {
+          minIp.push((ip & ~((1 << (32 - subnet)) - 1)) >>> 0);
+          maxIp.push((ip | ((1 << (32 - subnet)) - 1)) >>> 0);
+        }
       }
+      args.append('minIp', JSON.stringify(minIp));
+      args.append('maxIp', JSON.stringify(maxIp));
     }
     if (excludeRange != null) {
-      let [ip, subnet] = excludeRange.split('/');
-      ip = ip.split('.').reverse().map((a, i) => parseInt(a) * 256**i).reduce((a, b) => a + b, 0);
-      if (subnet == null) subnet = 32;
-      let excludeMinIp = (ip & ~((1 << (32 - subnet)) - 1)) >>> 0;
-      let excludeMaxIp = (ip | ((1 << (32 - subnet)) - 1)) >>> 0;
-      if (minIp == null) {
-        minIp = [0, excludeMaxIp + 1];
-        maxIp = [excludeMinIp - 1];
-      } else if (!(minIp > excludeMaxIp || maxIp < excludeMinIp)) {
-        let oldMinIp = minIp;
-        let oldMaxIp = maxIp;
-        minIp = [];
-        maxIp = [];
-        if (oldMinIp < excludeMinIp) {
-          minIp.push(oldMinIp);
-          maxIp.push(Math.min(oldMaxIp, excludeMinIp));
-        }
-        if (oldMaxIp > excludeMaxIp) {
-          minIp.push(excludeMaxIp + 1);
-          maxIp.push(oldMaxIp);
-        }
+      for (let range of excludeRange.split(',')) {
+        let [ip, subnet] = range.split('/');
+        ip = ip.split('.').reverse().map((a, i) => parseInt(a) * 256**i).reduce((a, b) => a + b, 0);
+        if (subnet == null) subnet = 32;
+        let excludeMinIp = (ip & ~((1 << (32 - subnet)) - 1)) >>> 0;
+        let excludeMaxIp = (ip | ((1 << (32 - subnet)) - 1)) >>> 0;
+        args.append('minIp', JSON.stringify([excludeMaxIp <= 0 ? null : 0, excludeMaxIp >= 4294967295 ? null : excludeMaxIp + 1].filter(a => a != null)));
+        args.append('maxIp', JSON.stringify([excludeMaxIp <= 0 ? null : excludeMinIp - 1].filter(a => a != null)));
       }
     }
-    if (minIp != null && typeof minIp != 'string') minIp = JSON.stringify(minIp);
-    if (maxIp != null && typeof maxIp != 'string') maxIp = JSON.stringify(maxIp);
-    if (minIp != null) args.set('minIp', minIp);
-    if (maxIp != null) args.set('maxIp', maxIp)
-    if (port != null) args.set('port', port);
-    if (country != null) args.set('country', country);
-    if (org != null) args.set('org', org);
-    if (cracked != null) args.set('cracked', cracked);
-    if (whitelisted != null) args.set('whitelisted', whitelisted);
-    if (vanilla != null) args.set('vanilla', vanilla);
+    if (port != null) args.append('port', port);
+    if (country != null) args.append('country', country);
+    if (org != null) args.append('org', org);
+    if (cracked != null) args.append('cracked', cracked);
+    if (whitelisted != null) args.append('whitelisted', whitelisted);
+    if (vanilla != null) args.append('vanilla', vanilla);
     
     servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
     if (servers.length > 0) {
