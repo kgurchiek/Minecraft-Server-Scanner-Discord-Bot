@@ -6,7 +6,7 @@ function createEmbed(server, ip, port) {
     .setColor("#02a337")
     .setTitle(`${ip}:${port}`)
     .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-    .setThumbnail(`https://ping.cornbread2100.com/favicon?ip=${ip}&port=${port}`)
+    .setThumbnail(`https://ping.cornbread2100.com/favicon?ip=${ip}&port=${port}&errors=false`)
     .addFields(
       { name: 'IP', value: ip },
       { name: 'Port', value: String(port) },

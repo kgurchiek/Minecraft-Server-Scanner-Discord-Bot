@@ -34,7 +34,6 @@ module.exports = {
             .setColor('#02a337')
             .setTitle('Ping Result')
             .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
-            .setThumbnail(`https://ping.cornbread2100.com/favicon/?ip=${ip}&port=${port}`)
             .addFields(
               { name: 'IP', value: ip },
               { name: 'Port', value: port.toString() },
