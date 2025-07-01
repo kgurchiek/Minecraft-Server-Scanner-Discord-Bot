@@ -13,7 +13,7 @@ module.exports = {
 			new EmbedBuilder()
 				.setColor("#02a337")
 				.setTitle('/random')
-				.setDescription('Gets a random online Minecraft server'),
+				.setDescription('Gets a random online Java Edition server'),
 			new EmbedBuilder()
 				.setColor("#02a337")
 				.setTitle('/ping')

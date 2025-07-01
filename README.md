@@ -35,7 +35,7 @@ You'll need to install Node.js version v18 or later to run the bot. Then install
 | --- | --- | --- |
 | /help | Shows the bot's list of commands | None |
 | /stats | Sends some stats about the bot | None |
-| /random | Fetches a random online Minecraft server | None |
+| /random | Fetches a random online Java Edition server | None |
 | /ping | Fetches info from a given Minecraft Java server | ip (required), port (optional, defaults to 25565) |
 | /ping | Fetches info from a given Minecraft Bedrock server | ip (required), port (optional, defaults to 19132) |
 | /search | Searches the database for a Java Edition server with specific properties | minimal (true/false), page (integer), playercount (range), playercap (integer), isfull (true/false), player (player name), playerhistory (player name), version (text), hasimage (true/false), description (text), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (text), org (text), cracked (true/false), whitelist (true/false), vanilla (true/false) |

@@ -52,7 +52,7 @@ module.exports = {
   // Define 'random' command
   data: new SlashCommandBuilder()
     .setName('random')
-	  .setDescription('Gets a random online Minecraft server'),
+	  .setDescription('Gets a random online Java Edition server'),
   async execute(interaction, buttonCallbacks, client, totalServers, setTotalServers, recentServers) {
     if (interaction.isChatInputCommand()) await interaction.deferReply();
     else await interaction.deferUpdate();
