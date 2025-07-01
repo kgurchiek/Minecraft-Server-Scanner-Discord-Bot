@@ -469,8 +469,8 @@ module.exports = {
           maxIp.push((ip | ((1 << (32 - subnet)) - 1)) >>> 0);
         }
       }
-      args.append('minIp', JSON.stringify(minIp));
-      args.append('maxIp', JSON.stringify(maxIp));
+      if (minIp.length > 0) args.append('minIp', JSON.stringify(minIp));
+      if (maxIp.length > 0) args.append('maxIp', JSON.stringify(maxIp));
     }
     if (excludeRange != null) {
       for (let range of excludeRange.split(',')) {
