@@ -22,7 +22,7 @@ You can contact me via Discord: [cornbread2100](https://discord.com/users/720658
 > [!IMPORTANT]
 > You can try the bot on its [official Discord server](https://discord.gg/TSWcF2m67m) without hosting it.
 
-Put the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers) into config.json, as well as a client id and secret from the [Twitch Developer Console](https://dev.twitch.tv/console/apps) for streamsniping.
+Put the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers) into `config.json`. If you're running your own instance of the scanner, you can host your own api with https://github.com/kgurchiek/Minecraft-Server-Scanner-API and enter the url into `config.json`. You can also change `displayURL` to make the bot use a different url in the API links exposed to users. This is useful if you have a public endpoint but internally want the bot to make a local or private connection. 
 
 You'll need to install Node.js version v18 or later to run the bot. Then install all required dependencies with `npm i` and run `node deploy-commands` in your terminal to register the slash commands, otherwise they won't show up in Discord. Once everything is set up, run `node index` to start the bot. Each command should load, and "\[Bot\]" will be logged when it's ready.
 
@@ -38,5 +38,5 @@ You'll need to install Node.js version v18 or later to run the bot. Then install
 | /random | Fetches a random online Minecraft server | None |
 | /ping | Fetches info from a given Minecraft Java server | ip (required), port (optional, defaults to 25565) |
 | /ping | Fetches info from a given Minecraft Bedrock server | ip (required), port (optional, defaults to 19132) |
-| /search | Searches the database for a server with specific properties | minimal (true/false), page (integer), playercount (range), playerCap (integer), isfull (true/false), player (player name), playerhistory (player name) version (text), hasimage (true/false), description (text), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (text), org (text), cracked (true/false), whitelist (true/false), vanilla (true/false) |
-| /streamsnipe | Searches the database for live Twitch streamers | language (language name) |
+| /search | Searches the database for a Java Edition server with specific properties | minimal (true/false), page (integer), playercount (range), playercap (integer), isfull (true/false), player (player name), playerhistory (player name), version (text), hasimage (true/false), description (text), hasplayerlist (true/false), seenafter (unix timestamp), iprange (ip subnet), port (integer), country (text), org (text), cracked (true/false), whitelist (true/false), vanilla (true/false) |
+| /bedrocksearch | Searches the database for a Bedrock Edition server with specific properties | minimal (true/false), page (integer), playercount (range), playercap (integer), isfull (true/false),  version (text), description (text), seenafter (unix timestamp), iprange (ip subnet), port (integer), gamemode (text), country (text), org (text) |
