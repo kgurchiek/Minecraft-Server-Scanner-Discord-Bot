@@ -37,11 +37,11 @@ module.exports = {
             .addFields(
               { name: 'IP', value: ip },
               { name: 'Port', value: port.toString() },
-              { name: 'Education Edition', value: response[0] == 'MCEE' ? 'true' : 'false' },
-              { name: 'Description', value: `${getDescription(response[1].description)}\n${getDescription(response[7].description)}` },
-              { name: 'Version', value: getVersion(response[3]) + ` (${response[2]})` },
+              { name: 'Version', value: `${getVersion(response[3])} (${response[2]})` },
+              { name: 'Description', value: `${getDescription(response[1])}\n\n${getDescription(response[7])}` },
               { name: 'Players', value: `${response[4]}/${response[5]}` },
-              { name: 'Game Mode', value: `${response[8]} (${response[9]})` }
+              { name: 'Game Mode', value: `${response[8]} (${response[9]})` },
+              { name: 'Education Edition', value: response[0] == 'MCEE' ? 'true' : 'false' }
             )
             .setTimestamp()
           await interaction.editReply({ content: '', embeds: [newEmbed] });

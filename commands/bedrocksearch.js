@@ -10,50 +10,40 @@ const shortenString = (string, length) => (string.length > length ? `${string.sl
 
 function createEmbed(server) {
   let description;
-  try {
-    description = JSON.parse(server.rawDescription);
-  } catch (err) {
-    description = server.description;
-  }
+  let description2;
+  try { description = JSON.parse(server.rawDescription);
+  } catch (err) { description = server.description; }
+  try { description2 = JSON.parse(server.rawDescription2);
+  } catch (err) { description2 = server.description2; }
   const newEmbed = new EmbedBuilder()
     .setColor('#02a337')
     .setTitle(`${cleanIp(server.ip)}${server.port == 25565 ? '' : `:${server.port}`}`)
     .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
-    .setThumbnail(`https://ping.cornbread2100.com/favicon?ip=${server.ip}&port=${server.port}&errors=false`)
     .addFields(
       { name: 'IP', value: cleanIp(parseInt(server.ip)) },
       { name: 'Port', value: String(server.port) },
       { name: 'Version', value: `${server.version.name} (${server.version.protocol})` },
-      { name: 'Description', value: String(getDescription(description)) || '​' },
+      { name: 'Description', value: `${getDescription(description)}\n\n${getDescription(description2)}` || '​' },
       { name: 'Players', value: displayPlayers(server) },
+      { name: 'Game Mode', value: `${server.gamemode.name} (${server.gamemode.id})` },
+      { name: 'Education Edition', value: String(server.education) },
       { name: 'Discovered', value: `<t:${server.discovered}:${(new Date().getTime() / 1000) - server.discovered > 86400 ? 'D' : 'R'}>`},
       { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` },
-      { name: 'Country: ', value: `${server.geo.country == null ? 'Unknown' : `:flag_${server.geo.country.toLowerCase()}: ${server.geo.country}`}` },
-      { name: 'Organization: ', value: server.org == null ? 'Unknown' : server.org },
-      { name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' },
-      { name: 'Whitelist', value: server.whitelisted == true ? 'Enabled' : server.whitelisted == false ? 'Disabled' : 'Unknown' }
+      { name: 'Country', value: `${server.geo.country == null ? 'Unknown' : `:flag_${server.geo.country.toLowerCase()}: ${server.geo.country}`}` },
+      { name: 'Organization', value: server.org == null ? 'Unknown' : server.org }
     )
     .setTimestamp();
 
   return newEmbed;
 }
 
-function createButtons(server, showingOldPlayers, loading = false) {
+function createButtons(server) {
   const buttons = new ActionRowBuilder()
-  if (showingOldPlayers != null || server.players?.hasPlayerSample) {
-    buttons.addComponents(
-      new ButtonBuilder()
-        .setLabel(loading ? 'Loading...' : showingOldPlayers == null ? 'Show Players' : showingOldPlayers ? 'Online Players' : 'Player History')
-        .setStyle(ButtonStyle.Primary)
-        .setCustomId(`search-${showingOldPlayers ? 'online' : 'history'}-${server.ip}:${server.port}`)
-        .setDisabled(loading)
-    )
-  }
   buttons.addComponents(
     new ButtonBuilder()
       .setLabel('API')
       .setStyle(ButtonStyle.Link)
-      .setURL(`${config.displayApi || config.api}/servers?ip=${server.ip}&port=${server.port}`)
+      .setURL(`${config.displayApi || config.api}/bedrockServers?ip=${server.ip}&port=${server.port}`)
   )
   return buttons;
 }
@@ -92,8 +82,8 @@ function createList(servers, currentEmbed, totalResults, minimal) {
 // Exports an object with the parameters for the target server
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('search')
-    .setDescription('Searches the database for a Java Edition server with specific properties')
+    .setName('bedrocksearch')
+    .setDescription('Searches the database for a Bedrock Edition server with specific properties')
     .addBooleanOption(option =>
       option
         .setName('minimal')
@@ -120,32 +110,16 @@ module.exports = {
         .setDescription('whether or not the server is full'))
     .addStringOption(option =>
       option
-        .setName('player')
-        .setDescription('A player that is currently playing on the server'))
-    .addStringOption(option =>
-      option
-        .setName('playerhistory')
-        .setDescription('The name of a player that has been on the server in the past'))
-    .addStringOption(option =>
-      option
         .setName('version')
         .setDescription('The version of the server'))
     .addIntegerOption(option =>
       option
         .setName('protocol')
         .setDescription('The protocol version of the server'))
-    .addBooleanOption(option =>
-      option
-        .setName('hasimage')
-        .setDescription('Whether or not the server has a custom favicon'))
     .addStringOption(option =>
       option
         .setName('description')
         .setDescription('The description of the server'))
-    .addBooleanOption(option =>
-      option
-        .setName('hasplayerlist')
-        .setDescription('Whether or not the server has player list enabled'))
     .addIntegerOption(option =>
       option
         .setName('seenafter')
@@ -165,6 +139,17 @@ module.exports = {
         .setDescription('The port the server is hosted on'))
     .addStringOption(option =>
       option
+        .setName('gamemode')
+        .setDescription('The default game mode of the server')
+        .addChoices(
+          { name: 'Survival', value: 'survival' },
+          { name: 'Creative', value: 'creative' },
+          { name: 'Adventure', value: 'adventure' },
+          { name: 'Spectator', value: 'spectator' }
+        )
+    )
+    .addStringOption(option =>
+      option
         .setName('country')
         .setDescription('The country the server is hosted in')
         .setAutocomplete(true))
@@ -172,19 +157,7 @@ module.exports = {
       option
         .setName('org')
         .setDescription('The organization hosting the server')
-        .setAutocomplete(true))
-    .addBooleanOption(option =>
-      option
-        .setName('cracked')
-        .setDescription('Whether or not the server is cracked (offline mode)'))
-    .addBooleanOption(option =>
-      option
-        .setName('whitelisted')
-        .setDescription('Whether or not the server has a whitelisted'))
-    .addBooleanOption(option =>
-      option
-        .setName('vanilla')
-        .setDescription('Whether or not the server is vanilla')),
+        .setAutocomplete(true)),
   async autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused(true);
     switch (focusedValue.name) {
@@ -204,32 +177,8 @@ module.exports = {
     switch (id) {
       case 'info': {
         const [ip, port] = content.split(':');
-        const server = (await (await fetch(`${config.api}/servers?ip=${ip}&port=${port}`)).json())[0];
+        const server = (await (await fetch(`${config.api}/bedrockServers?ip=${ip}&port=${port}`)).json())[0];
         await interaction.reply({ embeds: [createEmbed(server)], components: [createButtons(server)] });
-        break;
-      }
-      case 'history': {
-        const [ip, port] = content.split(':');
-        const embed = interaction.message.embeds[0];
-        embed.data.fields[4].value = `${embed.data.fields[4].value.split('\n')[0]}\nLoading Players...`;
-        await interaction.update({ embeds: [embed], components: [createButtons({ ip, port }, true, true)] });
-        const playerList = (await (await fetch(`${config.api}/playerHistory?ip=${ip}&port=${port}`)).json());
-        playerList.sort((a, b) => b.lastSession - a.lastSession);
-        let playerCounts = embed.data.fields[4].value.split('\n')[0];
-        embed.data.fields[4].value = displayPlayers({ players: { online: playerCounts.split('/')[0], max: playerCounts.split('/')[1] }, lastSeen: embed.data.fields[6].value.split(':')[1] }, playerList, true);
-        await interaction.editReply({ embeds: [embed], components: [createButtons({ ip, port }, true)] });
-        break;
-      }
-      case 'online' : {
-        const [ip, port] = content.split(':');
-        const embed = interaction.message.embeds[0];
-        embed.data.fields[4].value = `${embed.data.fields[4].value.split('\n')[0]}\nLoading Players...`;
-        await interaction.update({ embeds: [embed], components: [createButtons({ ip, port }, false, true)] });
-        const playerList = (await (await fetch(`${config.api}/playerHistory?ip=${ip}&port=${port}`)).json());
-        playerList.sort((a, b) => b.lastSession - a.lastSession);
-        let playerCounts = embed.data.fields[4].value.split('\n')[0];
-        embed.data.fields[4].value = displayPlayers({ players: { online: playerCounts.split('/')[0], max: playerCounts.split('/')[1] }}, playerList, false);
-        await interaction.editReply({ embeds: [embed], components: [createButtons({ ip, port }, false)] });
         break;
       }
     }
@@ -252,14 +201,9 @@ module.exports = {
     const nextResultID = `nextResult${interaction.id}`;
     let lastButtonPress = null;
 
-    // Creates interactable buttons
-    let currentEmbed = 0;
-    let servers;
-
     function createListButtons(totalResults) {
       let buttons;
       let infoButtons;
-      let infoButtons2;
       
       function updateButtons() {
         buttons = new ActionRowBuilder();
@@ -286,32 +230,27 @@ module.exports = {
               .setStyle(ButtonStyle.Success)
               .setDisabled(true))
         }
-        if (`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`.length <= 512) {
+        if (`${config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`.length <= 512) {
           buttons.addComponents(
             new ButtonBuilder()
             .setLabel('API')
             .setStyle(ButtonStyle.Link)
-            .setURL(`${config.displayApi || config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)
+            .setURL(`${config.displayApi || config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`)
           )
         }
 
-        infoButtons = new ActionRowBuilder();
-        for (let i = 0; i < (totalResults - currentEmbed < 5 ? totalResults - currentEmbed : 5); i++) {
-          infoButtons.addComponents(
-            new ButtonBuilder()
-              .setCustomId(`search-info-${servers[i].ip}:${servers[i].port}`)
-              .setLabel(String(i + 1))
-              .setStyle(ButtonStyle.Primary)
-          )
-        }
-        infoButtons2 = new ActionRowBuilder();
-        for (let i = 5; i < (totalResults - currentEmbed < 10 ? totalResults - currentEmbed : 10); i++) {
-          infoButtons2.addComponents(
-            new ButtonBuilder()
-              .setCustomId(`search-info-${servers[i].ip}:${servers[i].port}`)
-              .setLabel(String(i + 1))
-              .setStyle(ButtonStyle.Primary)
-          )
+        infoButtons = [];
+        for (let i = 0; i < Math.min(totalResults - currentEmbed, 10); i += 5) {
+          let row = new ActionRowBuilder();
+          for (let j = 0; j < Math.min(totalResults - currentEmbed - i, 5); j++) {
+            row.addComponents(
+              new ButtonBuilder()
+                .setCustomId(`bedrocksearch-info-${servers[i + j].ip}:${servers[i + j].port}`)
+                .setLabel(String(i + j + 1))
+                .setStyle(ButtonStyle.Primary)
+            )
+          }
+          infoButtons.push(row)
         }
       }
       updateButtons();
@@ -324,10 +263,10 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed -= 10;
           if (currentEmbed < 0) currentEmbed = totalResults < 10 ? 0 : totalResults - 10;
-          servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
+          servers = (await (await fetch(`${config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`)).json());
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
-          await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0) });
+          await interaction.editReply({ embeds: [newEmbed], components: [buttons].concat(infoButtons) });
         }
 
         // Event listener for 'Next Page' button
@@ -337,18 +276,18 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed += 10;
           if (currentEmbed >= totalResults) currentEmbed = 0;
-          servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
+          servers = (await (await fetch(`${config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`)).json());
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
-          await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0) });
+          await interaction.editReply({ embeds: [newEmbed], components: [buttons].concat(infoButtons) });
         }
       }
     
-      return [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0);
+      return [buttons].concat(infoButtons);
     }
     
     // Get arguments
-    if (interaction.options.getInteger('page') != null) currentEmbed = interaction.options.getInteger('page') - 1;
+    let currentEmbed = (interaction.options.getInteger('page') || 1) - 1;
     let playerCount;
     let minOnline;
     let maxOnline;
@@ -376,44 +315,32 @@ module.exports = {
     let recent = interaction.options.getBoolean('recent');
     let playerCap = interaction.options.getInteger('playercap');
     let isFull = interaction.options.getBoolean('isfull');
-    let player = interaction.options.getString('player');
-    let playerHistory = interaction.options.getString('playerhistory');
     let version = interaction.options.getString('version');
     let protocol = interaction.options.getInteger('protocol');
-    let hasImage = interaction.options.getBoolean('hasimage');
     let description = interaction.options.getString('description');
-    let hasPlayerList = interaction.options.getBoolean('hasplayerlist');
     let seenAfter = interaction.options.getInteger('seenafter');
     let ipRange = interaction.options.getString('iprange');
     let excludeRange = interaction.options.getString('excluderange');
     let port = interaction.options.getInteger('port');
+    let gamemode = interaction.options.getString('gamemode');
     let country = interaction.options.getString('country');
     let org = interaction.options.getString('org');
-    let cracked = interaction.options.getBoolean('cracked');
-    let whitelisted = interaction.options.getBoolean('whitelisted');
-    let vanilla = interaction.options.getBoolean('vanilla');
 
     let argumentList = 'Searching...';
     if (recent != null) argumentList += `\n- **sorted by recency (${recent ? 'descending' : 'ascending'})**`;
     if (playerCount != null) argumentList += `\n- **playercount:** ${playerCount}`;
     if (playerCap != null) argumentList += `\n- **playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n- **${isFull ? 'is' : 'not'} full**`;
-    if (player != null) argumentList += `\n- **player:** ${player}`;
-    if (playerHistory != null) argumentList += `\n- **playerhistory:** ${playerHistory}`;
     if (version != null) argumentList += `\n- **version:** ${version}`;
     if (protocol != null) argumentList += `\n- **protocol:** ${protocol}`;
-    if (hasImage != null) argumentList += `\n- **${hasImage ? 'has' : 'doesn\'t have'} a custom favicon**`;
     if (description != null) argumentList += `\n- **description:** ${description}`;
-    if (hasPlayerList != null) argumentList += `\n- **player list ${hasPlayerList ? 'enabled': 'disabled'}**`;
     if (seenAfter != null) argumentList += `\n- **seenafter: **<t:${seenAfter}:f>`;
     if (ipRange != null) argumentList += `\n- **iprange: **${ipRange}`;
     if (excludeRange != null) argumentList += `\n- **excluderange: **${excludeRange}`;
     if (port != null) argumentList += `\n- **port: **${port}`;
+    if (gamemode != null) argumentList += `\n- **gamemode: **${gamemode}`;
     if (country != null) argumentList += `\n- **country: **:flag_${country.toLowerCase()}: ${country}`;
     if (org != null) argumentList += `\n- **org: **${org}`;
-    if (cracked != null) argumentList += `\n- **auth: **${cracked ? 'cracked' : 'premium' }`;
-    if (whitelisted != null) argumentList += `\n- **whitelisted ${whitelisted ? 'enabled' : 'disabled'}**`;
-    if (vanilla != null) argumentList += `\n- **${vanilla ? 'vanilla' : 'not vanilla'}**`;
 
     await interaction.reply(argumentList);
 
@@ -429,11 +356,8 @@ module.exports = {
     }
     if (playerCap != null) args.append('playerLimit', playerCap);
     if (isFull != null) args.append('full', isFull);
-    if (player != null) args.append('onlinePlayer', player);
-    if (playerHistory != null) args.append('playerHistory', playerHistory);
     if (version != null) args.append('version', version);
     if (protocol != null) args.append('protocol', protocol);
-    if (hasImage != null) args.append('hasFavicon', hasImage);
     if (description != null) {
       let segments = [''];
       let escaped = false;
@@ -455,7 +379,6 @@ module.exports = {
       if (quotes.length > 0) args.append('description', `%${quotes.join('%')}%`);
       if (segments.filter((a, i) => i % 2 == 0 || !(i != segments.length - 1 || segments.length % 2 == 1)).join('').length > 0) args.append('descriptionVector', segments.join(''));
     }
-    if (hasPlayerList != null) args.append('hasPlayerSample', hasPlayerList);      
     if (seenAfter != null) args.append('seenAfter', seenAfter);
     if (ipRange != null) {
       let minIp = [];
@@ -484,16 +407,15 @@ module.exports = {
       }
     }
     if (port != null) args.append('port', port);
+    if (gamemode != null) args.append('gamemode', gamemode);
     if (country != null) args.append('country', country);
     if (org != null) args.append('org', org);
-    if (cracked != null) args.append('cracked', cracked);
-    if (whitelisted != null) args.append('whitelisted', whitelisted);
-    if (vanilla != null) args.append('vanilla', vanilla);
     
-    servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
+    servers = (await (await fetch(`${config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`)).json());
     if (servers.length > 0) {
       let totalResults;
-      (new Promise(async resolve => resolve(await (await fetch(`${config.api}/count?${args}`)).json()))).then(response => totalResults = response)
+      if (servers.length == 10) (new Promise(async resolve => resolve(await (await fetch(`${config.api}/bedrockCount?${args}`)).json()))).then(response => totalResults = response);
+      else totalResults = servers.length;
 
       let components = createListButtons(servers.length);
       let newEmbed = createList(servers, currentEmbed, 0, minimal);
@@ -523,6 +445,6 @@ module.exports = {
           await interaction.editReply({ components });
         }
       }, 500);
-    } else await interaction.editReply({ content: '', embeds: [new EmbedBuilder().setColor('#02a337').setTitle('No matches could be found')], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setLabel('API').setStyle(ButtonStyle.Link).setURL(`${config.displayApi || config.api}/servers?limit=10&skip=${currentEmbed}&${args}`))] }); 
+    } else await interaction.editReply({ content: '', embeds: [new EmbedBuilder().setColor('#02a337').setTitle('No matches could be found')], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setLabel('API').setStyle(ButtonStyle.Link).setURL(`${config.displayApi || config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`))] }); 
   }
 }

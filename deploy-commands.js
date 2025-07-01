@@ -31,4 +31,5 @@ const rest = new REST({ version: '10' }).setToken(token);
 		// Catches & logs any errors into the console
 		console.error(error);
 	}
+	process.exit();
 })();
