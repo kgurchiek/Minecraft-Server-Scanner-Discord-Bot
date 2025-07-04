@@ -87,7 +87,7 @@ module.exports = {
     .addBooleanOption(option =>
       option
         .setName('minimal')
-        .setDescription('Only shows ip and port in preview (recommended for mobile users)'))
+        .setDescription('Only shows IP and port in preview (recommended for mobile users)'))
     .addBooleanOption(option =>
       option
         .setName('recent')
@@ -128,11 +128,11 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName('iprange')
-        .setDescription('The ip subnet a server\'s ip has to be within'))
+        .setDescription('The IP subnet a server\'s IP has to be within'))
     .addStringOption(option =>
       option
         .setName('excluderange')
-        .setDescription('The ip subnet a server\'s ip cannot be within'))
+        .setDescription('The IP subnet a server\'s IP cannot be within'))
     .addIntegerOption(option =>
       option
         .setName('port')
