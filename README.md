@@ -15,14 +15,14 @@ This is the complete code for a Node.js Discord bot. This bot doesn't do the sca
 
 If you find any bugs, please report them in the [official Discord server](https://discord.gg/TSWcF2m67m).
 
-You can contact me via Discord: [cornbread2100](https://discord.com/users/720658048611516559)
+You can contact me via Discord: [cornbread2100](https://discord.com/users/720658048611516559).
 
 ## 🌐 Hosting the bot yourself
 
 > [!IMPORTANT]
 > You can try the bot on its [official Discord server](https://discord.gg/TSWcF2m67m) without hosting it.
 
-Put the bot's token and client id from the [Discord Developer Portal](https://discord.com/developers) into `config.json`. If you're running your own instance of the scanner, you can host your own api with https://github.com/kgurchiek/Minecraft-Server-Scanner-API and enter the url into `config.json`. You can also change `displayURL` to make the bot use a different url in the API links exposed to users. This is useful if you have a public endpoint but internally want the bot to make a local or private connection. 
+Put the bot's token and client ID from the [Discord Developer Portal](https://discord.com/developers) into `config.json`. If you're running your own instance of the scanner, you can host your own API with https://github.com/kgurchiek/Minecraft-Server-Scanner-API and enter the url into `config.json`. You can also change `displayURL` to make the bot use a different url in the API links exposed to users. This is useful if you have a public endpoint but internally want the bot to make a local or private connection. 
 
 You'll need to install Node.js version v18 or later to run the bot. Then install all required dependencies with `npm i` and run `node deploy-commands` in your terminal to register the slash commands, otherwise they won't show up in Discord. Once everything is set up, run `node index` to start the bot. Each command should load, and "\[Bot\]" will be logged when it's ready.
 
