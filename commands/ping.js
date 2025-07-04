@@ -39,10 +39,10 @@ module.exports = {
   // Command options
   data: new SlashCommandBuilder()
     .setName('ping')
-    .setDescription('Fetches info from a given Minecraft server')
+    .setDescription('Fetches info from a given Java Edition server')
     .addStringOption(option =>
       option.setName('ip')
-	    .setDescription('The ip of the server to ping')
+	    .setDescription('The IP of the server to ping')
       .setRequired(true))
     .addIntegerOption(option =>
       option.setName('port')
