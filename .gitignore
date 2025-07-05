@@ -1,3 +1,6 @@
 .env
 node_modules/
 config.json
+# macOS files
+*.DS_Store
+.DS_Store

@@ -9,7 +9,7 @@ module.exports = {
     .setDescription('Fetches info from a given Minecraft Bedrock server')
     .addStringOption(option =>
       option.setName('ip')
-	    .setDescription('The ip of the server to ping')
+	    .setDescription('The IP of the server to ping')
       .setRequired(true))
     .addIntegerOption(option =>
       option.setName('port')
