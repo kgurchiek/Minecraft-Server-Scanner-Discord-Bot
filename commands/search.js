@@ -411,7 +411,7 @@ module.exports = {
     let vanilla = interaction.options.getBoolean('vanilla');
 
     let argumentList = 'Searching...';
-    if (sort != null) argumentList += `\n- **${sort == 'none' ? 'not sorted' : `sorted by ${{ 'lastSeen': 'Last Ping', 'discovered': 'Dicovery Date' }[sort.split(':')[0]]} (${{ 'a': 'ascending', 'd': 'descending' }[sort.split(':')[1]]})`}**`;
+    argumentList += `\n- **${sort == 'none' ? 'not sorted' : `sorted by ${{ 'lastSeen': 'Last Ping', 'discovered': 'Dicovery Date' }[sort.split(':')[0]]} (${{ 'a': 'ascending', 'd': 'descending' }[sort.split(':')[1]]})`}**`;
     if (playerCount != null) argumentList += `\n- **playercount:** ${playerCount}`;
     if (playerCap != null) argumentList += `\n- **playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n- **${isFull ? 'is' : 'not'} full**`;
