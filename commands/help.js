@@ -64,6 +64,7 @@ module.exports = {
 				.setDescription('Searches the database for a Bedrock Edition server with specific properties')
 				.addFields(
 					{ name: 'minimal (true/false)', value: 'Only shows ip and port in preview (recommended for mobile users)', inline: true },
+					{ name: 'sort (autocomplete)', value: 'Sorts the results (may cause issues with pagination)', inline: true },
 					{ name: 'page (integer)', value: 'Skips to a page of results', inline: true },
 					{ name: 'playercount (range)', value: 'A range of how many players on on the server (e.g. 4, >10, <=5, 11-20)', inline: true },
 					{ name: 'playercap (integer)', value: 'The maximum player capacity of the server', inline: true },
