@@ -98,10 +98,17 @@ module.exports = {
       option
         .setName('minimal')
         .setDescription('Only shows ip and port in preview (recommended for mobile users)'))
-    .addBooleanOption(option =>
+    .addStringOption(option =>
       option
-        .setName('recent')
-        .setDescription('Sorts servers by recency'))
+        .setName('sort')
+        .setDescription('How to sort results')
+        .addChoices(
+          { name: 'None', value: 'none' },
+          { name: 'Last Ping (new to old)', value: 'lastSeen:d' },
+          { name: 'Last Ping (old to new)', value: 'lastSeen:a' },
+          { name: 'Discovery Date (new to old)', value: 'discovered:d' },
+          { name: 'Discovery Date (old to new)', value: 'discovered:a' }
+        ))
     .addIntegerOption(option =>
       option
         .setName('page')
@@ -373,7 +380,7 @@ module.exports = {
       }
     }
     let minimal = interaction.options.getBoolean('minimal');
-    let recent = interaction.options.getBoolean('recent');
+    let sort = interaction.options.getString('sort') || 'lastSeen:d';
     let playerCap = interaction.options.getInteger('playercap');
     let isFull = interaction.options.getBoolean('isfull');
     let player = interaction.options.getString('player');
@@ -394,7 +401,7 @@ module.exports = {
     let vanilla = interaction.options.getBoolean('vanilla');
 
     let argumentList = 'Searching...';
-    if (recent != null) argumentList += `\n- **sorted by recency (${recent ? 'descending' : 'ascending'})**`;
+    if (sort != null) argumentList += `\n- **${sort == 'none' ? 'not sorted' : `sorted by ${{ 'lastSeen': 'Last Ping', 'discovered': 'Dicovery Date' }[sort.split(':')[0]]} (${{ 'a': 'ascending', 'd': 'descending' }[sort.split(':')[1]]})`}**`;
     if (playerCount != null) argumentList += `\n- **playercount:** ${playerCount}`;
     if (playerCap != null) argumentList += `\n- **playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n- **${isFull ? 'is' : 'not'} full**`;
@@ -418,9 +425,9 @@ module.exports = {
     await interaction.reply(argumentList);
 
     let args = new URLSearchParams();
-    if (recent != null) {
-      args.append('sort', 'lastSeen');
-      args.append('descending', recent); 
+    if (sort != 'none') {
+      args.append('sort', sort.split(':')[0]);
+      args.append('descending', sort.split(':')[1] == 'd'); 
     }
     if (minOnline == maxOnline) { if (minOnline != null) args.append('playerCount', minOnline); }
     else {
