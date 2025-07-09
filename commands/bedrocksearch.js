@@ -384,7 +384,7 @@ module.exports = {
       }
       let quotes = segments.filter((a, i) => i % 2 == 1 && (i != segments.length - 1 || segments.length % 2 == 1));
       if (quotes.length > 0) args.append('description', `%${quotes.join('%')}%`);
-      if (segments.filter((a, i) => i % 2 == 0 || !(i != segments.length - 1 || segments.length % 2 == 1)).join('').length > 0) args.append('descriptionVector', segments.join(''));
+      if (segments.filter((a, i) => i % 2 == 0 || !(i != segments.length - 1 || segments.length % 2 == 1)).join('').length > 0) args.append('description', segments.join(''));
     }
     if (seenAfter != null) args.append('seenAfter', seenAfter);
     if (ipRange != null) {
