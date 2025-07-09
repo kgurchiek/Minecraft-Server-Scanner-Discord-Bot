@@ -36,12 +36,15 @@ module.exports = {
 				.setDescription('Searches the database for a Java Edition server with specific properties')
 				.addFields(
 					{ name: 'minimal (true/false)', value: 'Only shows ip and port in preview (recommended for mobile users)', inline: true },
+					{ name: 'sort (autocomplete)', value: 'Sorts the results (may cause issues with pagination)', inline: true },
 					{ name: 'page (integer)', value: 'Skips to a page of results', inline: true },
 					{ name: 'playercount (range)', value: 'A range of how many players on on the server (e.g. 4, >10, <=5, 11-20)', inline: true },
 					{ name: 'playercap (integer)', value: 'The maximum player capacity of the server', inline: true },
 					{ name: 'isfull (true/false)', value: 'Whether or not the server is full', inline: true },
-					{ name: 'player (player name)', value: 'A player that is currently playing on the server', inline: true },
+					{ name: 'player (player name)', value: 'The name of a player that is currently playing on the server', inline: true },
+					{ name: 'uuid (player uuid)', value: 'The uuid of a player that is currently playing on the server', inline: true },
 					{ name: 'playerhistory (player name)', value: 'The name of a player that has been on the server in the past', inline: true },
+					{ name: 'uuidhistory (player uuid)', value: 'The uuid of a player that has been on the server in the past', inline: true },
 					{ name: 'version (text)', value: 'The version of the server', inline: true },
 					{ name: 'hasimage (true/false)', value: 'Whether or not the server has a custom favicon', inline: true },
 					{ name: 'description (text)', value: 'The description of the server', inline: true },

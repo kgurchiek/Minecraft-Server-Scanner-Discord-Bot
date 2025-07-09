@@ -128,11 +128,19 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName('player')
-        .setDescription('A player that is currently playing on the server'))
+        .setDescription('The name of a player that is currently playing on the server'))
+    .addStringOption(option =>
+      option
+        .setName('uuid')
+        .setDescription('The uuid of a player that is currently playing on the server'))
     .addStringOption(option =>
       option
         .setName('playerhistory')
         .setDescription('The name of a player that has been on the server in the past'))
+    .addStringOption(option =>
+      option
+        .setName('uuidhistory')
+        .setDescription('The uuid of a player that has been on the server in the past'))
     .addStringOption(option =>
       option
         .setName('version')
@@ -384,7 +392,9 @@ module.exports = {
     let playerCap = interaction.options.getInteger('playercap');
     let isFull = interaction.options.getBoolean('isfull');
     let player = interaction.options.getString('player');
+    let uuid = interaction.options.getString('uuid');
     let playerHistory = interaction.options.getString('playerhistory');
+    let uuidHistory = interaction.options.getString('uuidhistory');
     let version = interaction.options.getString('version');
     let protocol = interaction.options.getInteger('protocol');
     let hasImage = interaction.options.getBoolean('hasimage');
@@ -406,7 +416,9 @@ module.exports = {
     if (playerCap != null) argumentList += `\n- **playercap:** ${playerCap}`;
     if (isFull != null) argumentList += `\n- **${isFull ? 'is' : 'not'} full**`;
     if (player != null) argumentList += `\n- **player:** ${player}`;
+    if (uuid != null) argumentList += `\n- **uuid:** ${uuid}`;
     if (playerHistory != null) argumentList += `\n- **playerhistory:** ${playerHistory}`;
+    if (uuidHistory != null) argumentList += `\n- **uuidhistory:** ${uuidHistory}`;
     if (version != null) argumentList += `\n- **version:** ${version}`;
     if (protocol != null) argumentList += `\n- **protocol:** ${protocol}`;
     if (hasImage != null) argumentList += `\n- **${hasImage ? 'has' : 'doesn\'t have'} a custom favicon**`;
@@ -437,7 +449,9 @@ module.exports = {
     if (playerCap != null) args.append('playerLimit', playerCap);
     if (isFull != null) args.append('full', isFull);
     if (player != null) args.append('onlinePlayer', player);
+    if (uuid != null) args.append('onlineUuid', uuid);
     if (playerHistory != null) args.append('playerHistory', playerHistory);
+    if (uuidHistory != null) args.append('uuidHistory', uuidHistory);
     if (version != null) args.append('version', version);
     if (protocol != null) args.append('protocol', protocol);
     if (hasImage != null) args.append('hasFavicon', hasImage);
