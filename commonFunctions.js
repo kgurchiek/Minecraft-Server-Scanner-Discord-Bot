@@ -63,12 +63,8 @@ module.exports = {
     if (description == null) return '';
     if (typeof description != 'object') return module.exports.getDescription({ text: String(description) });
     if (Array.isArray(description)) return description.reduce((a, b) => a + module.exports.getDescription(b), '');
-    let newDescription = String(description.text == null ? '' : description.text) + String(description.translate == null ? '' : description.translate) + (description.extra || []).reduce((a, b) => a + module.exports.getDescription(b), '');
-    description = '';
-    for (let i = 0; i < newDescription.length; i++) {
-      if (newDescription[i] == '§') i++;
-      else description += newDescription[i];
-    }
+    description = String(description.text == null ? '' : description.text) + String(description.translate == null ? '' : description.translate) + (description.extra || []).reduce((a, b) => a + module.exports.getDescription(b), '');
+    description = module.exports.minecraftToAnsi(description)
     return description;
   },
   getVersion: (rawVersion) => {
