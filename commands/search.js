@@ -59,7 +59,7 @@ function createButtons(server, showingOldPlayers, loading = false) {
 }
 
 const displayIp = (server) => `${cleanIp(parseInt(server.ip))}${server.port == 25565 ? '' : `:${server.port}`}`;
-const displayVersion = (version) => `${shortenString(String(version?.name), 19)} (${version?.protocol})`;
+const displayVersion = (version) => `${shortenString(String(version?.name), 18)}`;
 
 function createList(servers, currentEmbed, totalResults, minimal) {
   const embed = new EmbedBuilder()
@@ -82,7 +82,7 @@ function createList(servers, currentEmbed, totalResults, minimal) {
     description += `${i == 0 ? '' : '\n'}${i + 1}. ${minimal ? '' : (servers[i].geo?.country == null ? '❔ ' : `:flag_${servers[i].geo.country.toLowerCase()}: `)}`;
     description += `\`${displayIp(servers[i])}`;
     description += `${' '.repeat(longest.server - displayIp(servers[i]).length)}\``;
-    if (!minimal) description += ` \`${displayVersion(servers[i].version)}${' '.repeat(longest.version - displayVersion(servers[i].version).length)}\` <t:${servers[i].lastSeen}:R>`;
+    if (!minimal) description += ` \`${displayVersion(servers[i].version)}${' '.repeat(longest.version - displayVersion(servers[i].version).length)}\` Pinged <t:${servers[i].lastSeen}:R>`;
   }
 
   embed.setDescription(description);
