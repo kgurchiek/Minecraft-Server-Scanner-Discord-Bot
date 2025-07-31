@@ -53,7 +53,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('random')
 	  .setDescription('Gets a random online Java Edition server'),
-  async execute(interaction, buttonCallbacks, client, totalServers, setTotalServers, recentServers) {
+  async execute(interaction, buttonCallbacks, client, totalServers, setTotalServers, totalBedrock, updateTotalBedrock, recentServers) {
     if (interaction.isChatInputCommand()) await interaction.deferReply();
     else await interaction.deferUpdate();
     const user = interaction.user;
