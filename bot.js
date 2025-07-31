@@ -27,7 +27,7 @@ let totalServers;
 function updateTotalServers(newTotalServers) {
     if (typeof newTotalServers == 'number' && newTotalServers != totalServers) {
         totalServers = newTotalServers;
-        client.user.setPresence({ activities: [{ name: `${totalServers.toLocaleString()} MC Servers`, type: ActivityType.Watching }]});
+        if (totalServers != null && totalBedrock != null) client.user.setPresence({ activities: [{ name: `${(totalServers + totalBedrock).toLocaleString()} MC Servers`, type: ActivityType.Watching }]});
     }
 }
 
@@ -35,6 +35,7 @@ let totalBedrock;
 function updateTotalBedrock(newTotalBedrock) {
     if (typeof newTotalBedrock == 'number' && newTotalBedrock != totalBedrock) {
         totalBedrock = newTotalBedrock;
+        if (totalServers != null && totalBedrock != null) client.user.setPresence({ activities: [{ name: `${(totalServers + totalBedrock).toLocaleString()} MC Servers`, type: ActivityType.Watching }]});
     }
 }
 
