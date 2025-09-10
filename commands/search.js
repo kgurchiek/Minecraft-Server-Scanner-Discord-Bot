@@ -512,6 +512,14 @@ module.exports = {
     if (vanilla != null) args.append('vanilla', vanilla);
     
     servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
+    if (servers.error) {
+      let errorEmbed = new EmbedBuilder()
+        .setColor('#ff0000')
+        .setTitle('Error')
+        .setDescription(servers.error)
+      await interaction.editReply({ content: '', embeds: [errorEmbed]})
+      return;
+    }
     if (servers.length > 0) {
       let totalResults;
       (new Promise(async resolve => resolve(await (await fetch(`${config.api}/count?${args}`)).json()))).then(response => totalResults = response)

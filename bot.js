@@ -73,8 +73,8 @@ client.on(Events.InteractionCreate, async interaction => {
             var errorEmbed = new EmbedBuilder()
                 .setColor("#ff0000")
                 .addFields({ name: 'Error', value: error.toString() })
-            if (interaction.replied || interaction.deferred) await interaction.editReply({ embeds: [errorEmbed] })
-            else await interaction.reply({ content: '', embeds: [errorEmbed] })
+            if (interaction.replied || interaction.deferred) await interaction.editReply({ content: '', embeds: [errorEmbed] });
+            else await interaction.reply({ content: '', embeds: [errorEmbed] });
         }
     } else if (interaction.isAutocomplete()) {
         const command = client.commands.get(interaction.commandName);
