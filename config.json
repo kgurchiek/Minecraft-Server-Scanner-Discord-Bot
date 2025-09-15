@@ -1,8 +1,6 @@
 {
 	"clientId": "",
 	"token": "",
-	"twitchClientId": "",
-	"twitchClientSecret": "",
-	"api": "https://api.cornbread2100.com",
-	"displayApi": null
+	"api": "https://api.cornbread2100.com/v1",
+	"displayApi": "https://api.cornbread2100.com/v1"
 }

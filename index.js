@@ -10,12 +10,12 @@ manager.on('shardCreate', shard => {
 manager.spawn();
 
 async function updateCount() {
-    let result = await (await fetch(`${config.api}/count`)).json();
+    let result = (await (await fetch(`${config.api}/count`)).json()).data;
     if (typeof result == 'number') for (const shard of shards) shard.send({ type: 'updateCount', count: result });
 }
 
 async function updateBedrockCount() {
-    let result = await (await fetch(`${config.api}/bedrockCount`)).json();
+    let result = (await (await fetch(`${config.api}/bedrockCount`)).json()).data;
     if (typeof result == 'number') for (const shard of shards) shard.send({ type: 'updateBedrockCount', count: result });
 }
 

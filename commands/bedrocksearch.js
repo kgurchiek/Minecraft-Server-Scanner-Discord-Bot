@@ -184,7 +184,7 @@ module.exports = {
     switch (id) {
       case 'info': {
         const [ip, port] = content.split(':');
-        const server = (await (await fetch(`${config.api}/bedrockServers?ip=${ip}&port=${port}`)).json())[0];
+        const server = (await (await fetch(`${config.api}/bedrockServers?ip=${ip}&port=${port}`)).json()).data[0];
         await interaction.reply({ embeds: [createEmbed(server)], components: [createButtons(server)] });
         break;
       }
@@ -270,7 +270,7 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed -= 10;
           if (currentEmbed < 0) currentEmbed = totalResults < 10 ? 0 : totalResults - 10;
-          servers = (await (await fetch(`${config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`)).json());
+          servers = (await (await fetch(`${config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`)).json()).data;
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons].concat(infoButtons) });
@@ -283,7 +283,7 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed += 10;
           if (currentEmbed >= totalResults) currentEmbed = 0;
-          servers = (await (await fetch(`${config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`)).json());
+          servers = (await (await fetch(`${config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`)).json()).data;
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons].concat(infoButtons) });
@@ -418,10 +418,10 @@ module.exports = {
     if (country != null) args.append('country', country);
     if (org != null) args.append('org', org);
     
-    servers = (await (await fetch(`${config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`)).json());
+    servers = (await (await fetch(`${config.api}/bedrockServers?limit=10&skip=${currentEmbed}&${args}`)).json()).data;
     if (servers.length > 0) {
       let totalResults;
-      if (servers.length == 10) (new Promise(async resolve => resolve(await (await fetch(`${config.api}/bedrockCount?${args}`)).json()))).then(response => totalResults = response);
+      if (servers.length == 10) (new Promise(async resolve => resolve(await (await fetch(`${config.api}/bedrockCount?${args}`)).json()))).then(response => totalResults = response.data);
       else totalResults = servers.length;
 
       let components = createListButtons(servers.length);

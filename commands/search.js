@@ -219,7 +219,7 @@ module.exports = {
     switch (id) {
       case 'info': {
         const [ip, port] = content.split(':');
-        const server = (await (await fetch(`${config.api}/servers?ip=${ip}&port=${port}`)).json())[0];
+        const server = (await (await fetch(`${config.api}/servers?ip=${ip}&port=${port}`)).json()).data[0];
         await interaction.reply({ embeds: [createEmbed(server)], components: [createButtons(server)] });
         break;
       }
@@ -228,7 +228,7 @@ module.exports = {
         const embed = interaction.message.embeds[0];
         embed.data.fields[4].value = `${embed.data.fields[4].value.split('\n')[0]}\nLoading Players...`;
         await interaction.update({ embeds: [embed], components: [createButtons({ ip, port }, true, true)] });
-        const playerList = (await (await fetch(`${config.api}/playerHistory?ip=${ip}&port=${port}`)).json());
+        const playerList = (await (await fetch(`${config.api}/playerHistory?ip=${ip}&port=${port}`)).json()).data;
         playerList.sort((a, b) => b.lastSession - a.lastSession);
         let playerCounts = embed.data.fields[4].value.split('\n')[0];
         embed.data.fields[4].value = displayPlayers({ players: { online: playerCounts.split('/')[0], max: playerCounts.split('/')[1] }, lastSeen: embed.data.fields[6].value.split(':')[1] }, playerList, true);
@@ -240,7 +240,7 @@ module.exports = {
         const embed = interaction.message.embeds[0];
         embed.data.fields[4].value = `${embed.data.fields[4].value.split('\n')[0]}\nLoading Players...`;
         await interaction.update({ embeds: [embed], components: [createButtons({ ip, port }, false, true)] });
-        const playerList = (await (await fetch(`${config.api}/playerHistory?ip=${ip}&port=${port}`)).json());
+        const playerList = (await (await fetch(`${config.api}/playerHistory?ip=${ip}&port=${port}`)).json()).data;
         playerList.sort((a, b) => b.lastSession - a.lastSession);
         let playerCounts = embed.data.fields[4].value.split('\n')[0];
         embed.data.fields[4].value = displayPlayers({ players: { online: playerCounts.split('/')[0], max: playerCounts.split('/')[1] }}, playerList, false);
@@ -339,7 +339,7 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed -= 10;
           if (currentEmbed < 0) currentEmbed = totalResults < 10 ? 0 : totalResults - 10;
-          servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
+          servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json()).data;
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0) });
@@ -352,7 +352,7 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed += 10;
           if (currentEmbed >= totalResults) currentEmbed = 0;
-          servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
+          servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json()).data;
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0) });
@@ -511,7 +511,7 @@ module.exports = {
     if (whitelisted != null) args.append('whitelisted', whitelisted);
     if (vanilla != null) args.append('vanilla', vanilla);
     
-    servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json());
+    servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json()).data;
     if (servers.error) {
       let errorEmbed = new EmbedBuilder()
         .setColor('#ff0000')
@@ -522,7 +522,7 @@ module.exports = {
     }
     if (servers.length > 0) {
       let totalResults;
-      (new Promise(async resolve => resolve(await (await fetch(`${config.api}/count?${args}`)).json()))).then(response => totalResults = response)
+      (new Promise(async resolve => resolve(await (await fetch(`${config.api}/count?${args}`)).json()))).then(response => totalResults = response.data)
 
       let components = createListButtons(servers.length);
       let newEmbed = createList(servers, currentEmbed, 0, minimal);

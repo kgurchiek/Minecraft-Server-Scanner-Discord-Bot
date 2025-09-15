@@ -13,12 +13,12 @@ module.exports = {
         await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
 
         if (totalServers == null) {
-            totalServers = await (await fetch(`${config.api}/count`)).json();
+            totalServers = (await (await fetch(`${config.api}/count`)).json()).data;
             updateTotalServers(totalServers);
         }
 
         if (totalBedrock == null) {
-            totalBedrock = await (await fetch(`${config.api}/bedrockCount`)).json();
+            totalBedrock = a(wait (await fetch(`${config.api}/bedrockCount`)).json()).data;
             updateTotalServers(totalBedrock);
         }
 
