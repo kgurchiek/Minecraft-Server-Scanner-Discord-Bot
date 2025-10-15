@@ -278,28 +278,30 @@ module.exports = {
       
       function updateButtons() {
         buttons = new ActionRowBuilder();
-        if (totalResults > 10) {
-          buttons.addComponents(
-            new ButtonBuilder()
-              .setCustomId(lastResultID)
-              .setLabel('◀')
-              .setStyle(ButtonStyle.Success),
-            new ButtonBuilder()
-              .setCustomId(nextResultID)
-              .setLabel('▶')
-              .setStyle(ButtonStyle.Success))
-        } else {
-          buttons.addComponents(
-            new ButtonBuilder()
-              .setCustomId(lastResultID)
-              .setLabel('◀')
-              .setStyle(ButtonStyle.Success)
-              .setDisabled(true),
-            new ButtonBuilder()
-              .setCustomId(nextResultID)
-              .setLabel('▶')
-              .setStyle(ButtonStyle.Success)
-              .setDisabled(true))
+        if (totalResults != null) {
+          if (totalResults > 10) {
+            buttons.addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('◀')
+                .setStyle(ButtonStyle.Success),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('▶')
+                .setStyle(ButtonStyle.Success))
+          } else {
+            buttons.addComponents(
+              new ButtonBuilder()
+                .setCustomId(lastResultID)
+                .setLabel('◀')
+                .setStyle(ButtonStyle.Success)
+                .setDisabled(true),
+              new ButtonBuilder()
+                .setCustomId(nextResultID)
+                .setLabel('▶')
+                .setStyle(ButtonStyle.Success)
+                .setDisabled(true))
+          }
         }
         if (`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`.length <= 512) {
           buttons.addComponents(
@@ -310,23 +312,25 @@ module.exports = {
           )
         }
 
-        infoButtons = new ActionRowBuilder();
-        for (let i = 0; i < (totalResults - currentEmbed < 5 ? totalResults - currentEmbed : 5); i++) {
-          infoButtons.addComponents(
-            new ButtonBuilder()
-              .setCustomId(`search-info-${servers[i].ip}:${servers[i].port}`)
-              .setLabel(String(i + 1))
-              .setStyle(ButtonStyle.Primary)
-          )
-        }
-        infoButtons2 = new ActionRowBuilder();
-        for (let i = 5; i < (totalResults - currentEmbed < 10 ? totalResults - currentEmbed : 10); i++) {
-          infoButtons2.addComponents(
-            new ButtonBuilder()
-              .setCustomId(`search-info-${servers[i].ip}:${servers[i].port}`)
-              .setLabel(String(i + 1))
-              .setStyle(ButtonStyle.Primary)
-          )
+        if (totalResults != null) {
+          infoButtons = new ActionRowBuilder();
+          for (let i = 0; i < (totalResults - currentEmbed < 5 ? totalResults - currentEmbed : 5); i++) {
+            infoButtons.addComponents(
+              new ButtonBuilder()
+                .setCustomId(`search-info-${servers[i].ip}:${servers[i].port}`)
+                .setLabel(String(i + 1))
+                .setStyle(ButtonStyle.Primary)
+            )
+          }
+          infoButtons2 = new ActionRowBuilder();
+          for (let i = 5; i < (totalResults - currentEmbed < 10 ? totalResults - currentEmbed : 10); i++) {
+            infoButtons2.addComponents(
+              new ButtonBuilder()
+                .setCustomId(`search-info-${servers[i].ip}:${servers[i].port}`)
+                .setLabel(String(i + 1))
+                .setStyle(ButtonStyle.Primary)
+            )
+          }
         }
       }
       updateButtons();
@@ -359,7 +363,7 @@ module.exports = {
         }
       }
     
-      return [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0);
+      return [buttons, infoButtons, infoButtons2].filter(a => a != null && a.components.length > 0);
     }
     
     // Get arguments
@@ -409,32 +413,6 @@ module.exports = {
     let cracked = interaction.options.getBoolean('cracked');
     let whitelisted = interaction.options.getBoolean('whitelisted');
     let vanilla = interaction.options.getBoolean('vanilla');
-
-    let argumentList = 'Searching...';
-    argumentList += `\n- **${sort == 'none' ? 'not sorted' : `sorted by ${{ 'lastSeen': 'Last Ping', 'discovered': 'Dicovery Date' }[sort.split(':')[0]]} (${{ 'a': 'ascending', 'd': 'descending' }[sort.split(':')[1]]})`}**`;
-    if (playerCount != null) argumentList += `\n- **playercount:** ${playerCount}`;
-    if (playerCap != null) argumentList += `\n- **playercap:** ${playerCap}`;
-    if (isFull != null) argumentList += `\n- **${isFull ? 'is' : 'not'} full**`;
-    if (player != null) argumentList += `\n- **player:** ${player}`;
-    if (uuid != null) argumentList += `\n- **uuid:** ${uuid}`;
-    if (playerHistory != null) argumentList += `\n- **playerhistory:** ${playerHistory}`;
-    if (uuidHistory != null) argumentList += `\n- **uuidhistory:** ${uuidHistory}`;
-    if (version != null) argumentList += `\n- **version:** ${version}`;
-    if (protocol != null) argumentList += `\n- **protocol:** ${protocol}`;
-    if (hasImage != null) argumentList += `\n- **${hasImage ? 'has' : 'doesn\'t have'} a custom favicon**`;
-    if (description != null) argumentList += `\n- **description:** ${description}`;
-    if (hasPlayerList != null) argumentList += `\n- **player list ${hasPlayerList ? 'enabled': 'disabled'}**`;
-    if (seenAfter != null) argumentList += `\n- **seenafter: **<t:${seenAfter}:f>`;
-    if (ipRange != null) argumentList += `\n- **iprange: **${ipRange}`;
-    if (excludeRange != null) argumentList += `\n- **excluderange: **${excludeRange}`;
-    if (port != null) argumentList += `\n- **port: **${port}`;
-    if (country != null) argumentList += `\n- **country: **:flag_${country.toLowerCase()}: ${country}`;
-    if (org != null) argumentList += `\n- **org: **${org}`;
-    if (cracked != null) argumentList += `\n- **auth: **${cracked ? 'cracked' : 'premium' }`;
-    if (whitelisted != null) argumentList += `\n- **whitelisted ${whitelisted ? 'enabled' : 'disabled'}**`;
-    if (vanilla != null) argumentList += `\n- **${vanilla ? 'vanilla' : 'not vanilla'}**`;
-
-    await interaction.reply(argumentList);
 
     let args = new URLSearchParams();
     if (sort != 'none') {
@@ -510,6 +488,32 @@ module.exports = {
     if (cracked != null) args.append('cracked', cracked);
     if (whitelisted != null) args.append('whitelisted', whitelisted);
     if (vanilla != null) args.append('vanilla', vanilla);
+
+    let argumentList = 'Searching...';
+    argumentList += `\n- **${sort == 'none' ? 'not sorted' : `sorted by ${{ 'lastSeen': 'Last Ping', 'discovered': 'Dicovery Date' }[sort.split(':')[0]]} (${{ 'a': 'ascending', 'd': 'descending' }[sort.split(':')[1]]})`}**`;
+    if (playerCount != null) argumentList += `\n- **playercount:** ${playerCount}`;
+    if (playerCap != null) argumentList += `\n- **playercap:** ${playerCap}`;
+    if (isFull != null) argumentList += `\n- **${isFull ? 'is' : 'not'} full**`;
+    if (player != null) argumentList += `\n- **player:** ${player}`;
+    if (uuid != null) argumentList += `\n- **uuid:** ${uuid}`;
+    if (playerHistory != null) argumentList += `\n- **playerhistory:** ${playerHistory}`;
+    if (uuidHistory != null) argumentList += `\n- **uuidhistory:** ${uuidHistory}`;
+    if (version != null) argumentList += `\n- **version:** ${version}`;
+    if (protocol != null) argumentList += `\n- **protocol:** ${protocol}`;
+    if (hasImage != null) argumentList += `\n- **${hasImage ? 'has' : 'doesn\'t have'} a custom favicon**`;
+    if (description != null) argumentList += `\n- **description:** ${description}`;
+    if (hasPlayerList != null) argumentList += `\n- **player list ${hasPlayerList ? 'enabled': 'disabled'}**`;
+    if (seenAfter != null) argumentList += `\n- **seenafter: **<t:${seenAfter}:f>`;
+    if (ipRange != null) argumentList += `\n- **iprange: **${ipRange}`;
+    if (excludeRange != null) argumentList += `\n- **excluderange: **${excludeRange}`;
+    if (port != null) argumentList += `\n- **port: **${port}`;
+    if (country != null) argumentList += `\n- **country: **:flag_${country.toLowerCase()}: ${country}`;
+    if (org != null) argumentList += `\n- **org: **${org}`;
+    if (cracked != null) argumentList += `\n- **auth: **${cracked ? 'cracked' : 'premium' }`;
+    if (whitelisted != null) argumentList += `\n- **whitelisted ${whitelisted ? 'enabled' : 'disabled'}**`;
+    if (vanilla != null) argumentList += `\n- **${vanilla ? 'vanilla' : 'not vanilla'}**`;
+
+    await interaction.reply({ content: argumentList, components: createListButtons() });
     
     servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json()).data;
     if (servers.error) {
