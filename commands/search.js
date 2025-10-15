@@ -515,7 +515,7 @@ module.exports = {
 
     await interaction.reply({ content: argumentList, components: createListButtons() });
     
-    servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json()).data;
+    servers = await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json();
     if (servers.error) {
       let errorEmbed = new EmbedBuilder()
         .setColor('#ff0000')
@@ -524,6 +524,7 @@ module.exports = {
       await interaction.editReply({ content: '', embeds: [errorEmbed]})
       return;
     }
+    servers = servers.data;
     if (servers.length > 0) {
       let totalResults;
       (new Promise(async resolve => resolve(await (await fetch(`${config.api}/count?${args}`)).json()))).then(response => totalResults = response.data)
@@ -544,6 +545,7 @@ module.exports = {
       components = createListButtons(totalResults);
       newEmbed = createList(servers, currentEmbed, totalResults, minimal);
       await interaction.editReply({ embeds: [newEmbed], components })
+      
       // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
       lastButtonPress = Date.now();
       const buttonTimeoutCheck = setInterval(async () => {
