@@ -18,7 +18,7 @@ module.exports = {
         }
 
         if (totalBedrock == null) {
-            totalBedrock = a(wait (await fetch(`${config.api}/bedrockCount`)).json()).data;
+            totalBedrock = (await (await fetch(`${config.api}/bedrockCount`)).json()).data;
             updateTotalServers(totalBedrock);
         }
 
