@@ -4,12 +4,10 @@ const { getDescription, getVersion } = require('../commonFunctions.js');
 function createEmbed(server, ip, port) {
   const newEmbed = new EmbedBuilder()
     .setColor("#02a337")
-    .setTitle(`${ip}:${port}`)
+    .setTitle(`${ip}${port == 25565 ? '' : `:${port}`}`)
     .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
     .setThumbnail(`https://ping.cornbread2100.com/favicon?ip=${ip}&port=${port}&errors=false`)
     .addFields(
-      { name: 'IP', value: ip },
-      { name: 'Port', value: String(port) },
       { name: 'Version', value: `${getVersion(server.version)} (${server.version.protocol})` },
       { name: 'Description', value: getDescription(server.description) }
     )
@@ -48,10 +46,9 @@ module.exports = {
       option.setName('port')
 	    .setDescription('The port of the server to ping')),
     async execute(interaction) {
-      // Fetch IP and Port from the command
       const ip = interaction.options.getInteger('port') == null ? interaction.options.getString('ip').split(':')[0] : interaction.options.getString('ip');
       const port = interaction.options.getInteger('port') == null ? interaction.options.getString('ip').split(':')[1] || 25565 : interaction.options.getInteger('port');
-      await interaction.reply(`Pinging \`${ip}:${port}\`, please wait...`);
+      await interaction.reply(`Pinging \`${ip}${port == 25565 ? '' : `:${port}`}\`, please wait...`);
 
       const text = await (await fetch(`https://ping.cornbread2100.com/ping?ip=${ip}&port=${port}`)).text();
       if (text == 'Error: timeout') {

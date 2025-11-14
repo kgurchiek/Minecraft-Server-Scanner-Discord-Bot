@@ -16,7 +16,7 @@ module.exports = {
 	    .setDescription('The port of the server to ping')),
     async execute(interaction) {
       // Ping status
-      await interaction.reply('Pinging, please wait...');
+      await interaction.reply(`Pinging ${ip}${port == 19132 ? '' : `:${port}`}, please wait...`);
       // Fetch IP and Port from the command
       const ip = interaction.options.getString('ip');
       const port = interaction.options.getInteger('port') || 19132;
@@ -32,11 +32,9 @@ module.exports = {
           response = text.split(';');
           var newEmbed = new EmbedBuilder()
             .setColor('#02a337')
-            .setTitle('Ping Result')
+            .setTitle(`${ip}${port == 19132 ? '' : `:${port}`}`)
             .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png'})
             .addFields(
-              { name: 'IP', value: ip },
-              { name: 'Port', value: port.toString() },
               { name: 'Version', value: `${getVersion(response[3])} (${response[2]})` },
               { name: 'Description', value: `${getDescription(response[1])}\n\n${getDescription(response[7])}` },
               { name: 'Players', value: `${response[4]}/${response[5]}` },
