@@ -16,7 +16,7 @@ module.exports = {
 	    .setDescription('The port of the server to ping')),
     async execute(interaction) {
       // Ping status
-      await interaction.reply(`Pinging ${ip}${port == 19132 ? '' : `:${port}`}, please wait...`);
+      await interaction.reply(`Pinging \`${ip}${port == 19132 ? '' : `:${port}`}\`, please wait...`);
       // Fetch IP and Port from the command
       const ip = interaction.options.getString('ip');
       const port = interaction.options.getInteger('port') || 19132;
