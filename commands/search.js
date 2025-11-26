@@ -343,7 +343,16 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed -= 10;
           if (currentEmbed < 0) currentEmbed = totalResults < 10 ? 0 : totalResults - 10;
-          servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json()).data;
+          servers = await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json();
+          if (servers.error) {
+            let errorEmbed = new EmbedBuilder()
+              .setColor('#ff0000')
+              .setTitle('Error')
+              .setDescription(servers.error)
+            await interaction.editReply({ content: '', embeds: [errorEmbed]})
+            return;
+          }
+          servers = servers.data;
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0) });
@@ -356,7 +365,16 @@ module.exports = {
           lastButtonPress = new Date();
           currentEmbed += 10;
           if (currentEmbed >= totalResults) currentEmbed = 0;
-          servers = (await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json()).data;
+          servers = await (await fetch(`${config.api}/servers?limit=10&skip=${currentEmbed}&${args}`)).json();
+          if (servers.error) {
+            let errorEmbed = new EmbedBuilder()
+              .setColor('#ff0000')
+              .setTitle('Error')
+              .setDescription(servers.error)
+            await interaction.editReply({ content: '', embeds: [errorEmbed]})
+            return;
+          }
+          servers = servers.data;
           updateButtons();
           newEmbed = createList(servers, currentEmbed, totalResults, minimal);
           await interaction.editReply({ embeds: [newEmbed], components: [buttons, infoButtons, infoButtons2].filter(a =>a.components.length > 0) });
