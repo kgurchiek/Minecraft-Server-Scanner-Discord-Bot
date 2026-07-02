@@ -112,5 +112,5 @@ if (config.twitch.enabled) {
     refreshAccessToken();
     setInterval(refreshAccessToken, 7200);
     fetchStreams();
-    setInterval(fetchStreams, 10000);
+    setInterval(fetchStreams, 60000);
 }
