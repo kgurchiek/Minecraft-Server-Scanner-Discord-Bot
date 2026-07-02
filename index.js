@@ -67,9 +67,12 @@ async function refreshAccessToken() {
     }
 }
 
+let results = [];
 async function fetchStreams() {
-   if (twitchAccessToken == null) await (new Promise(resolve => setInterval(() => { if (twitchAccessToken != null) resolve(); }, 100)));
-    
+    if (results == null) return;
+    results = null;
+    if (twitchAccessToken == null) await (new Promise(resolve => setInterval(() => { if (twitchAccessToken != null) resolve(); }, 100)));
+
     let streams = [];
     const options = {
         method: 'GET',
@@ -78,6 +81,7 @@ async function fetchStreams() {
             'Authorization': `Bearer ${twitchAccessToken}`
         }
     }
+    console.log('[Twitch] Fetching streams...');
     let response = await (await fetch('https://api.twitch.tv/helix/streams?game_id=27471&first=100', options)).json();
     streams = response.data;
     do {
@@ -86,13 +90,15 @@ async function fetchStreams() {
             streams = streams.concat(response.data);
         } catch (err) {}
     } while (response.pagination?.cursor != null)
+    console.log(`[Twitch] Fetched ${streams.length} streams.`);
     for (const shard of shards) shard.send({ type: 'twitchStreams', streams });
 
+    console.log('[Twitch] Fetching servers...');
     results = (await (await fetch(`${config.api}/servers?includePlayers=true&limit=1000`, {
         method: 'POST',
         body: JSON.stringify({
             onlinePlayer: {
-                caseInsensitive: true,
+                caseInsensitive: !config.commands.streamsnipe.caseSensitive,
                 data: streams.map(a => a.user_name)
             }
         })
@@ -105,6 +111,7 @@ async function fetchStreams() {
             .slice(0, 10);
     }
     results = results.filter(a => a.streams.length > 0);
+    console.log(`[Twitch] Fetched ${results.length} servers.`);
     for (const shard of shards) shard.send({ type: 'twitchResults', results });
 }
 
