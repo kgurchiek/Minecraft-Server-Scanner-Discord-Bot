@@ -6,42 +6,20 @@ const languages = require('../languages.json');
 const { buttonHandler } = require('./search.js');
 
 let twitchStreams;
+let results;
 process.on('message', (message) => {
     switch (message.type) {
         case 'twitchStreams': {
             twitchStreams = message.streams;
             break;
         }
+        case 'twitchResults': {
+            results = message.results;
+            break;
+        }
     }
 });
 
-let results;
-async function updateResults() {
-    results = (await (await fetch(`${config.api}/servers?includePlayers=true&limit=1000`, {
-        method: 'POST',
-        body: JSON.stringify({
-            onlinePlayer: {
-                caseInsensitive: true,
-                data: twitchStreams.map(a => a.user_name)
-            }
-        })
-    })).json()).data;
-
-    for (let result of results) {
-        result.streams = twitchStreams
-            .filter(a => result.playerHistory.filter(a => a.lastSession == result.lastSeen).map(a => a.name.toLowerCase()).includes(a.user_name.toLowerCase()))
-            .filter((a, i, arr) => !arr.slice(0, i).some(b => a.user_name == b.user_name))
-            .slice(0, 10);
-    }
-    results = results.filter(a => a.streams.length > 0);
-}
-if (config.twitch.enabled) {
-    (async () => {
-        while (twitchStreams == null) await new Promise(res => setTimeout(res, 100));
-        updateResults();
-        setTimeout(updateResults, 60000);
-    })()
-}
 
 function createEmbed(servers, index, showingOldPlayers) {
     let server = servers[index];

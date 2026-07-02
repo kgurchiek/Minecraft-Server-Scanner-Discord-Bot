@@ -9,8 +9,7 @@ module.exports = {
         .setName('stats')
         .setDescription('Sends helpful info about the bot'),
     async execute(interaction, buttonCallbacks, client, totalServers, updateTotalServers, totalBedrock, updateTotalBedrock) {
-        if (!config.discord.stats) await interaction.reply({ content: 'Statistics have been disabled on this bot.', ephemeral: true });
-        // Status message
+        if (!config.discord.stats) return await interaction.reply({ content: 'Statistics have been disabled on this bot.', ephemeral: true });
         await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
 
         if (totalServers == null) {

@@ -87,6 +87,25 @@ async function fetchStreams() {
         } catch (err) {}
     } while (response.pagination?.cursor != null)
     for (const shard of shards) shard.send({ type: 'twitchStreams', streams });
+
+    results = (await (await fetch(`${config.api}/servers?includePlayers=true&limit=1000`, {
+        method: 'POST',
+        body: JSON.stringify({
+            onlinePlayer: {
+                caseInsensitive: true,
+                data: streams.map(a => a.user_name)
+            }
+        })
+    })).json()).data;
+
+    for (let result of results) {
+        result.streams = streams
+            .filter(a => result.playerHistory.filter(a => a.lastSession == result.lastSeen).map(a => a.name.toLowerCase()).includes(a.user_name.toLowerCase()))
+            .filter((a, i, arr) => !arr.slice(0, i).some(b => a.user_name == b.user_name))
+            .slice(0, 10);
+    }
+    results = results.filter(a => a.streams.length > 0);
+    for (const shard of shards) shard.send({ type: 'twitchResults', results });
 }
 
 if (config.twitch.enabled) {
