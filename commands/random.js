@@ -1,6 +1,6 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, thousandsSeparators, cleanIp, displayPlayers } = require('../commonFunctions.js')
+const { getDescription, thousandsSeparators, cleanIp, displayPlayers } = require('../lib.js')
 const config = require('../config.json')
 const buttonTimeout = 60;
 
@@ -110,7 +110,7 @@ module.exports = {
       buttons.components[1].data.disabled = true;
       await interaction.update({ content: '', embeds: [embed], components: [buttons] });
       if (playerList == null) {
-        playerList = (await (await fetch(`${config.api}/playerHistory?ip=${server.ip}&port=${server.port}`)).json()).data;
+        playerList = (await (await fetch(`${config.api}/servers?includePlayers=true&ip=${server.ip}&port=${server.port}`)).json()).data.playerHistory;
         playerList.sort((a, b) => b.lastSession - a.lastSession);
       }
       lastButtonPress = new Date();

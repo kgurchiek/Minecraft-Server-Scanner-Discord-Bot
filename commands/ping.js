@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion } = require('../commonFunctions.js');
+const { getDescription, getVersion } = require('../lib.js');
 
 function createEmbed(server, ip, port) {
   const newEmbed = new EmbedBuilder()

@@ -1,10 +1,9 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, thousandsSeparators, cleanIp, displayPlayers } = require('../commonFunctions.js');
-const countryCodes = require('../countryCodes.json');
+const { getDescription, thousandsSeparators, cleanIp, displayPlayers } = require('../lib.js');
+const countryCodes = require('../countries.json');
 const orgs = require('../orgs.json');
 const config = require('../config.json');
-const buttonTimeout = 300; // In seconds
 
 const shortenString = (string, length) => (string.length > length ? `${string.slice(0, length - 3)}...` : string);
 
@@ -21,15 +20,13 @@ function createEmbed(server) {
     .setAuthor({ name: 'MC Server Scanner', iconURL: 'https://cdn.discordapp.com/app-icons/1037250630475059211/21d5f60c4d2568eb3af4f7aec3dbdde5.png' })
     .setThumbnail(`https://ping.cornbread2100.com/favicon?ip=${server.ip}&port=${server.port}&errors=false`)
     .addFields(
-      { name: 'IP', value: cleanIp(parseInt(server.ip)) },
-      { name: 'Port', value: String(server.port) },
       { name: 'Version', value: `${server.version.name} (${server.version.protocol})` },
       { name: 'Description', value: String(getDescription(description)) || '​' },
       { name: 'Players', value: displayPlayers(server) },
       { name: 'Discovered', value: `<t:${server.discovered}:${(new Date().getTime() / 1000) - server.discovered > 86400 ? 'D' : 'R'}>`},
       { name: 'Last Seen', value: `<t:${server.lastSeen}:${(new Date().getTime() / 1000) - server.lastSeen > 86400 ? 'D' : 'R'}>` },
-      { name: 'Country: ', value: `${server.geo.country == null ? 'Unknown' : `:flag_${server.geo.country.toLowerCase()}: ${server.geo.country}`}` },
-      { name: 'Organization: ', value: server.org == null ? 'Unknown' : server.org },
+      { name: 'Country', value: `${server.geo.country == null ? 'Unknown' : `:flag_${server.geo.country.toLowerCase()}: ${server.geo.country}`}` },
+      { name: 'Organization', value: server.org == null ? 'Unknown' : server.org },
       { name: 'Auth', value: server.cracked == true ? 'Cracked' : server.cracked == false ? 'Premium' : 'Unknown' },
       { name: 'Whitelist', value: server.whitelisted == true ? 'Enabled' : server.whitelisted == false ? 'Disabled' : 'Unknown' }
     )
@@ -228,10 +225,10 @@ module.exports = {
         const embed = interaction.message.embeds[0];
         embed.data.fields[4].value = `${embed.data.fields[4].value.split('\n')[0]}\nLoading Players...`;
         await interaction.update({ embeds: [embed], components: [createButtons({ ip, port }, true, true)] });
-        const playerList = (await (await fetch(`${config.api}/playerHistory?ip=${ip}&port=${port}`)).json()).data;
+        const playerList = (await (await fetch(`${config.api}/servers?includePlayers=true&ip=${ip}&port=${port}`)).json()).data[0].playerHistory;
         playerList.sort((a, b) => b.lastSession - a.lastSession);
-        let playerCounts = embed.data.fields[4].value.split('\n')[0];
-        embed.data.fields[4].value = displayPlayers({ players: { online: playerCounts.split('/')[0], max: playerCounts.split('/')[1] }, lastSeen: embed.data.fields[6].value.split(':')[1] }, playerList, true);
+        let playerCounts = embed.data.fields[2].value.split('\n')[0];
+        embed.data.fields[2].value = displayPlayers({ players: { online: parseInt(playerCounts.split('/')[0]), max: parseInt(playerCounts.split('/')[1]) }, lastSeen: embed.data.fields[4].value.split(':')[1] }, playerList, true);
         await interaction.editReply({ embeds: [embed], components: [createButtons({ ip, port }, true)] });
         break;
       }
@@ -240,10 +237,10 @@ module.exports = {
         const embed = interaction.message.embeds[0];
         embed.data.fields[4].value = `${embed.data.fields[4].value.split('\n')[0]}\nLoading Players...`;
         await interaction.update({ embeds: [embed], components: [createButtons({ ip, port }, false, true)] });
-        const playerList = (await (await fetch(`${config.api}/playerHistory?ip=${ip}&port=${port}`)).json()).data;
+        const playerList = (await (await fetch(`${config.api}/servers?includePlayers=true&ip=${ip}&port=${port}`)).json()).data[0].playerHistory;
         playerList.sort((a, b) => b.lastSession - a.lastSession);
-        let playerCounts = embed.data.fields[4].value.split('\n')[0];
-        embed.data.fields[4].value = displayPlayers({ players: { online: playerCounts.split('/')[0], max: playerCounts.split('/')[1] }}, playerList, false);
+        let playerCounts = embed.data.fields[2].value.split('\n')[0];
+        embed.data.fields[2].value = displayPlayers({ players: { online: parseInt(playerCounts.split('/')[0]), max: parseInt(playerCounts.split('/')[1]) }, lastSeen: embed.data.fields[4].value.split(':')[1] }, playerList, false);
         await interaction.editReply({ embeds: [embed], components: [createButtons({ ip, port }, false)] });
         break;
       }
@@ -567,7 +564,7 @@ module.exports = {
       // Times out the buttons after a few seconds of inactivity (set in buttonTimeout variable)
       lastButtonPress = Date.now();
       const buttonTimeoutCheck = setInterval(async () => {
-        if (Date.now() / 1000 - lastButtonPress / 1000 >= buttonTimeout) {
+        if (Date.now() / 1000 - lastButtonPress / 1000 >= config.commands.search.timeout) {
           clearInterval(buttonTimeoutCheck);
           delete buttonCallbacks[nextResultID];
           delete buttonCallbacks[lastResultID];

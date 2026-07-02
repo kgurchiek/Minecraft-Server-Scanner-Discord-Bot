@@ -1,6 +1,6 @@
 // Imports
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { thousandsSeparators } = require('../commonFunctions.js');
+const { thousandsSeparators } = require('../lib.js');
 const config = require('../config.json');
 
 module.exports = {
@@ -9,6 +9,7 @@ module.exports = {
         .setName('stats')
         .setDescription('Sends helpful info about the bot'),
     async execute(interaction, buttonCallbacks, client, totalServers, updateTotalServers, totalBedrock, updateTotalBedrock) {
+        if (!config.discord.stats) await interaction.reply({ content: 'Statistics have been disabled on this bot.', ephemeral: true });
         // Status message
         await interaction.reply({ content: 'Retrieving stats...', ephemeral: true });
 

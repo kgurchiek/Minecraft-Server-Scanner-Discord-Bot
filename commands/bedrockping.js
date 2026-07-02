@@ -1,6 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, getVersion } = require('../commonFunctions.js');
-
+const { getDescription, getVersion } = require('../lib.js');
 
 module.exports = {
   // Command options

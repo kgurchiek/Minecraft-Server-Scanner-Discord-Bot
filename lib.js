@@ -96,7 +96,7 @@ module.exports = {
   thousandsSeparators: (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
   cleanIp: (ip) => ('0'.repeat(8 - ip.toString(16).length) + ip.toString(16)).match(/.{1,2}/g).map(a => parseInt(a, 16)).join('.'),
   displayPlayers: (server, playerList, showingOldPlayers) => {
-    var result = `${server.players.online}/${server.players.max}`;
+    var result = `${server.players.online.toLocaleString()}/${server.players.max.toLocaleString()}`;
     if (playerList == null) return result;
     if (playerList != null && playerList.length > 0 && (showingOldPlayers || playerList.filter(a => a.lastSession == server.lastSeen).length > 0)) {
       result += `${showingOldPlayers ? '' : '\n```'}`;

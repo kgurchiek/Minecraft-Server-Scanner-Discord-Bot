@@ -1,0 +1,25 @@
+{
+    "discord": {
+        "clientId": "",
+		"token": "",
+        "stats": false
+	},
+	"twitch": {
+        "enabled": false,
+        "clientId": "",
+        "secret": ""
+	},
+    "api": "https://api.cornbread2100.com/v2",
+    "displayApi": "https://api.cornbread2100.com/v2",
+    "commands": {
+        "search": {
+            "timeout": 600
+        },
+        "streamsnipe": {
+            "thumbnailResolution": {
+                "width": 1280,
+                "height": 720
+            }
+        }
+    }
+}

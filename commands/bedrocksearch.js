@@ -1,7 +1,7 @@
 // Fectches dependencies and inits variables
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getDescription, thousandsSeparators, cleanIp, displayPlayers } = require('../commonFunctions.js');
-const countryCodes = require('../countryCodes.json');
+const { getDescription, thousandsSeparators, cleanIp, displayPlayers } = require('../lib.js');
+const countryCodes = require('../countries.json');
 const orgs = require('../orgs.json');
 const config = require('../config.json');
 const buttonTimeout = 300; // In seconds

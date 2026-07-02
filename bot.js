@@ -93,4 +93,4 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 // Log the bot into the Discord API
-client.login(config.token);
+client.login(config.discord.token);
