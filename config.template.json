@@ -1,14 +1,14 @@
 {
     "discord": {
         "clientId": "",
-		"token": "",
+        "token": "",
         "stats": false
-	},
-	"twitch": {
+    },
+    "twitch": {
         "enabled": false,
         "clientId": "",
         "secret": ""
-	},
+    },
     "api": "https://api.cornbread2100.com/v2",
     "displayApi": "https://api.cornbread2100.com/v2",
     "commands": {
